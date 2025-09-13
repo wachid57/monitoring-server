@@ -1,4 +1,5 @@
-package main
+
+package auth
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +12,7 @@ import (
 
 var jwtSecret = []byte("supersecretkey")
 
-func loginHandler(c *fiber.Ctx) error {
+func LoginHandler(c *fiber.Ctx) error {
 	type LoginRequest struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -20,7 +21,6 @@ func loginHandler(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
-	// Cek user di database
 	var user model.User
 	if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid credentials"})
@@ -28,7 +28,6 @@ func loginHandler(c *fiber.Ctx) error {
 	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid credentials"})
 	}
-	// Generate JWT
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": req.Username,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
@@ -40,7 +39,10 @@ func loginHandler(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"token": t})
 }
 
-func jwtMiddleware(c *fiber.Ctx) error {
+
+
+// JWT middleware for protected routes
+func JwtMiddleware(c *fiber.Ctx) error {
 	tokenStr := c.Get("Authorization")
 	if tokenStr == "" {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
@@ -53,3 +55,4 @@ func jwtMiddleware(c *fiber.Ctx) error {
 	}
 	return c.Next()
 }
+

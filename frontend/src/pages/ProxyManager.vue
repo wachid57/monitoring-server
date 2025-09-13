@@ -1,3 +1,4 @@
+import { BACKEND_URL } from '@/config/constants.js';
 <template>
   <div>
     <h3>Proxy Management</h3>
@@ -30,7 +31,7 @@ export default {
   methods: {
     async fetchProxies() {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:8080/proxies', {
+      const res = await fetch(BACKEND_URL + 'proxies', {
         headers: { 'Authorization': token }
       })
       const data = await res.json()
@@ -38,7 +39,7 @@ export default {
     },
     async addProxy() {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:8080/proxies', {
+      const res = await fetch(BACKEND_URL + 'proxies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +55,7 @@ export default {
     },
     async removeProxy(id) {
       const token = localStorage.getItem('token')
-      const res = await fetch(`http://localhost:8080/proxies/${id}`, {
+      const res = await fetch(`${BACKEND_URL}proxies/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': token }
       })

@@ -1,6 +1,12 @@
 version: '3.8'
 services:
   backend:
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healtz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     build: ./backend
     ports:
       - "9080:8080"
@@ -12,6 +18,12 @@ services:
       - ./nginx/ssl:/app/nginx/ssl
       - ./nginx/backend:/app/nginx/backend
   frontend:
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healtz"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     build:
       context: ./frontend
       args:
@@ -20,7 +32,14 @@ services:
       - "9081:8080"
     env_file:
       - .env
+    depends_on:
+      - mariadb
   mariadb:
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASS}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     image: mariadb:latest
     restart: always
     env_file:
@@ -31,8 +50,14 @@ services:
     ports:
       - "9306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - ./mariadb_data:/var/lib/mysql
   nginx:
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     build: ./nginx
     ports:
       - "9082:80"

@@ -6,6 +6,6 @@ RUN go mod tidy && go build -o app .
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /app/app /app/app
-RUN apk add --no-cache certbot
+RUN apk add --no-cache certbot curl
 EXPOSE 8080
 CMD ["/app/app"]

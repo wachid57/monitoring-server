@@ -51,7 +51,7 @@ export default {
     }
   },
   mounted() {
-    import('@/assets/js/wave.js');
+    require('@/assets/js/wave.js');
     // Simulasi cek signup (bisa diganti dengan API sesuai kebutuhan)
     fetch(BACKEND_URL + 'enable-signup')
       .then(res => res.json())

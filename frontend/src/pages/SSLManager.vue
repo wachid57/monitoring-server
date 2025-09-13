@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { BACKEND_URL } from '@/config/constants.js';
 export default {
   data() {
     return {
@@ -32,7 +33,7 @@ export default {
   methods: {
     async generateSSL() {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:8080/ssl/generate', {
+  const res = await fetch(BACKEND_URL + 'ssl/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +47,7 @@ export default {
     },
     async fetchSSLList() {
       const token = localStorage.getItem('token')
-      const res = await fetch('http://localhost:8080/ssl/list', {
+  const res = await fetch(BACKEND_URL + 'ssl/list', {
         headers: { 'Authorization': token }
       })
       const data = await res.json()
