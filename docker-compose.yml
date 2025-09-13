@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "9080:8080"
+    depends_on:
+      - mariadb
+    env_file:
+      - .env
+    volumes:
+      - ./nginx/ssl:/app/nginx/ssl
+      - ./nginx/backend:/app/nginx/backend
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+    ports:
+      - "9081:8080"
+    env_file:
+      - .env
+  mariadb:
+    image: mariadb:latest
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "9306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+  nginx:
+    build: ./nginx
+    ports:
+      - "9082:80"
+      - "9443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/backend:/etc/nginx/backend
+volumes:
+  mariadb_data:
