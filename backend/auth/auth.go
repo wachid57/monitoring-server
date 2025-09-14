@@ -43,3 +43,33 @@ func LogoutHandler(c *fiber.Ctx) error {
 	// Jika ingin blacklist token, simpan token ke database/redis di sini.
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Logout successful"})
 }
+
+func RegisterHandler(c *fiber.Ctx) error {
+	type RegisterRequest struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	var req RegisterRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
+	}
+	// Cek apakah username sudah ada
+	var user model.User
+	if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username already exists"})
+	}
+	// Hash password
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to hash password"})
+	}
+	// Simpan user baru
+	newUser := model.User{
+		Username: req.Username,
+		Password: string(hashed),
+	}
+	if err := database.DB.Create(&newUser).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create user"})
+	}
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "User registered successfully"})
+}
