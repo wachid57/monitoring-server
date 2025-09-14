@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
@@ -7,10 +7,10 @@ import (
 )
 
 type SSLInfo struct {
-	Domain string `json:"domain"`
+	Domain   string `json:"domain"`
 	CertPath string `json:"certPath"`
-	KeyPath string `json:"keyPath"`
-	Status string `json:"status"`
+	KeyPath  string `json:"keyPath"`
+	Status   string `json:"status"`
 }
 
 var (

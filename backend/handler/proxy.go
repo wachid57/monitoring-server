@@ -1,6 +1,7 @@
-package main
+package handler
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"io/ioutil"
 	"os"
