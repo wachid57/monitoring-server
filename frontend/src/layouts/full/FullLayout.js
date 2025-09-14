@@ -8,7 +8,6 @@ import Customizer from './shared/customizer/Customizer';
 import Navigation from './horizontal/navbar/Navbar';
 import ScrollToTop from '../../components/shared/ScrollToTop';
 import LoadingBar from '../../LoadingBar';
-import Navbar from '../../components/navbar/Navbar';
 
 
 const MainWrapper = styled('div')(() => ({
@@ -35,7 +34,7 @@ const FullLayout = () => {
   return (
     <>
       <LoadingBar />
-      <Navbar />
+      <Navigation />
       <MainWrapper
         className={customizer.activeMode === 'dark' ? 'darkbg mainwrapper' : 'mainwrapper'}
       >
