@@ -10,6 +10,12 @@ import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
 
+// Tambahkan fungsi logout
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  window.location.href = '/auth/login';
+};
+
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
   const handleClick2 = (event) => {
@@ -138,7 +144,7 @@ const Profile = () => {
               </Box>
             ))}
             <Box mt={2}>
-              <Box bgcolor="primary.light" p={3} mb={3} overflow="hidden" position="relative">
+              {/* <Box bgcolor="primary.light" p={3} mb={3} overflow="hidden" position="relative">
                 <Box display="flex" justifyContent="space-between">
                   <Box>
                     <Typography variant="h5" mb={2}>
@@ -151,13 +157,12 @@ const Profile = () => {
                   </Box>
                   <img src={unlimitedImg} alt="unlimited" className="signup-bg"></img>
                 </Box>
-              </Box>
+              </Box> */}
               <Button
-                to="/auth/login"
                 variant="outlined"
                 color="primary"
-                component={Link}
                 fullWidth
+                onClick={handleLogout} // ubah dari Link ke fungsi logout
               >
                 Logout
               </Button>
