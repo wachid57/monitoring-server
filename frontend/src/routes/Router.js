@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { Navigate, createBrowserRouter } from 'react-router';
+import { Navigate, createBrowserRouter } from 'react-router-dom';
 
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import ProtectedRoute from '../middlewares/ProtectedRoute';

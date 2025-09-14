@@ -1,0 +1,1 @@
+find frontend -type f -name "*.js" -o -name "*.jsx" | xargs sed -i 's/from[[:space:]]\x27react-router\x27/from '\''react-router-dom'\''/g'

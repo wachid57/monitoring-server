@@ -3,7 +3,7 @@ import { sum } from 'lodash';
 import { IconShoppingCart, IconX } from '@tabler/icons';
 import { Box, Typography, Badge, Drawer, IconButton, Button, Stack } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import CartItems from './CartItems';
 
 const Cart = () => {

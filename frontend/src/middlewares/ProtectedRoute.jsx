@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from 'react-router-dom'; // pastikan dari react-router-dom
 
 const isAuthenticated = () => {
   // Contoh: cek token di localStorage
