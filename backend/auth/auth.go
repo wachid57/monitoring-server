@@ -1,13 +1,12 @@
-
 package auth
 
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"time"
-	"mini-npm-backend/model"
 	"mini-npm-backend/database"
+	"mini-npm-backend/model"
+	"time"
 )
 
 var jwtSecret = []byte("supersecretkey")
@@ -30,7 +29,7 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": req.Username,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	})
 	t, err := token.SignedString(jwtSecret)
 	if err != nil {
@@ -38,8 +37,6 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 	return c.JSON(fiber.Map{"token": t})
 }
-
-
 
 // JWT middleware for protected routes
 func JwtMiddleware(c *fiber.Ctx) error {
@@ -55,4 +52,3 @@ func JwtMiddleware(c *fiber.Ctx) error {
 	}
 	return c.Next()
 }
-
