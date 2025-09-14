@@ -10,7 +10,7 @@ export default function useLogin() {
     e.preventDefault();
     setError('');
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + 'auth/login', {
+      const res = await fetch(BACKEND_URL + API_PREFIX + '/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
