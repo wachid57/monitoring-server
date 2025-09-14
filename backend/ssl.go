@@ -18,7 +18,7 @@ var (
 	sslLock sync.Mutex
 )
 
-func generateSSL(c *fiber.Ctx) error {
+func GenerateSSL(c *fiber.Ctx) error {
 	type Req struct {
 		Domain string `json:"domain"`
 	}
@@ -41,7 +41,7 @@ func generateSSL(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"status": status, "certPath": certPath, "keyPath": keyPath})
 }
 
-func listSSL(c *fiber.Ctx) error {
+func ListSSL(c *fiber.Ctx) error {
 	sslLock.Lock()
 	defer sslLock.Unlock()
 	return c.JSON(sslList)

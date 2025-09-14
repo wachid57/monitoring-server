@@ -14,7 +14,7 @@ import {
   TableBody,
   IconButton,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { IconMinus, IconPlus, IconTrash } from '@tabler/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import emptyCart from 'src/assets/images/products/empty-shopping-cart.svg';

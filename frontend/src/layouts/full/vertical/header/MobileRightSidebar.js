@@ -20,7 +20,7 @@ import {
   Collapse,
 } from '@mui/material';
 
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import AppLinks from './AppLinks';
 import QuickLinks from './QuickLinks';
 

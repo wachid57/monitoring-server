@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'; // pastikan dari react-router-dom
+import { Navigate } from 'react-router'; // pastikan dari react-router-dom
 
 const isAuthenticated = () => {
   // Contoh: cek token di localStorage
@@ -6,5 +6,5 @@ const isAuthenticated = () => {
 };
 
 export default function ProtectedRoute({ children }) {
-  return isAuthenticated() ? children : <Navigate to="/auth/login2" replace />;
+  return isAuthenticated() ? children : <Navigate to="/auth/login" replace />;
 }

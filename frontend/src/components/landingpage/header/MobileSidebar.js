@@ -5,7 +5,7 @@ import Logo from "src/layouts/full/shared/logo/Logo"
 import DemosDD from './DemosDD';
 import AppLinks from 'src/layouts/full/vertical/header/AppLinks';
 import QuickLinks from 'src/layouts/full/vertical/header/QuickLinks';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 
 const MobileSidebar = () => {
     const [toggle, setToggle] = useState(false)

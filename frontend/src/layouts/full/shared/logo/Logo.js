@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { ReactComponent as LogoDark } from 'src/assets/images/logos/dark-logo.svg';
 import { ReactComponent as LogoDarkRTL } from 'src/assets/images/logos/dark-rtl-logo.svg';
 import { ReactComponent as LogoLight } from 'src/assets/images/logos/light-logo.svg';

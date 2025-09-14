@@ -14,7 +14,7 @@ import {
 import { IconSearch, IconX } from '@tabler/icons';
 import Menuitems from '../sidebar/MenuItems';
 import CustomTextField from 'src/components/forms/theme-elements/CustomTextField';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const Search = () => {
   // drawer top

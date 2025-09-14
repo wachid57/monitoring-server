@@ -2,11 +2,10 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"sync"
-	"os"
-	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
+	"sync"
 )
 
 type Proxy struct {
@@ -26,13 +25,13 @@ var (
 	proxyID   = 1
 )
 
-func getProxies(c *fiber.Ctx) error {
+func GetProxies(c *fiber.Ctx) error {
 	proxyLock.Lock()
 	defer proxyLock.Unlock()
 	return c.JSON(proxyList)
 }
 
-func addProxy(c *fiber.Ctx) error {
+func AddProxy(c *fiber.Ctx) error {
 	var req Proxy
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
@@ -48,7 +47,7 @@ func addProxy(c *fiber.Ctx) error {
 	return c.JSON(req)
 }
 
-func deleteProxy(c *fiber.Ctx) error {
+func DeleteProxy(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
@@ -67,7 +66,6 @@ func deleteProxy(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusNoContent)
 
 }
-
 
 func updateNginxConfig() {
 	config := ""

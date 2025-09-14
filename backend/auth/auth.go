@@ -38,17 +38,8 @@ func LoginHandler(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"token": t})
 }
 
-// JWT middleware for protected routes
-func JwtMiddleware(c *fiber.Ctx) error {
-	tokenStr := c.Get("Authorization")
-	if tokenStr == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing token"})
-	}
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
-	})
-	if err != nil || !token.Valid {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
-	}
-	return c.Next()
+func LogoutHandler(c *fiber.Ctx) error {
+	// Logout pada JWT biasanya hanya menghapus token di client.
+	// Jika ingin blacklist token, simpan token ke database/redis di sini.
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Logout successful"})
 }

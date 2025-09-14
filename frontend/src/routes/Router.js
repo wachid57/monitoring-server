@@ -1,5 +1,5 @@
 import React, { lazy } from 'react';
-import { Navigate, createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter } from 'react-router';
 
 import Loadable from '../layouts/full/shared/loadable/Loadable';
 import ProtectedRoute from '../middlewares/ProtectedRoute';
@@ -123,7 +123,7 @@ const MuiTransferList = Loadable(lazy(() => import('../views/ui-components/MuiTr
 const MuiTypography = Loadable(lazy(() => import('../views/ui-components/MuiTypography')));
 
 // authentication
-const Login = Loadable(lazy(() => import('../views/authentication/auth1/Login')));
+const Login = Loadable(lazy(() => import('../views/authentication/auth/Login')));
 const Login2 = Loadable(lazy(() => import('../views/authentication/auth2/Login2')));
 const Register = Loadable(lazy(() => import('../views/authentication/auth1/Register')));
 const Register2 = Loadable(lazy(() => import('../views/authentication/auth2/Register2')));
@@ -171,31 +171,31 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/dashboards/modern" /> },
-      // Nonaktifkan ProtectedRoute:
-      { path: '/dashboards/modern', exact: true, element: <ModernDash /> },
-      { path: '/dashboards/ecommerce', exact: true, element: <EcommerceDash /> },
-      { path: '/apps/chats', element: <Chats /> },
-      { path: '/apps/notes', element: <Notes /> },
-      { path: '/apps/calendar', element: <Calendar /> },
-      { path: '/apps/email', element: <Email /> },
-      { path: '/apps/tickets', element: <Tickets /> },
-      { path: '/apps/contacts', element: <Contacts /> },
-      { path: '/apps/ecommerce/shop', element: <Ecommerce /> },
-      { path: '/apps/ecommerce/eco-product-list', element: <EcomProductList /> },
-      { path: '/apps/ecommerce/eco-checkout', element: <EcomProductCheckout /> },
-      { path: '/apps/ecommerce/add-product', element: <EcommerceAddProduct /> },
-      { path: '/apps/ecommerce/edit-product', element: <EcommerceEditProduct /> },
-      { path: '/apps/ecommerce/detail/:id', element: <EcommerceDetail /> },
-      { path: '/apps/kanban', element: <Kanban /> },
-      { path: '/apps/invoice/list', element: <InvoiceList /> },
-      { path: '/apps/invoice/create', element: <InvoiceCreate /> },
-      { path: '/apps/invoice/detail/:id', element: <InvoiceDetail /> },
-      { path: '/apps/invoice/edit/:id', element: <InvoiceEdit /> },
-      { path: '/apps/followers', element: <Followers /> },
-      { path: '/apps/friends', element: <Friends /> },
-      { path: '/apps/gallery', element: <Gallery /> },
-      { path: '/user-profile', element: <UserProfile /> },
-      { path: '/pages/casl', element: <RollbaseCASL /> },
+      // Proteksi dashboard dan aplikasi
+      { path: '/dashboards/modern', exact: true, element: <ProtectedRoute><ModernDash /></ProtectedRoute> },
+      { path: '/dashboards/ecommerce', exact: true, element: <ProtectedRoute><EcommerceDash /></ProtectedRoute> },
+      { path: '/apps/chats', element: <ProtectedRoute><Chats /></ProtectedRoute> },
+      { path: '/apps/notes', element: <ProtectedRoute><Notes /></ProtectedRoute> },
+      { path: '/apps/calendar', element: <ProtectedRoute><Calendar /></ProtectedRoute> },
+      { path: '/apps/email', element: <ProtectedRoute><Email /></ProtectedRoute> },
+      { path: '/apps/tickets', element: <ProtectedRoute><Tickets /></ProtectedRoute> },
+      { path: '/apps/contacts', element: <ProtectedRoute><Contacts /></ProtectedRoute> },
+      { path: '/apps/ecommerce/shop', element: <ProtectedRoute><Ecommerce /></ProtectedRoute> },
+      { path: '/apps/ecommerce/eco-product-list', element: <ProtectedRoute><EcomProductList /></ProtectedRoute> },
+      { path: '/apps/ecommerce/eco-checkout', element: <ProtectedRoute><EcomProductCheckout /></ProtectedRoute> },
+      { path: '/apps/ecommerce/add-product', element: <ProtectedRoute><EcommerceAddProduct /></ProtectedRoute> },
+      { path: '/apps/ecommerce/edit-product', element: <ProtectedRoute><EcommerceEditProduct /></ProtectedRoute> },
+      { path: '/apps/ecommerce/detail/:id', element: <ProtectedRoute><EcommerceDetail /></ProtectedRoute> },
+      { path: '/apps/kanban', element: <ProtectedRoute><Kanban /></ProtectedRoute> },
+      { path: '/apps/invoice/list', element: <ProtectedRoute><InvoiceList /></ProtectedRoute> },
+      { path: '/apps/invoice/create', element: <ProtectedRoute><InvoiceCreate /></ProtectedRoute> },
+      { path: '/apps/invoice/detail/:id', element: <ProtectedRoute><InvoiceDetail /></ProtectedRoute> },
+      { path: '/apps/invoice/edit/:id', element: <ProtectedRoute><InvoiceEdit /></ProtectedRoute> },
+      { path: '/apps/followers', element: <ProtectedRoute><Followers /></ProtectedRoute> },
+      { path: '/apps/friends', element: <ProtectedRoute><Friends /></ProtectedRoute> },
+      { path: '/apps/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
+      { path: '/user-profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+      { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
       { path: '/pages/pricing', element: <Pricing /> },
       { path: '/pages/account-settings', element: <AccountSetting /> },

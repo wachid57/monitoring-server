@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { fetchBlogPost } from 'src/store/apps/blog/BlogSlice';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import {
   CardContent,
   Stack,

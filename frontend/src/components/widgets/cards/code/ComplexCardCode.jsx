@@ -6,7 +6,7 @@ const ComplexCardCode = () => {
       <CodeDialog>
         {`
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import Grid from '@mui/material/Grid2';
 import {
   CardContent,

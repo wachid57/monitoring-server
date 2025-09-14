@@ -32,7 +32,7 @@ import {
   IconTruck,
 } from '@tabler/icons';
 import CustomCheckbox from 'src/components/forms/theme-elements/CustomCheckbox';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const InvoiceList = () => {
   const { invoices, deleteInvoice } = useContext(InvoiceContext);

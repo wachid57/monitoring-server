@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { Stack, Typography, Avatar, Box, AvatarGroup } from '@mui/material';
 import { IconMessage2 } from '@tabler/icons';
 

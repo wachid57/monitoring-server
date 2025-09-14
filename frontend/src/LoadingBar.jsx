@@ -1,16 +1,9 @@
 import { useState, useEffect } from 'react';
 import TopLoadingBar from 'react-top-loading-bar';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 function LoadingBar() {
-    let location;
-    try {
-        location = useLocation();
-    } catch {
-        // Router context not available, don't render LoadingBar
-        return null;
-    }
-
+    const location = useLocation(); // panggil langsung, tanpa try/catch
     const [progress, setProgress] = useState(0);
 
     const startLoading = () => setProgress(10);

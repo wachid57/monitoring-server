@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Stack, Typography, Container, Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 const Banner = () => {
   return (

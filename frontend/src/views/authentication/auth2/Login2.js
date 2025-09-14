@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router';
+// useNavigate tidak tersedia di react-router, jadi tetap pakai window.location
+
 import Grid from '@mui/material/Grid2';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 // components
 import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
-import { REACT_API_URL } from 'src/config/constants';
 import AuthLogin from '../authForms/AuthLogin';
 import 'src/assets/css/login.css';
 
@@ -18,46 +21,17 @@ const Login2 = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showSignup, setShowSignup] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Load wave animation JS if needed
     if (window && typeof window !== "undefined") {
       const script = document.createElement('script');
       script.src = '/assets/js/wave.js';
       script.async = true;
       document.body.appendChild(script);
     }
-    // Check signup availability
-    fetch(REACT_API_URL + 'enable-signup')
-      .then(res => res.json())
-      .then(data => {
-        if (data && (data.enable_sign_up === 1 || data.enable_sign_up === true)) {
-          setShowSignup(true);
-        }
-      });
+    // Check signup availability (panggil dari AuthLogin jika perlu)
+    // setShowSignup(true); // Atur sesuai kebutuhan
   }, []);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    try {
-      const res = await fetch(BACKEND_URL + 'login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        navigate('/dashboard');
-      } else {
-        setError(data.error || 'Login gagal');
-      }
-    } catch {
-      setError('Login gagal');
-    }
-  };
 
   return (
     <PageContainer title="Login" description="this is Login page">
@@ -91,31 +65,42 @@ const Login2 = () => {
                 <div className="login-logo">
                   <img src="/assets/img/logo_wpm.svg" alt="Wcloud Logo" />
                 </div>
-                <div className="login-title">Wcloud Proxy Manager</div>
+                <Typography variant="h5" align="center" sx={{ mt: 2, mb: 2 }}>
+                  Wcloud Proxy Manager
+                </Typography>
                 <form onSubmit={handleLogin} id="login-form">
-                  <input
-                    className="login-input"
-                    type="text"
-                    name="username"
-                    placeholder="Username"
+                  <TextField
+                    label="Username"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
                     required
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                   />
-                  <input
-                    className="login-input"
+                  <TextField
+                    label="Password"
                     type="password"
-                    name="password"
-                    placeholder="Password"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
                     required
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                   />
-                  <button className="login-btn" type="submit">SIGN IN</button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    sx={{ mt: 2 }}
+                  >
+                    SIGN IN
+                  </Button>
                 </form>
-                {error && <div id="login-error" style={{ color: 'red' }}>{error}</div>}
+                {error && <div id="login-error" style={{ color: 'red', marginTop: 8 }}>{error}</div>}
                 {showSignup && (
-                  <div className="login-footer" id="signup-footer">
+                  <div className="login-footer" id="signup-footer" style={{ marginTop: 16 }}>
                     <a href="/signup">SIGN UP</a>
                   </div>
                 )}

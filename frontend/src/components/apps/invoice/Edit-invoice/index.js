@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { InvoiceContext } from 'src/context/InvoiceContext/index';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router';
 import {
   Button,
   MenuItem,
