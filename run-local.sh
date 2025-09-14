@@ -7,8 +7,8 @@ docker compose down
 echo "[1/4] Remove old images..."
 docker image rm mini-npm-backend mini-npm-frontend mini-npm-nginx || true
 
-echo "[2/4] Build docker images (no cache)..."
-docker compose build --no-cache
+echo "[2/4] Build docker images (no cache, always pull base image)..."
+docker compose build --no-cache --pull
 
 echo "[3/4] Start all services..."
 docker compose up -d

@@ -1,27 +1,28 @@
 import { useState, useEffect } from 'react';
 import TopLoadingBar from 'react-top-loading-bar';
-import { useLocation } from 'react-router-dom'; // update to react-router-dom
+import { useLocation } from 'react-router-dom';
 
 function LoadingBar() {
+    let location;
+    try {
+        location = useLocation();
+    } catch {
+        // Router context not available, don't render LoadingBar
+        return null;
+    }
+
     const [progress, setProgress] = useState(0);
-    const location = useLocation(); // page navigation.
 
-    const startLoading = () => {
-        setProgress(10); // Start loading
-    };
-
+    const startLoading = () => setProgress(10);
     const finishLoading = () => {
-        setProgress(100); // Complete loading
-        setTimeout(() => setProgress(0), 10); // Reset progress after completion
+        setProgress(100);
+        setTimeout(() => setProgress(0), 10);
     };
 
-    // Trigger loading when route changes
     useEffect(() => {
         startLoading();
-        setTimeout(() => {
-            finishLoading(); // Complete the loader after 2 seconds (or after data load)
-        }, 2000); // 2-second delay 
-    }, [location]); // trigger whenever the route changes
+        setTimeout(() => finishLoading(), 2000);
+    }, [location]);
 
     return (
         <TopLoadingBar

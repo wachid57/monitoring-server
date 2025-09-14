@@ -171,8 +171,9 @@ const Router = [
     element: <FullLayout />,
     children: [
       { path: '/', element: <Navigate to="/dashboards/modern" /> },
-      { path: '/dashboards/modern', exact: true, element: <ProtectedRoute><ModernDash /></ProtectedRoute> },
-      { path: '/dashboards/ecommerce', exact: true, element: <ProtectedRoute><EcommerceDash /></ProtectedRoute> },
+      // Nonaktifkan ProtectedRoute:
+      { path: '/dashboards/modern', exact: true, element: <ModernDash /> },
+      { path: '/dashboards/ecommerce', exact: true, element: <EcommerceDash /> },
       { path: '/apps/chats', element: <Chats /> },
       { path: '/apps/notes', element: <Notes /> },
       { path: '/apps/calendar', element: <Calendar /> },

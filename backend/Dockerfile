@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine as builder
+FROM harbor-regs.wachid.web.id/library/golang:1.21-alpine as builder
 WORKDIR /app
 COPY . .
 RUN go mod tidy && go build -o app .
