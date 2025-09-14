@@ -27,7 +27,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
 
   // Navigasi manual karena useNavigate tidak tersedia di react-router
   const onLoginSuccess = () => {
-    window.location.href = '/dashboard';
+    window.location.href = '/dashboards/modern';
   };
 
   return (
