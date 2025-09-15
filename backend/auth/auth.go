@@ -11,11 +11,29 @@ import (
 
 var jwtSecret = []byte("supersecretkey")
 
+// LoginRequest is the request body for login
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// RegisterRequest is the request body for register
+type RegisterRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// LoginHandler godoc
+// @Summary Login user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param login body auth.LoginRequest true "Login credentials"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
 func LoginHandler(c *fiber.Ctx) error {
-	type LoginRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
 	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
@@ -38,32 +56,39 @@ func LoginHandler(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"token": t})
 }
 
+// LogoutHandler godoc
+// @Summary Logout user
+// @Tags Auth
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /auth/logout [post]
 func LogoutHandler(c *fiber.Ctx) error {
-	// Logout pada JWT biasanya hanya menghapus token di client.
-	// Jika ingin blacklist token, simpan token ke database/redis di sini.
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Logout successful"})
 }
 
+// RegisterHandler godoc
+// @Summary Register user
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param register body auth.RegisterRequest true "Register credentials"
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Router /auth/register [post]
 func RegisterHandler(c *fiber.Ctx) error {
-	type RegisterRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
 	var req RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
-	// Cek apakah username sudah ada
 	var user model.User
 	if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err == nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username already exists"})
 	}
-	// Hash password
 	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to hash password"})
 	}
-	// Simpan user baru
 	newUser := model.User{
 		Username: req.Username,
 		Password: string(hashed),

@@ -2,10 +2,13 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"mini-npm-backend/database"
 	"mini-npm-backend/database/migration"
 	"mini-npm-backend/cors"
 	"mini-npm-backend/router"
+	"mini-npm-backend/handler"
+	_ "mini-npm-backend/docs"
 )
 
 func main() {
@@ -14,20 +17,20 @@ func main() {
 	}
 
 	app := fiber.New()
+	store := session.New()
+	swaggerHandler := handler.NewSwaggerHandler(store)
+
 	cors.SetupCORS(app)
 	if err := migration.CreateDefaultUser(database.DB); err != nil {
 		panic(err)
 	}
 
-	// Health check (root)
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Backend Fiber API running!")
 	})
 
-	// Versioned API group
-	api := app.Group("/api/v1.0")
-
-	router.RegisterRoutes(api)
+	// Panggil router langsung dengan app
+	router.RegisterRoutes(app, swaggerHandler)
 
 	app.Listen(":8080")
 }
