@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 
@@ -16,6 +16,10 @@ import TopPerformers from '../../components/dashboards/modern/TopPerformers';
 import Welcome from 'src/layouts/full/shared/welcome/Welcome';
 
 const Modern = () => {
+  useEffect(() => {
+    document.title = 'wcloud - monitoring dashboard';
+  }, []);
+
   return (
     <Box>
       <Grid container spacing={3}>

@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Snackbar, Alert, AlertTitle } from '@mui/material';
 
+import { SITE_TITLE } from 'src/config/constants';
+
 const Welcome = () => {
   const [open, setOpen] = React.useState(false);
 
@@ -16,6 +18,8 @@ const Welcome = () => {
   };
   React.useEffect(() => {
     // Update the document title using the browser API
+    document.title = SITE_TITLE;
+    
     const timer = setTimeout(() => {
       handleClick();
     }, 1500);
