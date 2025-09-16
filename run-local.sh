@@ -17,6 +17,5 @@ echo "[4/4] Show status..."
 docker compose ps
 
 echo "Aplikasi sudah berjalan."
-echo "- Backend: http://localhost:8080"
-echo "- Frontend: http://localhost:8081"
-echo "- Nginx Proxy: http://localhost (HTTP/HTTPS)"
+echo "- Backend: http://localhost:9080"
+echo "- Frontend: http://localhost:9081"
