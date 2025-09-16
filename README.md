@@ -1,10 +1,9 @@
-# Mini Nginx Proxy Manager
+# Aplikasi Monitoring Infrastuktur 
 
-Aplikasi manajemen proxy seperti Nginx Proxy Manager dengan:
+Aplikasi Monitoring Infrastuktur dengan:
 - Backend: Golang (Fiber)
 - Frontend: React.js
 - Database: MariaDB
-- Proxy Engine: Nginx
 
 ## Struktur
 - `backend/` : API server Golang
@@ -26,8 +25,6 @@ Aplikasi manajemen proxy seperti Nginx Proxy Manager dengan:
 3. Akses:
    - Backend: http://localhost:9080
    - Frontend: http://localhost:9081
-   - Nginx Proxy: http://localhost:9082 (HTTP)
-   - Nginx Proxy: https://localhost:9443 (HTTPS)
    - MariaDB: localhost:9306
 
 ## Migrasi Database
@@ -47,8 +44,17 @@ Aplikasi manajemen proxy seperti Nginx Proxy Manager dengan:
 - Login, dashboard, manajemen proxy, dan SSL
 - RBAC: User, Role, Group, RoleBinding
 - CRUD Host dan HostGroup
+- CRUD Service ICMP: `/api/v1.0/services/availability/icmp`
+- CRUD Service Website: `/api/v1.0/services/availability/website`
+- CRUD Metrics (CPU, Memory, Disk):
+  - `/api/v1.0/services/metrics/cpu`
+  - `/api/v1.0/services/metrics/memory`
+  - `/api/v1.0/services/metrics/disk`
+- CRUD Service Group: `/api/v1.0/services/groups`
+- CRUD Contact Group: `/api/v1.0/monitoring/contactgroups`
+- CRUD Notification: `/api/v1.0/monitoring/notifications`
+- CRUD Aknowledged: `/api/v1.0/monitoring/aknowledged`
+- CRUD Profile Setting: `/api/v1.0/profiles/settings`
+- CRUD Report Manual: `/api/v1.0/reports/manual`
+- CRUD Report Automatic: `/api/v1.0/reports/automatic`
 - Dokumentasi API otomatis via Swagger di `/docs/v1.0`
-
-## Catatan
-- Untuk reload Nginx dari backend, pastikan volume Docker socket sudah di-mount.
-- Silakan modifikasi sesuai kebutuhan.
