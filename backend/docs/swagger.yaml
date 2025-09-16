@@ -13,6 +13,26 @@ definitions:
       username:
         type: string
     type: object
+  model.CPUMetric:
+    properties:
+      host:
+        type: string
+      id:
+        type: integer
+      usage:
+        format: float64
+        type: number
+    type: object
+  model.DiskMetric:
+    properties:
+      host:
+        type: string
+      id:
+        type: integer
+      usage:
+        format: float64
+        type: number
+    type: object
   model.Group:
     properties:
       createdAt:
@@ -71,6 +91,25 @@ definitions:
         type: string
       updatedAt:
         type: string
+    type: object
+  model.ICMPService:
+    properties:
+      host:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+    type: object
+  model.MemoryMetric:
+    properties:
+      host:
+        type: string
+      id:
+        type: integer
+      usage:
+        format: float64
+        type: number
     type: object
   model.Role:
     properties:
@@ -398,6 +437,366 @@ paths:
       summary: Update host group by ID
       tags:
       - HostGroups
+  /api/v1.0/metrics/cpu/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.CPUMetric'
+            type: array
+      summary: List CPU metrics
+      tags:
+      - Metrics
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: CPU Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CPUMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CPUMetric'
+      summary: Create CPU metric
+      tags:
+      - Metrics
+  /api/v1.0/metrics/cpu/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete CPU metric
+      tags:
+      - Metrics
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CPUMetric'
+      summary: Get CPU metric by ID
+      tags:
+      - Metrics
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: CPU Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.CPUMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CPUMetric'
+      summary: Update CPU metric
+      tags:
+      - Metrics
+  /api/v1.0/metrics/disk/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.DiskMetric'
+            type: array
+      summary: List Disk metrics
+      tags:
+      - Metrics
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Disk Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.DiskMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DiskMetric'
+      summary: Create Disk metric
+      tags:
+      - Metrics
+  /api/v1.0/metrics/disk/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Disk metric
+      tags:
+      - Metrics
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DiskMetric'
+      summary: Get Disk metric by ID
+      tags:
+      - Metrics
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Disk Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.DiskMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.DiskMetric'
+      summary: Update Disk metric
+      tags:
+      - Metrics
+  /api/v1.0/metrics/memory/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.MemoryMetric'
+            type: array
+      summary: List Memory metrics
+      tags:
+      - Metrics
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Memory Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.MemoryMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MemoryMetric'
+      summary: Create Memory metric
+      tags:
+      - Metrics
+  /api/v1.0/metrics/memory/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Memory metric
+      tags:
+      - Metrics
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MemoryMetric'
+      summary: Get Memory metric by ID
+      tags:
+      - Metrics
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Memory Metric
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.MemoryMetric'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MemoryMetric'
+      summary: Update Memory metric
+      tags:
+      - Metrics
+  /api/v1.0/services/availability/icmp/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ICMPService'
+            type: array
+      summary: List ICMP services
+      tags:
+      - ICMP
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ICMP Service
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ICMPService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ICMPService'
+      summary: Create ICMP service
+      tags:
+      - ICMP
+  /api/v1.0/services/availability/icmp/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete ICMP service
+      tags:
+      - ICMP
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ICMPService'
+      summary: Get ICMP service by ID
+      tags:
+      - ICMP
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ICMP Service
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ICMPService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ICMPService'
+      summary: Update ICMP service
+      tags:
+      - ICMP
   /api/v1.0/users:
     get:
       produces:

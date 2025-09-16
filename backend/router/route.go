@@ -69,6 +69,47 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         hostGroups.Get("/:id", handler.GetHostGroupByID)
         hostGroups.Put("/:id", handler.UpdateHostGroup)
         hostGroups.Delete("/:id", handler.DeleteHostGroup)
+
+        // CRUD ICMP Service
+        icmpGroup := protected.Group("services/availability/icmp")
+        icmpGroup.Get("/", handler.GetICMPServices)
+        icmpGroup.Post("/", handler.CreateICMPService)
+        icmpGroup.Get("/:id", handler.GetICMPServiceByID)
+        icmpGroup.Put("/:id", handler.UpdateICMPService)
+        icmpGroup.Delete("/:id", handler.DeleteICMPService)
+
+        // CRUD Metric CPU
+        cpuGroup := protected.Group("services/metrics/cpu")
+        cpuGroup.Get("/", handler.GetCPUMetrics)
+        cpuGroup.Post("/", handler.CreateCPUMetric)
+        cpuGroup.Get("/:id", handler.GetCPUMetricByID)
+        cpuGroup.Put("/:id", handler.UpdateCPUMetric)
+        cpuGroup.Delete("/:id", handler.DeleteCPUMetric)
+
+        // CRUD Metric Memory
+        memoryGroup := protected.Group("services/metrics/memory")
+        memoryGroup.Get("/", handler.GetMemoryMetrics)
+        memoryGroup.Post("/", handler.CreateMemoryMetric)
+        memoryGroup.Get("/:id", handler.GetMemoryMetricByID)
+        memoryGroup.Put("/:id", handler.UpdateMemoryMetric)
+        memoryGroup.Delete("/:id", handler.DeleteMemoryMetric)
+
+        // CRUD Metric Disk
+        diskGroup := protected.Group("services/metrics/disk")
+        diskGroup.Get("/", handler.GetDiskMetrics)
+        diskGroup.Post("/", handler.CreateDiskMetric)
+        diskGroup.Get("/:id", handler.GetDiskMetricByID)
+        diskGroup.Put("/:id", handler.UpdateDiskMetric)
+        diskGroup.Delete("/:id", handler.DeleteDiskMetric)
+
+        // CRUD Service Group
+        serviceGroup := protected.Group("services/groups")
+        serviceGroup.Get("/", handler.GetServiceGroups)
+        serviceGroup.Post("/", handler.CreateServiceGroup)
+        serviceGroup.Get("/:id", handler.GetServiceGroupByID)
+        serviceGroup.Put("/:id", handler.UpdateServiceGroup)
+        serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
+
     }
 
     // Docs endpoints under /docs/v1.0

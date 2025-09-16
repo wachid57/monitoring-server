@@ -20,6 +20,12 @@ var migrations = []struct {
     {4, "CreateRoleBindingsTable", func(db *gorm.DB) error { return migration.CreateRoleBindingsTable(db) }},
     {5, "CreateHostsTable", func(db *gorm.DB) error { return migration.CreateHostsTable(db) }},
     {6, "CreateHostGroupsTable", func(db *gorm.DB) error { return migration.CreateHostGroupsTable(db) }},
+    {7, "CreateICMPTable", func(db *gorm.DB) error { return migration.CreateICMPTable(db) }},
+    {8, "CreateCPUMetricTable", func(db *gorm.DB) error { return migration.CreateCPUMetricTable(db) }},
+    {9, "CreateMemoryMetricTable", func(db *gorm.DB) error { return migration.CreateMemoryMetricTable(db) }},
+    {10, "CreateDiskMetricTable", func(db *gorm.DB) error { return migration.CreateDiskMetricTable(db) }},
+    {11, "CreateServiceGroupsTable", func(db *gorm.DB) error { return migration.CreateServiceGroupsTable(db) }},
+
 }
 
 func main() {
