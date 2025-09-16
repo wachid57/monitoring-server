@@ -2,7 +2,7 @@
 
 Aplikasi manajemen proxy seperti Nginx Proxy Manager dengan:
 - Backend: Golang (Fiber)
-- Frontend: Vue.js
+- Frontend: React.js
 - Database: MariaDB
 - Proxy Engine: Nginx
 
@@ -14,9 +14,8 @@ Aplikasi manajemen proxy seperti Nginx Proxy Manager dengan:
   - `handler/` : Handler endpoint API (CRUD User, Role, Group, Host, HostGroup, RoleBinding, dsb)
   - `database/migration/` : Script migrasi per tabel
   - `router/` : Routing API dan Swagger
-- `frontend/` : UI Vue.js
+- `frontend/` : UI React.js
 - `docker-compose.yml` : Orkestrasi service
-- `nginx/` : Konfigurasi Nginx
 
 ## Cara Menjalankan
 1. Pastikan Docker & Docker Compose terinstall
