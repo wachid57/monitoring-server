@@ -78,6 +78,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         icmpGroup.Put("/:id", handler.UpdateICMPService)
         icmpGroup.Delete("/:id", handler.DeleteICMPService)
 
+        // CRUD Availability Website
+        availabilityWebsiteGroup := protected.Group("services/availability/website")
+        availabilityWebsiteGroup.Get("/", handler.GetAvailabilityWebsites)
+        availabilityWebsiteGroup.Post("/", handler.CreateAvailabilityWebsite)
+        availabilityWebsiteGroup.Get("/:id", handler.GetAvailabilityWebsiteByID)
+        availabilityWebsiteGroup.Put("/:id", handler.UpdateAvailabilityWebsite)
+        availabilityWebsiteGroup.Delete("/:id", handler.DeleteAvailabilityWebsite)
+
         // CRUD Metric CPU
         cpuGroup := protected.Group("services/metrics/cpu")
         cpuGroup.Get("/", handler.GetCPUMetrics)
@@ -109,6 +117,55 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         serviceGroup.Get("/:id", handler.GetServiceGroupByID)
         serviceGroup.Put("/:id", handler.UpdateServiceGroup)
         serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
+
+        // CRUD Contact Groups
+        contactGroup := protected.Group("monitoring/contactgroups")
+        contactGroup.Get("/", handler.GetContactGroups)
+        contactGroup.Post("/", handler.CreateContactGroup)
+        contactGroup.Get("/:id", handler.GetContactGroupByID)
+        contactGroup.Put("/:id", handler.UpdateContactGroup)
+        contactGroup.Delete("/:id", handler.DeleteContactGroup)
+
+        // CRUD Notifications
+        notificationGroup := protected.Group("monitoring/notifications")
+        notificationGroup.Get("/", handler.GetNotifications)
+        notificationGroup.Post("/", handler.CreateNotification)
+        notificationGroup.Get("/:id", handler.GetNotificationByID)
+        notificationGroup.Put("/:id", handler.UpdateNotification)
+        notificationGroup.Delete("/:id", handler.DeleteNotification)
+
+
+        // CRUD Aknowledged
+        aknowledgedGroup := protected.Group("monitoring/aknowledged")
+        aknowledgedGroup.Get("/", handler.GetAknowledged)
+        aknowledgedGroup.Post("/", handler.CreateAknowledged)
+        aknowledgedGroup.Get("/:id", handler.GetAknowledgedByID)
+        aknowledgedGroup.Put("/:id", handler.UpdateAknowledged)
+        aknowledgedGroup.Delete("/:id", handler.DeleteAknowledged)
+
+        // CRUD Profile Setting
+        profileSettingGroup := protected.Group("profiles/settings")
+        profileSettingGroup.Get("/", handler.GetProfileSettings)
+        profileSettingGroup.Post("/", handler.CreateProfileSetting)
+        profileSettingGroup.Get("/:id", handler.GetProfileSettingByID)
+        profileSettingGroup.Put("/:id", handler.UpdateProfileSetting)
+        profileSettingGroup.Delete("/:id", handler.DeleteProfileSetting)
+
+        // CRUD Report Manual
+        reportManualGroup := protected.Group("reports/manual")
+        reportManualGroup.Get("/", handler.GetReportManuals)
+        reportManualGroup.Post("/", handler.CreateReportManual)
+        reportManualGroup.Get("/:id", handler.GetReportManualByID)
+        reportManualGroup.Put("/:id", handler.UpdateReportManual)
+        reportManualGroup.Delete("/:id", handler.DeleteReportManual)
+
+        // CRUD Report Automatic
+        reportAutomaticGroup := protected.Group("reports/automatic")
+        reportAutomaticGroup.Get("/", handler.GetReportAutomatics)
+        reportAutomaticGroup.Post("/", handler.CreateReportAutomatic)
+        reportAutomaticGroup.Get("/:id", handler.GetReportAutomaticByID)
+        reportAutomaticGroup.Put("/:id", handler.UpdateReportAutomatic)
+        reportAutomaticGroup.Delete("/:id", handler.DeleteReportAutomatic)
 
     }
 

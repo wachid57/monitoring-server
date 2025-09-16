@@ -13,6 +13,28 @@ definitions:
       username:
         type: string
     type: object
+  model.Aknowledged:
+    properties:
+      id:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+      user:
+        type: string
+    type: object
+  model.AvailabilityWebsite:
+    properties:
+      checkedAt:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      url:
+        type: string
+    type: object
   model.CPUMetric:
     properties:
       host:
@@ -22,6 +44,15 @@ definitions:
       usage:
         format: float64
         type: number
+    type: object
+  model.ContactGroup:
+    properties:
+      desc:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   model.DiskMetric:
     properties:
@@ -111,6 +142,50 @@ definitions:
         format: float64
         type: number
     type: object
+  model.Notification:
+    properties:
+      id:
+        type: integer
+      message:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+    type: object
+  model.ProfileSetting:
+    properties:
+      id:
+        type: integer
+      key:
+        type: string
+      userID:
+        type: integer
+      value:
+        type: string
+    type: object
+  model.ReportAutomatic:
+    properties:
+      content:
+        type: string
+      generatedAt:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  model.ReportManual:
+    properties:
+      content:
+        type: string
+      createdBy:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
   model.Role:
     properties:
       createdAt:
@@ -146,6 +221,15 @@ definitions:
         $ref: '#/definitions/model.User'
       userID:
         type: integer
+    type: object
+  model.ServiceGroup:
+    properties:
+      desc:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   model.User:
     properties:
@@ -707,6 +791,546 @@ paths:
       summary: Update Memory metric
       tags:
       - Metrics
+  /api/v1.0/monitoring/aknowledged/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Aknowledged'
+            type: array
+      summary: List Aknowledged
+      tags:
+      - Aknowledged
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Aknowledged
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Aknowledged'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Aknowledged'
+      summary: Create Aknowledged
+      tags:
+      - Aknowledged
+  /api/v1.0/monitoring/aknowledged/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Aknowledged
+      tags:
+      - Aknowledged
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Aknowledged'
+      summary: Get Aknowledged by ID
+      tags:
+      - Aknowledged
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Aknowledged
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Aknowledged'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Aknowledged'
+      summary: Update Aknowledged
+      tags:
+      - Aknowledged
+  /api/v1.0/monitoring/contactgroups/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ContactGroup'
+            type: array
+      summary: List Contact Groups
+      tags:
+      - ContactGroup
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Contact Group
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ContactGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ContactGroup'
+      summary: Create Contact Group
+      tags:
+      - ContactGroup
+  /api/v1.0/monitoring/contactgroups/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Contact Group
+      tags:
+      - ContactGroup
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ContactGroup'
+      summary: Get Contact Group by ID
+      tags:
+      - ContactGroup
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Contact Group
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ContactGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ContactGroup'
+      summary: Update Contact Group
+      tags:
+      - ContactGroup
+  /api/v1.0/monitoring/notifications/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Notification'
+            type: array
+      summary: List Notifications
+      tags:
+      - Notification
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Notification
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Notification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Notification'
+      summary: Create Notification
+      tags:
+      - Notification
+  /api/v1.0/monitoring/notifications/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Notification
+      tags:
+      - Notification
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Notification'
+      summary: Get Notification by ID
+      tags:
+      - Notification
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Notification
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Notification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Notification'
+      summary: Update Notification
+      tags:
+      - Notification
+  /api/v1.0/profiles/settings/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ProfileSetting'
+            type: array
+      summary: List Profile Settings
+      tags:
+      - ProfileSetting
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profile Setting
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProfileSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ProfileSetting'
+      summary: Create Profile Setting
+      tags:
+      - ProfileSetting
+  /api/v1.0/profiles/settings/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Profile Setting
+      tags:
+      - ProfileSetting
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ProfileSetting'
+      summary: Get Profile Setting by ID
+      tags:
+      - ProfileSetting
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Profile Setting
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ProfileSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ProfileSetting'
+      summary: Update Profile Setting
+      tags:
+      - ProfileSetting
+  /api/v1.0/reports/automatic/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ReportAutomatic'
+            type: array
+      summary: List Automatic Reports
+      tags:
+      - ReportAutomatic
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Automatic Report
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReportAutomatic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportAutomatic'
+      summary: Create Automatic Report
+      tags:
+      - ReportAutomatic
+  /api/v1.0/reports/automatic/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Automatic Report
+      tags:
+      - ReportAutomatic
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportAutomatic'
+      summary: Get Automatic Report by ID
+      tags:
+      - ReportAutomatic
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Automatic Report
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReportAutomatic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportAutomatic'
+      summary: Update Automatic Report
+      tags:
+      - ReportAutomatic
+  /api/v1.0/reports/manual/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ReportManual'
+            type: array
+      summary: List Manual Reports
+      tags:
+      - ReportManual
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Manual Report
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReportManual'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportManual'
+      summary: Create Manual Report
+      tags:
+      - ReportManual
+  /api/v1.0/reports/manual/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Manual Report
+      tags:
+      - ReportManual
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportManual'
+      summary: Get Manual Report by ID
+      tags:
+      - ReportManual
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Manual Report
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ReportManual'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ReportManual'
+      summary: Update Manual Report
+      tags:
+      - ReportManual
   /api/v1.0/services/availability/icmp/:
     get:
       produces:
@@ -797,6 +1421,186 @@ paths:
       summary: Update ICMP service
       tags:
       - ICMP
+  /api/v1.0/services/availability/website/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.AvailabilityWebsite'
+            type: array
+      summary: List Website Availability
+      tags:
+      - AvailabilityWebsite
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Website Availability
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AvailabilityWebsite'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AvailabilityWebsite'
+      summary: Create Website Availability
+      tags:
+      - AvailabilityWebsite
+  /api/v1.0/services/availability/website/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Website Availability
+      tags:
+      - AvailabilityWebsite
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AvailabilityWebsite'
+      summary: Get Website Availability by ID
+      tags:
+      - AvailabilityWebsite
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Website Availability
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.AvailabilityWebsite'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AvailabilityWebsite'
+      summary: Update Website Availability
+      tags:
+      - AvailabilityWebsite
+  /api/v1.0/services/groups/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ServiceGroup'
+            type: array
+      summary: List Service Groups
+      tags:
+      - ServiceGroup
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Service Group
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ServiceGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroup'
+      summary: Create Service Group
+      tags:
+      - ServiceGroup
+  /api/v1.0/services/groups/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      summary: Delete Service Group
+      tags:
+      - ServiceGroup
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroup'
+      summary: Get Service Group by ID
+      tags:
+      - ServiceGroup
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service Group
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ServiceGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroup'
+      summary: Update Service Group
+      tags:
+      - ServiceGroup
   /api/v1.0/users:
     get:
       produces:

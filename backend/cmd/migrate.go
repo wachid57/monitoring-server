@@ -25,7 +25,13 @@ var migrations = []struct {
     {9, "CreateMemoryMetricTable", func(db *gorm.DB) error { return migration.CreateMemoryMetricTable(db) }},
     {10, "CreateDiskMetricTable", func(db *gorm.DB) error { return migration.CreateDiskMetricTable(db) }},
     {11, "CreateServiceGroupsTable", func(db *gorm.DB) error { return migration.CreateServiceGroupsTable(db) }},
-
+    {12, "CreateContactGroupsTable", func(db *gorm.DB) error { return migration.CreateContactGroupsTable(db) }},
+    {13, "CreateNotificationsTable", func(db *gorm.DB) error { return migration.CreateNotificationsTable(db) }},
+    {14, "CreateAknowledgedTable", func(db *gorm.DB) error { return migration.CreateAknowledgedTable(db) }},
+    {15, "CreateProfileSettingsTable", func(db *gorm.DB) error { return migration.CreateProfileSettingsTable(db) }},
+    {16, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
+    {17, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
+    {18, "CreateAvailabilityWebsiteTable", func(db *gorm.DB) error { return migration.CreateAvailabilityWebsiteTable(db) }},
 }
 
 func main() {
