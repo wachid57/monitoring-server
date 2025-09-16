@@ -4,7 +4,7 @@ COPY . .
 RUN go mod tidy && go build -o app main.go
 RUN go build -o migrate cmd/migrate.go
 
-FROM alpine:latest
+FROM harbor-regs.wachid.web.id/library/alpine:latest
 WORKDIR /app
 COPY --from=builder /app/app /app/app
 COPY --from=builder /app/migrate /app/migrate

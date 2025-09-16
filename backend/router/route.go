@@ -19,65 +19,56 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     authGroup.Post("/logout", auth.LogoutHandler)
     authGroup.Post("/register", auth.RegisterHandler)
 
-    // CRUD endpoints for users, roles, groups, role bindings
-    usersGroup := app.Group("/api/v1.0/users")
-    usersGroup.Get("/", handler.GetUsers)
-    usersGroup.Post("/", handler.CreateUser)
-    usersGroup.Get("/:id", handler.GetUserByID)
-    usersGroup.Put("/:id", handler.UpdateUser)
-    usersGroup.Delete("/:id", handler.DeleteUser)
-
-    // CRUD Role
-    usersGroup.Get("/roles", handler.GetRoles)
-    usersGroup.Post("/roles", handler.CreateRole)
-    usersGroup.Get("/roles/:id", handler.GetRoleByID)
-    usersGroup.Put("/roles/:id", handler.UpdateRole)
-    usersGroup.Delete("/roles/:id", handler.DeleteRole)
-
-    // CRUD Group
-    usersGroup.Get("/groups", handler.GetGroups)
-    usersGroup.Post("/groups", handler.CreateGroup)
-    usersGroup.Get("/groups/:id", handler.GetGroupByID)
-    usersGroup.Put("/groups/:id", handler.UpdateGroup)
-    usersGroup.Delete("/groups/:id", handler.DeleteGroup)
-
-    // CRUD Role Binding
-    usersGroup.Get("/role-bindings", handler.GetRoleBindings)
-    usersGroup.Post("/role-bindings", handler.CreateRoleBinding)
-    usersGroup.Get("/role-bindings/:id", handler.GetRoleBindingByID)
-    usersGroup.Put("/role-bindings/:id", handler.UpdateRoleBinding)
-    usersGroup.Delete("/role-bindings/:id", handler.DeleteRoleBinding)
-
-    // CRUD Host
-    hostsGroup := app.Group("/api/v1.0/hosts")
-    hostsGroup.Get("/", handler.GetHosts)
-    hostsGroup.Post("/", handler.CreateHost)
-    hostsGroup.Get("/:id", handler.GetHostByID)
-    hostsGroup.Put("/:id", handler.UpdateHost)
-    hostsGroup.Delete("/:id", handler.DeleteHost)
-
-    // CRUD Host Group
-    hostGroups := app.Group("/api/v1.0/hosts/groups")
-    hostGroups.Get("/", handler.GetHostGroups)
-    hostGroups.Post("/", handler.CreateHostGroup)
-    hostGroups.Get("/:id", handler.GetHostGroupByID)
-    hostGroups.Put("/:id", handler.UpdateHostGroup)
-    hostGroups.Delete("/:id", handler.DeleteHostGroup)
-
     // Protected endpoints
     protected := app.Group("/api/v1.0/", middlewares.JwtMiddleware)
     {
         // Dashboard endpoint
         protected.Get("/dashboard", handler.DashboardHandler)
 
-        // Proxy management endpoints
-        protected.Get("/proxies", handler.GetProxies)
-        protected.Post("/proxies", handler.AddProxy)
-        protected.Delete("/proxies/:id", handler.DeleteProxy)
+        // CRUD endpoints for users, roles, groups, role bindings
+        usersGroup := protected.Group("users")
+        usersGroup.Get("/", handler.GetUsers)
+        usersGroup.Post("/", handler.CreateUser)
+        usersGroup.Get("/:id", handler.GetUserByID)
+        usersGroup.Put("/:id", handler.UpdateUser)
+        usersGroup.Delete("/:id", handler.DeleteUser)
 
-        // SSL endpoints
-        protected.Post("/ssl/generate", handler.GenerateSSL)
-        protected.Get("/ssl/list", handler.ListSSL)
+        // CRUD Role
+        usersGroup.Get("/roles", handler.GetRoles)
+        usersGroup.Post("/roles", handler.CreateRole)
+        usersGroup.Get("/roles/:id", handler.GetRoleByID)
+        usersGroup.Put("/roles/:id", handler.UpdateRole)
+        usersGroup.Delete("/roles/:id", handler.DeleteRole)
+
+        // CRUD Group
+        usersGroup.Get("/groups", handler.GetGroups)
+        usersGroup.Post("/groups", handler.CreateGroup)
+        usersGroup.Get("/groups/:id", handler.GetGroupByID)
+        usersGroup.Put("/groups/:id", handler.UpdateGroup)
+        usersGroup.Delete("/groups/:id", handler.DeleteGroup)
+
+        // CRUD Role Binding
+        usersGroup.Get("/role-bindings", handler.GetRoleBindings)
+        usersGroup.Post("/role-bindings", handler.CreateRoleBinding)
+        usersGroup.Get("/role-bindings/:id", handler.GetRoleBindingByID)
+        usersGroup.Put("/role-bindings/:id", handler.UpdateRoleBinding)
+        usersGroup.Delete("/role-bindings/:id", handler.DeleteRoleBinding)
+
+        // CRUD Host
+        hostsGroup := protected.Group("hosts")
+        hostsGroup.Get("/", handler.GetHosts)
+        hostsGroup.Post("/", handler.CreateHost)
+        hostsGroup.Get("/:id", handler.GetHostByID)
+        hostsGroup.Put("/:id", handler.UpdateHost)
+        hostsGroup.Delete("/:id", handler.DeleteHost)
+
+        // CRUD Host Group
+        hostGroups := protected.Group("hosts/groups")
+        hostGroups.Get("/", handler.GetHostGroups)
+        hostGroups.Post("/", handler.CreateHostGroup)
+        hostGroups.Get("/:id", handler.GetHostGroupByID)
+        hostGroups.Put("/:id", handler.UpdateHostGroup)
+        hostGroups.Delete("/:id", handler.DeleteHostGroup)
     }
 
     // Docs endpoints under /docs/v1.0

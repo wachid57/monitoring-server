@@ -6,19 +6,20 @@ import (
     "mini-npm-backend/database/migration"
     "os"
     "strconv"
+    "gorm.io/gorm"
 )
 
 var migrations = []struct {
     Number int
     Name   string
-    Func   func(db *database.DBType) error
+    Func   func(db *gorm.DB) error
 }{
-    {1, "CreateDefaultUser", func(db *database.DBType) error { return migration.CreateDefaultUser(db) }},
-    {2, "CreateRolesTable", func(db *database.DBType) error { return migration.CreateRolesTable(db) }},
-    {3, "CreateGroupsTable", func(db *database.DBType) error { return migration.CreateGroupsTable(db) }},
-    {4, "CreateRoleBindingsTable", func(db *database.DBType) error { return migration.CreateRoleBindingsTable(db) }},
-    {5, "CreateHostsTable", func(db *database.DBType) error { return migration.CreateHostsTable(db) }},
-    {6, "CreateHostGroupsTable", func(db *database.DBType) error { return migration.CreateHostGroupsTable(db) }},
+    {1, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
+    {2, "CreateRolesTable", func(db *gorm.DB) error { return migration.CreateRolesTable(db) }},
+    {3, "CreateGroupsTable", func(db *gorm.DB) error { return migration.CreateGroupsTable(db) }},
+    {4, "CreateRoleBindingsTable", func(db *gorm.DB) error { return migration.CreateRoleBindingsTable(db) }},
+    {5, "CreateHostsTable", func(db *gorm.DB) error { return migration.CreateHostsTable(db) }},
+    {6, "CreateHostGroupsTable", func(db *gorm.DB) error { return migration.CreateHostGroupsTable(db) }},
 }
 
 func main() {

@@ -26,6 +26,52 @@ definitions:
       updatedAt:
         type: string
     type: object
+  model.Host:
+    properties:
+      alias:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      deskripsi:
+        type: string
+      hostname:
+        type: string
+      hostsTags:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      keterangan:
+        type: string
+      service:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  model.HostGroup:
+    properties:
+      alias:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      groupName:
+        type: string
+      groupsTags:
+        type: string
+      hostID:
+        type: integer
+      id:
+        type: integer
+      keterangan:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   model.Role:
     properties:
       createdAt:
@@ -88,6 +134,270 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1.0/hosts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Host'
+            type: array
+      summary: Get all hosts
+      tags:
+      - Hosts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Host data
+        in: body
+        name: host
+        required: true
+        schema:
+          $ref: '#/definitions/model.Host'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Host'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new host
+      tags:
+      - Hosts
+  /api/v1.0/hosts/{id}:
+    delete:
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete host by ID
+      tags:
+      - Hosts
+    get:
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Host'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get host by ID
+      tags:
+      - Hosts
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Host data
+        in: body
+        name: host
+        required: true
+        schema:
+          $ref: '#/definitions/model.Host'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Host'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update host by ID
+      tags:
+      - Hosts
+  /api/v1.0/hosts/groups:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.HostGroup'
+            type: array
+      summary: Get all host groups
+      tags:
+      - HostGroups
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: HostGroup data
+        in: body
+        name: hostgroup
+        required: true
+        schema:
+          $ref: '#/definitions/model.HostGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroup'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new host group
+      tags:
+      - HostGroups
+  /api/v1.0/hosts/groups/{id}:
+    delete:
+      parameters:
+      - description: HostGroup ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete host group by ID
+      tags:
+      - HostGroups
+    get:
+      parameters:
+      - description: HostGroup ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroup'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get host group by ID
+      tags:
+      - HostGroups
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: HostGroup ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: HostGroup data
+        in: body
+        name: hostgroup
+        required: true
+        schema:
+          $ref: '#/definitions/model.HostGroup'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroup'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update host group by ID
+      tags:
+      - HostGroups
   /api/v1.0/users:
     get:
       produces:
