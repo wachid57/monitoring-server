@@ -48,6 +48,22 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     usersGroup.Put("/role-bindings/:id", handler.UpdateRoleBinding)
     usersGroup.Delete("/role-bindings/:id", handler.DeleteRoleBinding)
 
+    // CRUD Host
+    hostsGroup := app.Group("/api/v1.0/hosts")
+    hostsGroup.Get("/", handler.GetHosts)
+    hostsGroup.Post("/", handler.CreateHost)
+    hostsGroup.Get("/:id", handler.GetHostByID)
+    hostsGroup.Put("/:id", handler.UpdateHost)
+    hostsGroup.Delete("/:id", handler.DeleteHost)
+
+    // CRUD Host Group
+    hostGroups := app.Group("/api/v1.0/hosts/groups")
+    hostGroups.Get("/", handler.GetHostGroups)
+    hostGroups.Post("/", handler.CreateHostGroup)
+    hostGroups.Get("/:id", handler.GetHostGroupByID)
+    hostGroups.Put("/:id", handler.UpdateHostGroup)
+    hostGroups.Delete("/:id", handler.DeleteHostGroup)
+
     // Protected endpoints
     protected := app.Group("/api/v1.0/", middlewares.JwtMiddleware)
     {

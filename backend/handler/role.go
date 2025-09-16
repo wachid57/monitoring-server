@@ -6,7 +6,12 @@ import (
     "mini-npm-backend/database"
 )
 
-// Get all roles
+// GetRoles godoc
+// @Summary Get all roles
+// @Tags Roles
+// @Produce json
+// @Success 200 {array} model.Role
+// @Router /api/v1.0/users/roles [get]
 func GetRoles(c *fiber.Ctx) error {
     var roles []model.Role
     if err := database.DB.Find(&roles).Error; err != nil {
@@ -15,7 +20,16 @@ func GetRoles(c *fiber.Ctx) error {
     return c.JSON(roles)
 }
 
-// Create role
+// CreateRole godoc
+// @Summary Create a new role
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param role body model.Role true "Role data"
+// @Success 200 {object} model.Role
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/roles [post]
 func CreateRole(c *fiber.Ctx) error {
     var role model.Role
     if err := c.BodyParser(&role); err != nil {
@@ -27,7 +41,14 @@ func CreateRole(c *fiber.Ctx) error {
     return c.JSON(role)
 }
 
-// Get role by ID
+// GetRoleByID godoc
+// @Summary Get role by ID
+// @Tags Roles
+// @Produce json
+// @Param id path int true "Role ID"
+// @Success 200 {object} model.Role
+// @Failure 404 {object} map[string]string
+// @Router /api/v1.0/users/roles/{id} [get]
 func GetRoleByID(c *fiber.Ctx) error {
     var role model.Role
     id := c.Params("id")
@@ -37,7 +58,18 @@ func GetRoleByID(c *fiber.Ctx) error {
     return c.JSON(role)
 }
 
-// Update role
+// UpdateRole godoc
+// @Summary Update role by ID
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param id path int true "Role ID"
+// @Param role body model.Role true "Role data"
+// @Success 200 {object} model.Role
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/roles/{id} [put]
 func UpdateRole(c *fiber.Ctx) error {
     var role model.Role
     id := c.Params("id")
@@ -53,7 +85,13 @@ func UpdateRole(c *fiber.Ctx) error {
     return c.JSON(role)
 }
 
-// Delete role
+// DeleteRole godoc
+// @Summary Delete role by ID
+// @Tags Roles
+// @Param id path int true "Role ID"
+// @Success 204
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
     id := c.Params("id")
     if err := database.DB.Delete(&model.Role{}, id).Error; err != nil {

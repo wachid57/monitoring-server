@@ -6,7 +6,12 @@ import (
     "mini-npm-backend/database"
 )
 
-// Get all groups
+// GetGroups godoc
+// @Summary Get all groups
+// @Tags Groups
+// @Produce json
+// @Success 200 {array} model.Group
+// @Router /api/v1.0/users/groups [get]
 func GetGroups(c *fiber.Ctx) error {
     var groups []model.Group
     if err := database.DB.Find(&groups).Error; err != nil {
@@ -15,7 +20,16 @@ func GetGroups(c *fiber.Ctx) error {
     return c.JSON(groups)
 }
 
-// Create group
+// CreateGroup godoc
+// @Summary Create a new group
+// @Tags Groups
+// @Accept json
+// @Produce json
+// @Param group body model.Group true "Group data"
+// @Success 200 {object} model.Group
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/groups [post]
 func CreateGroup(c *fiber.Ctx) error {
     var group model.Group
     if err := c.BodyParser(&group); err != nil {
@@ -27,7 +41,14 @@ func CreateGroup(c *fiber.Ctx) error {
     return c.JSON(group)
 }
 
-// Get group by ID
+// GetGroupByID godoc
+// @Summary Get group by ID
+// @Tags Groups
+// @Produce json
+// @Param id path int true "Group ID"
+// @Success 200 {object} model.Group
+// @Failure 404 {object} map[string]string
+// @Router /api/v1.0/users/groups/{id} [get]
 func GetGroupByID(c *fiber.Ctx) error {
     var group model.Group
     id := c.Params("id")
@@ -37,7 +58,18 @@ func GetGroupByID(c *fiber.Ctx) error {
     return c.JSON(group)
 }
 
-// Update group
+// UpdateGroup godoc
+// @Summary Update group by ID
+// @Tags Groups
+// @Accept json
+// @Produce json
+// @Param id path int true "Group ID"
+// @Param group body model.Group true "Group data"
+// @Success 200 {object} model.Group
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/groups/{id} [put]
 func UpdateGroup(c *fiber.Ctx) error {
     var group model.Group
     id := c.Params("id")
@@ -53,7 +85,13 @@ func UpdateGroup(c *fiber.Ctx) error {
     return c.JSON(group)
 }
 
-// Delete group
+// DeleteGroup godoc
+// @Summary Delete group by ID
+// @Tags Groups
+// @Param id path int true "Group ID"
+// @Success 204
+// @Failure 500 {object} map[string]string
+// @Router /api/v1.0/users/groups/{id} [delete]
 func DeleteGroup(c *fiber.Ctx) error {
     id := c.Params("id")
     if err := database.DB.Delete(&model.Group{}, id).Error; err != nil {

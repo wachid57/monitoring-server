@@ -1,9 +1,14 @@
 package model
 
-import "gorm.io/gorm"
+import (
+    "time"
+
+)
 
 type Group struct {
-    ID   uint   `gorm:"primaryKey"`
-    Name string `gorm:"uniqueIndex"`
-    gorm.Model
+	ID        uint       `gorm:"primaryKey"`
+	Name      string     `gorm:"uniqueIndex"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `gorm:"index"`
 }
