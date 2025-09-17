@@ -11,6 +11,7 @@ import (
 // @Tags ReportManual
 // @Produce json
 // @Success 200 {array} model.ReportManual
+// @Security BearerAuth
 // @Router /api/v1.0/reports/manual/ [get]
 func GetReportManuals(c *fiber.Ctx) error {
     var reports []model.ReportManual
@@ -27,6 +28,7 @@ func GetReportManuals(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ReportManual true "Manual Report"
 // @Success 200 {object} model.ReportManual
+// @Security BearerAuth
 // @Router /api/v1.0/reports/manual/ [post]
 func CreateReportManual(c *fiber.Ctx) error {
     var report model.ReportManual
@@ -45,6 +47,7 @@ func CreateReportManual(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ReportManual
+// @Security BearerAuth
 // @Router /api/v1.0/reports/manual/{id} [get]
 func GetReportManualByID(c *fiber.Ctx) error {
     var report model.ReportManual
@@ -63,6 +66,7 @@ func GetReportManualByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ReportManual true "Manual Report"
 // @Success 200 {object} model.ReportManual
+// @Security BearerAuth
 // @Router /api/v1.0/reports/manual/{id} [put]
 func UpdateReportManual(c *fiber.Ctx) error {
     var report model.ReportManual
@@ -84,6 +88,7 @@ func UpdateReportManual(c *fiber.Ctx) error {
 // @Tags ReportManual
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/reports/manual/{id} [delete]
 func DeleteReportManual(c *fiber.Ctx) error {
     id := c.Params("id")

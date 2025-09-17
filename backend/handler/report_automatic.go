@@ -11,6 +11,7 @@ import (
 // @Tags ReportAutomatic
 // @Produce json
 // @Success 200 {array} model.ReportAutomatic
+// @Security BearerAuth
 // @Router /api/v1.0/reports/automatic/ [get]
 func GetReportAutomatics(c *fiber.Ctx) error {
     var reports []model.ReportAutomatic
@@ -27,6 +28,7 @@ func GetReportAutomatics(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ReportAutomatic true "Automatic Report"
 // @Success 200 {object} model.ReportAutomatic
+// @Security BearerAuth
 // @Router /api/v1.0/reports/automatic/ [post]
 func CreateReportAutomatic(c *fiber.Ctx) error {
     var report model.ReportAutomatic
@@ -45,6 +47,7 @@ func CreateReportAutomatic(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ReportAutomatic
+// @Security BearerAuth
 // @Router /api/v1.0/reports/automatic/{id} [get]
 func GetReportAutomaticByID(c *fiber.Ctx) error {
     var report model.ReportAutomatic
@@ -63,6 +66,7 @@ func GetReportAutomaticByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ReportAutomatic true "Automatic Report"
 // @Success 200 {object} model.ReportAutomatic
+// @Security BearerAuth
 // @Router /api/v1.0/reports/automatic/{id} [put]
 func UpdateReportAutomatic(c *fiber.Ctx) error {
     var report model.ReportAutomatic
@@ -84,6 +88,7 @@ func UpdateReportAutomatic(c *fiber.Ctx) error {
 // @Tags ReportAutomatic
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/reports/automatic/{id} [delete]
 func DeleteReportAutomatic(c *fiber.Ctx) error {
     id := c.Params("id")

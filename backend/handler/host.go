@@ -11,6 +11,7 @@ import (
 // @Tags Hosts
 // @Produce json
 // @Success 200 {array} model.Host
+// @Security BearerAuth
 // @Router /api/v1.0/hosts [get]
 func GetHosts(c *fiber.Ctx) error {
     var hosts []model.Host
@@ -29,6 +30,7 @@ func GetHosts(c *fiber.Ctx) error {
 // @Success 200 {object} model.Host
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts [post]
 func CreateHost(c *fiber.Ctx) error {
     var host model.Host
@@ -48,6 +50,7 @@ func CreateHost(c *fiber.Ctx) error {
 // @Param id path int true "Host ID"
 // @Success 200 {object} model.Host
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/{id} [get]
 func GetHostByID(c *fiber.Ctx) error {
     var host model.Host
@@ -69,6 +72,7 @@ func GetHostByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/{id} [put]
 func UpdateHost(c *fiber.Ctx) error {
     var host model.Host
@@ -91,6 +95,7 @@ func UpdateHost(c *fiber.Ctx) error {
 // @Param id path int true "Host ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/{id} [delete]
 func DeleteHost(c *fiber.Ctx) error {
     id := c.Params("id")

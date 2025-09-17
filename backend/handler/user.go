@@ -11,6 +11,7 @@ import (
 // @Tags Users
 // @Produce json
 // @Success 200 {array} model.User
+// @Security BearerAuth
 // @Router /api/v1.0/users [get]
 func GetUsers(c *fiber.Ctx) error {
     var users []model.User
@@ -29,6 +30,7 @@ func GetUsers(c *fiber.Ctx) error {
 // @Success 200 {object} model.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users [post]
 func CreateUser(c *fiber.Ctx) error {
     var user model.User
@@ -48,6 +50,7 @@ func CreateUser(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Success 200 {object} model.User
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/{id} [get]
 func GetUserByID(c *fiber.Ctx) error {
     var user model.User
@@ -69,6 +72,7 @@ func GetUserByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/{id} [put]
 func UpdateUser(c *fiber.Ctx) error {
     var user model.User
@@ -91,6 +95,7 @@ func UpdateUser(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/{id} [delete]
 func DeleteUser(c *fiber.Ctx) error {
     id := c.Params("id")

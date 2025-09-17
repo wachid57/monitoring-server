@@ -11,6 +11,7 @@ import (
 // @Tags Roles
 // @Produce json
 // @Success 200 {array} model.Role
+// @Security BearerAuth
 // @Router /api/v1.0/users/roles [get]
 func GetRoles(c *fiber.Ctx) error {
     var roles []model.Role
@@ -29,6 +30,7 @@ func GetRoles(c *fiber.Ctx) error {
 // @Success 200 {object} model.Role
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/roles [post]
 func CreateRole(c *fiber.Ctx) error {
     var role model.Role
@@ -48,6 +50,7 @@ func CreateRole(c *fiber.Ctx) error {
 // @Param id path int true "Role ID"
 // @Success 200 {object} model.Role
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/roles/{id} [get]
 func GetRoleByID(c *fiber.Ctx) error {
     var role model.Role
@@ -69,6 +72,7 @@ func GetRoleByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/roles/{id} [put]
 func UpdateRole(c *fiber.Ctx) error {
     var role model.Role
@@ -91,6 +95,7 @@ func UpdateRole(c *fiber.Ctx) error {
 // @Param id path int true "Role ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
     id := c.Params("id")

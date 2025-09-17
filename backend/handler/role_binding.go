@@ -11,6 +11,7 @@ import (
 // @Tags RoleBindings
 // @Produce json
 // @Success 200 {array} model.RoleBinding
+// @Security BearerAuth
 // @Router /api/v1.0/users/role-bindings [get]
 func GetRoleBindings(c *fiber.Ctx) error {
     var bindings []model.RoleBinding
@@ -29,6 +30,7 @@ func GetRoleBindings(c *fiber.Ctx) error {
 // @Success 200 {object} model.RoleBinding
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/role-bindings [post]
 func CreateRoleBinding(c *fiber.Ctx) error {
     var binding model.RoleBinding
@@ -48,6 +50,7 @@ func CreateRoleBinding(c *fiber.Ctx) error {
 // @Param id path int true "Role Binding ID"
 // @Success 200 {object} model.RoleBinding
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/role-bindings/{id} [get]
 func GetRoleBindingByID(c *fiber.Ctx) error {
     var binding model.RoleBinding
@@ -69,6 +72,7 @@ func GetRoleBindingByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/role-bindings/{id} [put]
 func UpdateRoleBinding(c *fiber.Ctx) error {
     var binding model.RoleBinding
@@ -91,6 +95,7 @@ func UpdateRoleBinding(c *fiber.Ctx) error {
 // @Param id path int true "Role Binding ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/users/role-bindings/{id} [delete]
 func DeleteRoleBinding(c *fiber.Ctx) error {
     id := c.Params("id")

@@ -11,6 +11,7 @@ import (
 // @Tags ContactGroup
 // @Produce json
 // @Success 200 {array} model.ContactGroup
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/contactgroups/ [get]
 func GetContactGroups(c *fiber.Ctx) error {
     var groups []model.ContactGroup
@@ -27,6 +28,7 @@ func GetContactGroups(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ContactGroup true "Contact Group"
 // @Success 200 {object} model.ContactGroup
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/contactgroups/ [post]
 func CreateContactGroup(c *fiber.Ctx) error {
     var group model.ContactGroup
@@ -45,6 +47,7 @@ func CreateContactGroup(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ContactGroup
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/contactgroups/{id} [get]
 func GetContactGroupByID(c *fiber.Ctx) error {
     var group model.ContactGroup
@@ -63,6 +66,7 @@ func GetContactGroupByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ContactGroup true "Contact Group"
 // @Success 200 {object} model.ContactGroup
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/contactgroups/{id} [put]
 func UpdateContactGroup(c *fiber.Ctx) error {
     var group model.ContactGroup
@@ -84,6 +88,7 @@ func UpdateContactGroup(c *fiber.Ctx) error {
 // @Tags ContactGroup
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/contactgroups/{id} [delete]
 func DeleteContactGroup(c *fiber.Ctx) error {
     id := c.Params("id")

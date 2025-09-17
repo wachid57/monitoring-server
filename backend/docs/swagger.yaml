@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   auth.LoginRequest:
     properties:
@@ -256,6 +257,7 @@ definitions:
     type: object
 info:
   contact: {}
+  title: Monitoring Server Backend API
 paths:
   /api/v1.0/hosts:
     get:
@@ -268,6 +270,8 @@ paths:
             items:
               $ref: '#/definitions/model.Host'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all hosts
       tags:
       - Hosts
@@ -300,6 +304,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new host
       tags:
       - Hosts
@@ -320,6 +326,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete host by ID
       tags:
       - Hosts
@@ -343,6 +351,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get host by ID
       tags:
       - Hosts
@@ -386,6 +396,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update host by ID
       tags:
       - Hosts
@@ -400,6 +412,8 @@ paths:
             items:
               $ref: '#/definitions/model.HostGroup'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all host groups
       tags:
       - HostGroups
@@ -432,6 +446,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new host group
       tags:
       - HostGroups
@@ -452,6 +468,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete host group by ID
       tags:
       - HostGroups
@@ -475,6 +493,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get host group by ID
       tags:
       - HostGroups
@@ -518,6 +538,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update host group by ID
       tags:
       - HostGroups
@@ -532,6 +554,8 @@ paths:
             items:
               $ref: '#/definitions/model.CPUMetric'
             type: array
+      security:
+      - BearerAuth: []
       summary: List CPU metrics
       tags:
       - Metrics
@@ -552,6 +576,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.CPUMetric'
+      security:
+      - BearerAuth: []
       summary: Create CPU metric
       tags:
       - Metrics
@@ -566,6 +592,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete CPU metric
       tags:
       - Metrics
@@ -583,6 +611,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.CPUMetric'
+      security:
+      - BearerAuth: []
       summary: Get CPU metric by ID
       tags:
       - Metrics
@@ -608,6 +638,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.CPUMetric'
+      security:
+      - BearerAuth: []
       summary: Update CPU metric
       tags:
       - Metrics
@@ -622,6 +654,8 @@ paths:
             items:
               $ref: '#/definitions/model.DiskMetric'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Disk metrics
       tags:
       - Metrics
@@ -642,6 +676,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.DiskMetric'
+      security:
+      - BearerAuth: []
       summary: Create Disk metric
       tags:
       - Metrics
@@ -656,6 +692,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Disk metric
       tags:
       - Metrics
@@ -673,6 +711,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.DiskMetric'
+      security:
+      - BearerAuth: []
       summary: Get Disk metric by ID
       tags:
       - Metrics
@@ -698,6 +738,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.DiskMetric'
+      security:
+      - BearerAuth: []
       summary: Update Disk metric
       tags:
       - Metrics
@@ -712,6 +754,8 @@ paths:
             items:
               $ref: '#/definitions/model.MemoryMetric'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Memory metrics
       tags:
       - Metrics
@@ -732,6 +776,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.MemoryMetric'
+      security:
+      - BearerAuth: []
       summary: Create Memory metric
       tags:
       - Metrics
@@ -746,6 +792,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Memory metric
       tags:
       - Metrics
@@ -763,6 +811,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.MemoryMetric'
+      security:
+      - BearerAuth: []
       summary: Get Memory metric by ID
       tags:
       - Metrics
@@ -788,6 +838,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.MemoryMetric'
+      security:
+      - BearerAuth: []
       summary: Update Memory metric
       tags:
       - Metrics
@@ -802,6 +854,8 @@ paths:
             items:
               $ref: '#/definitions/model.Aknowledged'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Aknowledged
       tags:
       - Aknowledged
@@ -822,6 +876,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Aknowledged'
+      security:
+      - BearerAuth: []
       summary: Create Aknowledged
       tags:
       - Aknowledged
@@ -836,6 +892,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Aknowledged
       tags:
       - Aknowledged
@@ -853,6 +911,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Aknowledged'
+      security:
+      - BearerAuth: []
       summary: Get Aknowledged by ID
       tags:
       - Aknowledged
@@ -878,6 +938,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Aknowledged'
+      security:
+      - BearerAuth: []
       summary: Update Aknowledged
       tags:
       - Aknowledged
@@ -892,6 +954,8 @@ paths:
             items:
               $ref: '#/definitions/model.ContactGroup'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Contact Groups
       tags:
       - ContactGroup
@@ -912,6 +976,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ContactGroup'
+      security:
+      - BearerAuth: []
       summary: Create Contact Group
       tags:
       - ContactGroup
@@ -926,6 +992,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Contact Group
       tags:
       - ContactGroup
@@ -943,6 +1011,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ContactGroup'
+      security:
+      - BearerAuth: []
       summary: Get Contact Group by ID
       tags:
       - ContactGroup
@@ -968,6 +1038,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ContactGroup'
+      security:
+      - BearerAuth: []
       summary: Update Contact Group
       tags:
       - ContactGroup
@@ -982,6 +1054,8 @@ paths:
             items:
               $ref: '#/definitions/model.Notification'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Notifications
       tags:
       - Notification
@@ -1002,6 +1076,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Notification'
+      security:
+      - BearerAuth: []
       summary: Create Notification
       tags:
       - Notification
@@ -1016,6 +1092,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Notification
       tags:
       - Notification
@@ -1033,6 +1111,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Notification'
+      security:
+      - BearerAuth: []
       summary: Get Notification by ID
       tags:
       - Notification
@@ -1058,6 +1138,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Notification'
+      security:
+      - BearerAuth: []
       summary: Update Notification
       tags:
       - Notification
@@ -1072,6 +1154,8 @@ paths:
             items:
               $ref: '#/definitions/model.ProfileSetting'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Profile Settings
       tags:
       - ProfileSetting
@@ -1092,6 +1176,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ProfileSetting'
+      security:
+      - BearerAuth: []
       summary: Create Profile Setting
       tags:
       - ProfileSetting
@@ -1106,6 +1192,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Profile Setting
       tags:
       - ProfileSetting
@@ -1123,6 +1211,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ProfileSetting'
+      security:
+      - BearerAuth: []
       summary: Get Profile Setting by ID
       tags:
       - ProfileSetting
@@ -1148,6 +1238,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ProfileSetting'
+      security:
+      - BearerAuth: []
       summary: Update Profile Setting
       tags:
       - ProfileSetting
@@ -1162,6 +1254,8 @@ paths:
             items:
               $ref: '#/definitions/model.ReportAutomatic'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Automatic Reports
       tags:
       - ReportAutomatic
@@ -1182,6 +1276,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportAutomatic'
+      security:
+      - BearerAuth: []
       summary: Create Automatic Report
       tags:
       - ReportAutomatic
@@ -1196,6 +1292,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Automatic Report
       tags:
       - ReportAutomatic
@@ -1213,6 +1311,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportAutomatic'
+      security:
+      - BearerAuth: []
       summary: Get Automatic Report by ID
       tags:
       - ReportAutomatic
@@ -1238,6 +1338,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportAutomatic'
+      security:
+      - BearerAuth: []
       summary: Update Automatic Report
       tags:
       - ReportAutomatic
@@ -1252,6 +1354,8 @@ paths:
             items:
               $ref: '#/definitions/model.ReportManual'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Manual Reports
       tags:
       - ReportManual
@@ -1272,6 +1376,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportManual'
+      security:
+      - BearerAuth: []
       summary: Create Manual Report
       tags:
       - ReportManual
@@ -1286,6 +1392,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Manual Report
       tags:
       - ReportManual
@@ -1303,6 +1411,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportManual'
+      security:
+      - BearerAuth: []
       summary: Get Manual Report by ID
       tags:
       - ReportManual
@@ -1328,6 +1438,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ReportManual'
+      security:
+      - BearerAuth: []
       summary: Update Manual Report
       tags:
       - ReportManual
@@ -1342,6 +1454,8 @@ paths:
             items:
               $ref: '#/definitions/model.ICMPService'
             type: array
+      security:
+      - BearerAuth: []
       summary: List ICMP services
       tags:
       - ICMP
@@ -1362,6 +1476,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ICMPService'
+      security:
+      - BearerAuth: []
       summary: Create ICMP service
       tags:
       - ICMP
@@ -1376,6 +1492,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete ICMP service
       tags:
       - ICMP
@@ -1393,6 +1511,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ICMPService'
+      security:
+      - BearerAuth: []
       summary: Get ICMP service by ID
       tags:
       - ICMP
@@ -1418,6 +1538,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ICMPService'
+      security:
+      - BearerAuth: []
       summary: Update ICMP service
       tags:
       - ICMP
@@ -1432,6 +1554,8 @@ paths:
             items:
               $ref: '#/definitions/model.AvailabilityWebsite'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Website Availability
       tags:
       - AvailabilityWebsite
@@ -1452,6 +1576,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.AvailabilityWebsite'
+      security:
+      - BearerAuth: []
       summary: Create Website Availability
       tags:
       - AvailabilityWebsite
@@ -1466,6 +1592,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Website Availability
       tags:
       - AvailabilityWebsite
@@ -1483,6 +1611,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.AvailabilityWebsite'
+      security:
+      - BearerAuth: []
       summary: Get Website Availability by ID
       tags:
       - AvailabilityWebsite
@@ -1508,6 +1638,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.AvailabilityWebsite'
+      security:
+      - BearerAuth: []
       summary: Update Website Availability
       tags:
       - AvailabilityWebsite
@@ -1522,6 +1654,8 @@ paths:
             items:
               $ref: '#/definitions/model.ServiceGroup'
             type: array
+      security:
+      - BearerAuth: []
       summary: List Service Groups
       tags:
       - ServiceGroup
@@ -1542,6 +1676,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ServiceGroup'
+      security:
+      - BearerAuth: []
       summary: Create Service Group
       tags:
       - ServiceGroup
@@ -1556,6 +1692,8 @@ paths:
       responses:
         "204":
           description: No Content
+      security:
+      - BearerAuth: []
       summary: Delete Service Group
       tags:
       - ServiceGroup
@@ -1573,6 +1711,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ServiceGroup'
+      security:
+      - BearerAuth: []
       summary: Get Service Group by ID
       tags:
       - ServiceGroup
@@ -1598,6 +1738,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.ServiceGroup'
+      security:
+      - BearerAuth: []
       summary: Update Service Group
       tags:
       - ServiceGroup
@@ -1612,6 +1754,8 @@ paths:
             items:
               $ref: '#/definitions/model.User'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all users
       tags:
       - Users
@@ -1644,6 +1788,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new user
       tags:
       - Users
@@ -1664,6 +1810,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete user by ID
       tags:
       - Users
@@ -1687,6 +1835,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get user by ID
       tags:
       - Users
@@ -1730,6 +1880,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update user by ID
       tags:
       - Users
@@ -1744,6 +1896,8 @@ paths:
             items:
               $ref: '#/definitions/model.Group'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all groups
       tags:
       - Groups
@@ -1776,6 +1930,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new group
       tags:
       - Groups
@@ -1796,6 +1952,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete group by ID
       tags:
       - Groups
@@ -1819,6 +1977,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get group by ID
       tags:
       - Groups
@@ -1862,6 +2022,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update group by ID
       tags:
       - Groups
@@ -1876,6 +2038,8 @@ paths:
             items:
               $ref: '#/definitions/model.RoleBinding'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all role bindings
       tags:
       - RoleBindings
@@ -1908,6 +2072,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new role binding
       tags:
       - RoleBindings
@@ -1928,6 +2094,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete role binding by ID
       tags:
       - RoleBindings
@@ -1951,6 +2119,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get role binding by ID
       tags:
       - RoleBindings
@@ -1994,6 +2164,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update role binding by ID
       tags:
       - RoleBindings
@@ -2008,6 +2180,8 @@ paths:
             items:
               $ref: '#/definitions/model.Role'
             type: array
+      security:
+      - BearerAuth: []
       summary: Get all roles
       tags:
       - Roles
@@ -2040,6 +2214,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Create a new role
       tags:
       - Roles
@@ -2060,6 +2236,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Delete role by ID
       tags:
       - Roles
@@ -2083,6 +2261,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Get role by ID
       tags:
       - Roles
@@ -2126,6 +2306,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Update role by ID
       tags:
       - Roles
@@ -2213,4 +2395,12 @@ paths:
       summary: Register user
       tags:
       - Auth
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

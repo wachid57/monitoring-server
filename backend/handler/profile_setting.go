@@ -11,6 +11,7 @@ import (
 // @Tags ProfileSetting
 // @Produce json
 // @Success 200 {array} model.ProfileSetting
+// @Security BearerAuth
 // @Router /api/v1.0/profiles/settings/ [get]
 func GetProfileSettings(c *fiber.Ctx) error {
     var settings []model.ProfileSetting
@@ -27,6 +28,7 @@ func GetProfileSettings(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ProfileSetting true "Profile Setting"
 // @Success 200 {object} model.ProfileSetting
+// @Security BearerAuth
 // @Router /api/v1.0/profiles/settings/ [post]
 func CreateProfileSetting(c *fiber.Ctx) error {
     var setting model.ProfileSetting
@@ -45,6 +47,7 @@ func CreateProfileSetting(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ProfileSetting
+// @Security BearerAuth
 // @Router /api/v1.0/profiles/settings/{id} [get]
 func GetProfileSettingByID(c *fiber.Ctx) error {
     var setting model.ProfileSetting
@@ -63,6 +66,7 @@ func GetProfileSettingByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ProfileSetting true "Profile Setting"
 // @Success 200 {object} model.ProfileSetting
+// @Security BearerAuth
 // @Router /api/v1.0/profiles/settings/{id} [put]
 func UpdateProfileSetting(c *fiber.Ctx) error {
     var setting model.ProfileSetting
@@ -84,6 +88,7 @@ func UpdateProfileSetting(c *fiber.Ctx) error {
 // @Tags ProfileSetting
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/profiles/settings/{id} [delete]
 func DeleteProfileSetting(c *fiber.Ctx) error {
     id := c.Params("id")

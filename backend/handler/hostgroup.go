@@ -11,6 +11,7 @@ import (
 // @Tags HostGroups
 // @Produce json
 // @Success 200 {array} model.HostGroup
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/groups [get]
 func GetHostGroups(c *fiber.Ctx) error {
     var groups []model.HostGroup
@@ -29,6 +30,7 @@ func GetHostGroups(c *fiber.Ctx) error {
 // @Success 200 {object} model.HostGroup
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/groups [post]
 func CreateHostGroup(c *fiber.Ctx) error {
     var group model.HostGroup
@@ -48,6 +50,7 @@ func CreateHostGroup(c *fiber.Ctx) error {
 // @Param id path int true "HostGroup ID"
 // @Success 200 {object} model.HostGroup
 // @Failure 404 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/groups/{id} [get]
 func GetHostGroupByID(c *fiber.Ctx) error {
     var group model.HostGroup
@@ -69,6 +72,7 @@ func GetHostGroupByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/groups/{id} [put]
 func UpdateHostGroup(c *fiber.Ctx) error {
     var group model.HostGroup
@@ -91,6 +95,7 @@ func UpdateHostGroup(c *fiber.Ctx) error {
 // @Param id path int true "HostGroup ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
+// @Security BearerAuth
 // @Router /api/v1.0/hosts/groups/{id} [delete]
 func DeleteHostGroup(c *fiber.Ctx) error {
     id := c.Params("id")

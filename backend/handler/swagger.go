@@ -7,6 +7,8 @@ import (
     "mini-npm-backend/database"
     "mini-npm-backend/model"
     "golang.org/x/crypto/bcrypt"
+    "github.com/golang-jwt/jwt/v4"
+    "time"
 )
 
 // Handler group for Swagger login/session
@@ -38,7 +40,20 @@ func (h *SwaggerHandler) Login(c *fiber.Ctx) error {
     }
     sess.Set("swagger_logged_in", true)
     sess.Save()
-    return c.Redirect("/docs/v1.0")
+
+    // Generate JWT token
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "username": user.Username,
+        "exp":      jwt.NewNumericDate(time.Now().Add(time.Hour * 24)),
+    })
+    jwtSecret := []byte("your-secret-key") // Ganti dengan secret Anda
+    tokenString, err := token.SignedString(jwtSecret)
+    if err != nil {
+        return c.SendStatus(fiber.StatusInternalServerError)
+    }
+
+    // Redirect ke Swagger UI dengan token
+    return c.Redirect("/docs/v1.0?token=" + tokenString)
 }
 
 func (h *SwaggerHandler) Logout(c *fiber.Ctx) error {
@@ -54,5 +69,34 @@ func (h *SwaggerHandler) Docs(c *fiber.Ctx) error {
     if err != nil || sess.Get("swagger_logged_in") != true {
         return c.Redirect("/docs/v1.0/login")
     }
+    // Inject JS to set token from URL/localStorage to Swagger UI
+    html := `
+    <script>
+    window.addEventListener('DOMContentLoaded', function() {
+        // Ambil token dari URL
+        function getTokenFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('token');
+        }
+        var token = getTokenFromUrl();
+        if (token) {
+            localStorage.setItem('swagger_jwt', token);
+        } else {
+            token = localStorage.getItem('swagger_jwt');
+        }
+        // Tunggu Swagger UI siap
+        function setSwaggerToken() {
+            if (window.ui && token) {
+                window.ui.preauthorizeApiKey('BearerAuth', 'Bearer ' + token);
+            } else {
+                setTimeout(setSwaggerToken, 500);
+            }
+        }
+        setSwaggerToken();
+    });
+    </script>
+    `
+    c.Set("Content-Type", "text/html")
+    c.Response().AppendBodyString(html)
     return swagger.HandlerDefault(c)
 }

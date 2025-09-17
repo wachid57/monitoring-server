@@ -11,6 +11,7 @@ import (
 // @Tags Metrics
 // @Produce json
 // @Success 200 {array} model.CPUMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/cpu/ [get]
 func GetCPUMetrics(c *fiber.Ctx) error {
     var metrics []model.CPUMetric
@@ -27,6 +28,7 @@ func GetCPUMetrics(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.CPUMetric true "CPU Metric"
 // @Success 200 {object} model.CPUMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/cpu/ [post]
 func CreateCPUMetric(c *fiber.Ctx) error {
     var metric model.CPUMetric
@@ -45,6 +47,7 @@ func CreateCPUMetric(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.CPUMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/cpu/{id} [get]
 func GetCPUMetricByID(c *fiber.Ctx) error {
     var metric model.CPUMetric
@@ -63,6 +66,7 @@ func GetCPUMetricByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.CPUMetric true "CPU Metric"
 // @Success 200 {object} model.CPUMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/cpu/{id} [put]
 func UpdateCPUMetric(c *fiber.Ctx) error {
     var metric model.CPUMetric
@@ -84,6 +88,7 @@ func UpdateCPUMetric(c *fiber.Ctx) error {
 // @Tags Metrics
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/cpu/{id} [delete]
 func DeleteCPUMetric(c *fiber.Ctx) error {
     id := c.Params("id")
@@ -99,6 +104,7 @@ func DeleteCPUMetric(c *fiber.Ctx) error {
 // @Tags Metrics
 // @Produce json
 // @Success 200 {array} model.MemoryMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/memory/ [get]
 func GetMemoryMetrics(c *fiber.Ctx) error {
     var metrics []model.MemoryMetric
@@ -115,6 +121,7 @@ func GetMemoryMetrics(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.MemoryMetric true "Memory Metric"
 // @Success 200 {object} model.MemoryMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/memory/ [post]
 func CreateMemoryMetric(c *fiber.Ctx) error {
     var metric model.MemoryMetric
@@ -133,6 +140,7 @@ func CreateMemoryMetric(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.MemoryMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/memory/{id} [get]
 func GetMemoryMetricByID(c *fiber.Ctx) error {
     var metric model.MemoryMetric
@@ -151,6 +159,7 @@ func GetMemoryMetricByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.MemoryMetric true "Memory Metric"
 // @Success 200 {object} model.MemoryMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/memory/{id} [put]
 func UpdateMemoryMetric(c *fiber.Ctx) error {
     var metric model.MemoryMetric
@@ -172,6 +181,7 @@ func UpdateMemoryMetric(c *fiber.Ctx) error {
 // @Tags Metrics
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/memory/{id} [delete]
 func DeleteMemoryMetric(c *fiber.Ctx) error {
     id := c.Params("id")
@@ -187,6 +197,7 @@ func DeleteMemoryMetric(c *fiber.Ctx) error {
 // @Tags Metrics
 // @Produce json
 // @Success 200 {array} model.DiskMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/disk/ [get]
 func GetDiskMetrics(c *fiber.Ctx) error {
     var metrics []model.DiskMetric
@@ -203,6 +214,7 @@ func GetDiskMetrics(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.DiskMetric true "Disk Metric"
 // @Success 200 {object} model.DiskMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/disk/ [post]
 func CreateDiskMetric(c *fiber.Ctx) error {
     var metric model.DiskMetric
@@ -221,6 +233,7 @@ func CreateDiskMetric(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.DiskMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/disk/{id} [get]
 func GetDiskMetricByID(c *fiber.Ctx) error {
     var metric model.DiskMetric
@@ -239,6 +252,7 @@ func GetDiskMetricByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.DiskMetric true "Disk Metric"
 // @Success 200 {object} model.DiskMetric
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/disk/{id} [put]
 func UpdateDiskMetric(c *fiber.Ctx) error {
     var metric model.DiskMetric
@@ -260,6 +274,7 @@ func UpdateDiskMetric(c *fiber.Ctx) error {
 // @Tags Metrics
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/metrics/disk/{id} [delete]
 func DeleteDiskMetric(c *fiber.Ctx) error {
     id := c.Params("id")

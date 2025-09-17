@@ -11,6 +11,7 @@ import (
 // @Tags Notification
 // @Produce json
 // @Success 200 {array} model.Notification
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/notifications/ [get]
 func GetNotifications(c *fiber.Ctx) error {
     var notifs []model.Notification
@@ -27,6 +28,7 @@ func GetNotifications(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.Notification true "Notification"
 // @Success 200 {object} model.Notification
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/notifications/ [post]
 func CreateNotification(c *fiber.Ctx) error {
     var notif model.Notification
@@ -45,6 +47,7 @@ func CreateNotification(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.Notification
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/notifications/{id} [get]
 func GetNotificationByID(c *fiber.Ctx) error {
     var notif model.Notification
@@ -63,6 +66,7 @@ func GetNotificationByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.Notification true "Notification"
 // @Success 200 {object} model.Notification
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/notifications/{id} [put]
 func UpdateNotification(c *fiber.Ctx) error {
     var notif model.Notification
@@ -84,6 +88,7 @@ func UpdateNotification(c *fiber.Ctx) error {
 // @Tags Notification
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/notifications/{id} [delete]
 func DeleteNotification(c *fiber.Ctx) error {
     id := c.Params("id")

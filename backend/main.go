@@ -11,6 +11,19 @@ import (
 	_ "mini-npm-backend/docs"
 )
 
+// @title Monitoring Server Backend API
+// @BasePath /
+// @schemes http https
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Enter 'Bearer <token>' to authenticate API requests
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 	if err := database.InitDB(); err != nil {
 		panic(err)

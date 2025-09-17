@@ -11,6 +11,7 @@ import (
 // @Tags Aknowledged
 // @Produce json
 // @Success 200 {array} model.Aknowledged
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/aknowledged/ [get]
 func GetAknowledged(c *fiber.Ctx) error {
     var items []model.Aknowledged
@@ -27,6 +28,7 @@ func GetAknowledged(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.Aknowledged true "Aknowledged"
 // @Success 200 {object} model.Aknowledged
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/aknowledged/ [post]
 func CreateAknowledged(c *fiber.Ctx) error {
     var item model.Aknowledged
@@ -45,6 +47,7 @@ func CreateAknowledged(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.Aknowledged
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/aknowledged/{id} [get]
 func GetAknowledgedByID(c *fiber.Ctx) error {
     var item model.Aknowledged
@@ -63,6 +66,7 @@ func GetAknowledgedByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.Aknowledged true "Aknowledged"
 // @Success 200 {object} model.Aknowledged
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/aknowledged/{id} [put]
 func UpdateAknowledged(c *fiber.Ctx) error {
     var item model.Aknowledged
@@ -84,6 +88,7 @@ func UpdateAknowledged(c *fiber.Ctx) error {
 // @Tags Aknowledged
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/monitoring/aknowledged/{id} [delete]
 func DeleteAknowledged(c *fiber.Ctx) error {
     id := c.Params("id")

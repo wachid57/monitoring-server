@@ -11,6 +11,7 @@ import (
 // @Tags ServiceGroup
 // @Produce json
 // @Success 200 {array} model.ServiceGroup
+// @Security BearerAuth
 // @Router /api/v1.0/services/groups/ [get]
 func GetServiceGroups(c *fiber.Ctx) error {
     var groups []model.ServiceGroup
@@ -27,6 +28,7 @@ func GetServiceGroups(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ServiceGroup true "Service Group"
 // @Success 200 {object} model.ServiceGroup
+// @Security BearerAuth
 // @Router /api/v1.0/services/groups/ [post]
 func CreateServiceGroup(c *fiber.Ctx) error {
     var group model.ServiceGroup
@@ -45,6 +47,7 @@ func CreateServiceGroup(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ServiceGroup
+// @Security BearerAuth
 // @Router /api/v1.0/services/groups/{id} [get]
 func GetServiceGroupByID(c *fiber.Ctx) error {
     var group model.ServiceGroup
@@ -63,6 +66,7 @@ func GetServiceGroupByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ServiceGroup true "Service Group"
 // @Success 200 {object} model.ServiceGroup
+// @Security BearerAuth
 // @Router /api/v1.0/services/groups/{id} [put]
 func UpdateServiceGroup(c *fiber.Ctx) error {
     var group model.ServiceGroup
@@ -84,6 +88,7 @@ func UpdateServiceGroup(c *fiber.Ctx) error {
 // @Tags ServiceGroup
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/services/groups/{id} [delete]
 func DeleteServiceGroup(c *fiber.Ctx) error {
     id := c.Params("id")

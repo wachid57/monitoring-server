@@ -33,6 +33,7 @@ type RegisterRequest struct {
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Router /auth/login [post]
+// Tidak ada annotation @Security
 func LoginHandler(c *fiber.Ctx) error {
 	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {

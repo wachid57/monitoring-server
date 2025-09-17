@@ -11,6 +11,7 @@ import (
 // @Tags AvailabilityWebsite
 // @Produce json
 // @Success 200 {array} model.AvailabilityWebsite
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/website/ [get]
 func GetAvailabilityWebsites(c *fiber.Ctx) error {
     var items []model.AvailabilityWebsite
@@ -27,6 +28,7 @@ func GetAvailabilityWebsites(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.AvailabilityWebsite true "Website Availability"
 // @Success 200 {object} model.AvailabilityWebsite
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/website/ [post]
 func CreateAvailabilityWebsite(c *fiber.Ctx) error {
     var item model.AvailabilityWebsite
@@ -45,6 +47,7 @@ func CreateAvailabilityWebsite(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.AvailabilityWebsite
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/website/{id} [get]
 func GetAvailabilityWebsiteByID(c *fiber.Ctx) error {
     var item model.AvailabilityWebsite
@@ -63,6 +66,7 @@ func GetAvailabilityWebsiteByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.AvailabilityWebsite true "Website Availability"
 // @Success 200 {object} model.AvailabilityWebsite
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/website/{id} [put]
 func UpdateAvailabilityWebsite(c *fiber.Ctx) error {
     var item model.AvailabilityWebsite
@@ -84,6 +88,7 @@ func UpdateAvailabilityWebsite(c *fiber.Ctx) error {
 // @Tags AvailabilityWebsite
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/website/{id} [delete]
 func DeleteAvailabilityWebsite(c *fiber.Ctx) error {
     id := c.Params("id")

@@ -11,6 +11,7 @@ import (
 // @Tags ICMP
 // @Produce json
 // @Success 200 {array} model.ICMPService
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/icmp/ [get]
 func GetICMPServices(c *fiber.Ctx) error {
     var services []model.ICMPService
@@ -27,6 +28,7 @@ func GetICMPServices(c *fiber.Ctx) error {
 // @Produce json
 // @Param data body model.ICMPService true "ICMP Service"
 // @Success 200 {object} model.ICMPService
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/icmp/ [post]
 func CreateICMPService(c *fiber.Ctx) error {
     var service model.ICMPService
@@ -45,6 +47,7 @@ func CreateICMPService(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ICMPService
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/icmp/{id} [get]
 func GetICMPServiceByID(c *fiber.Ctx) error {
     var service model.ICMPService
@@ -63,6 +66,7 @@ func GetICMPServiceByID(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Param data body model.ICMPService true "ICMP Service"
 // @Success 200 {object} model.ICMPService
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/icmp/{id} [put]
 func UpdateICMPService(c *fiber.Ctx) error {
     var service model.ICMPService
@@ -84,6 +88,7 @@ func UpdateICMPService(c *fiber.Ctx) error {
 // @Tags ICMP
 // @Param id path int true "ID"
 // @Success 204
+// @Security BearerAuth
 // @Router /api/v1.0/services/availability/icmp/{id} [delete]
 func DeleteICMPService(c *fiber.Ctx) error {
     id := c.Params("id")
