@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Box, Menu, Avatar, Typography, Divider, Button, IconButton } from '@mui/material';
 import * as dropdownData from './data';
@@ -9,18 +9,55 @@ import { Stack } from '@mui/system';
 import ProfileImg from 'src/assets/images/profile/user-1.jpg';
 import unlimitedImg from 'src/assets/images/backgrounds/unlimited-bg.png';
 import Scrollbar from 'src/components/custom-scroll/Scrollbar';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
-// Tambahkan fungsi logout
-const handleLogout = () => {
-  localStorage.removeItem('token');
-  window.location.href = '/auth/login';
+// Enhanced logout function with session cleanup
+const handleLogout = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Call logout API to blacklist token and cleanup session
+      await fetch(BACKEND_URL + API_PREFIX + '/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+  } catch (err) {
+    console.error('Logout API error:', err);
+  } finally {
+    // Clear all local storage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('sessionId');
+    localStorage.removeItem('expiresIn');
+    localStorage.removeItem('loginTime');
+    window.location.href = '/auth/login';
+  }
 };
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUserInfo(JSON.parse(userData));
+      } catch (err) {
+        console.error('Error parsing user data:', err);
+      }
+    }
+  }, []);
+
   const handleClick2 = (event) => {
     setAnchorEl2(event.currentTarget);
   };
+  
   const handleClose2 = () => {
     setAnchorEl2(null);
   };
@@ -73,10 +110,10 @@ const Profile = () => {
               <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
               <Box>
                 <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-                  Mathew Anderson
+                  {userInfo?.username || 'User'}
                 </Typography>
                 <Typography variant="subtitle2" color="textSecondary">
-                  Designer
+                  {userInfo?.role || 'User'}
                 </Typography>
                 <Typography
                   variant="subtitle2"
@@ -86,7 +123,7 @@ const Profile = () => {
                   gap={1}
                 >
                   <IconMail width={15} height={15} />
-                  info@modernize.com
+                  {userInfo?.email || 'user@example.com'}
                 </Typography>
               </Box>
             </Stack>

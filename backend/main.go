@@ -8,6 +8,8 @@ import (
 	"mini-npm-backend/cors"
 	"mini-npm-backend/router"
 	"mini-npm-backend/handler"
+	"mini-npm-backend/session"
+	"log"
 	_ "mini-npm-backend/docs"
 )
 
@@ -27,6 +29,13 @@ import (
 func main() {
 	if err := database.InitDB(); err != nil {
 		panic(err)
+	}
+	
+	// Initialize Redis (optional - graceful fallback if Redis is not available)
+	if err := session.InitRedis(); err != nil {
+		log.Printf("Redis not available, falling back to stateless JWT: %v", err)
+	} else {
+		log.Println("Redis session management initialized")
 	}
 
 	app := fiber.New()

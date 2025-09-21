@@ -16,8 +16,13 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     // API endpoints under /api/v1.0/auth
     authGroup := app.Group("/api/v1.0/auth")
     authGroup.Post("/login", auth.LoginHandler)
-    authGroup.Post("/logout", auth.LogoutHandler)
     authGroup.Post("/register", auth.RegisterHandler)
+    
+    // Protected auth endpoints
+    authProtected := authGroup.Group("/", middlewares.JwtMiddleware)
+    authProtected.Post("/logout", auth.LogoutHandler)
+    authProtected.Post("/change-password", auth.ChangePasswordHandler)
+    authProtected.Get("/sessions", auth.GetActiveSessionsHandler)
 
     // Protected endpoints
     protected := app.Group("/api/v1.0/", middlewares.JwtMiddleware)

@@ -1,11 +1,12 @@
-import React from 'react';
-import { CardContent, Typography, MenuItem, Box, Avatar, Button, Stack } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { CardContent, Typography, MenuItem, Box, Avatar, Button, Stack, Alert } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 // components
 import BlankCard from '../../shared/BlankCard';
 import CustomTextField from '../../forms/theme-elements/CustomTextField';
 import CustomFormLabel from '../../forms/theme-elements/CustomFormLabel';
 import CustomSelect from '../../forms/theme-elements/CustomSelect';
+import useChangePassword from 'src/hooks/useChangePassword';
 
 // images
 import user1 from 'src/assets/images/profile/user-1.jpg';
@@ -52,13 +53,38 @@ const currencies = [
 
 const AccountTab = () => {
   const [location, setLocation] = React.useState('india');
+  const [currency, setCurrency] = React.useState('india');
+  const [userInfo, setUserInfo] = useState(null);
+
+  const {
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    error,
+    success,
+    loading,
+    handleChangePassword,
+    reset
+  } = useChangePassword();
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUserInfo(JSON.parse(userData));
+      } catch (err) {
+        console.error('Error parsing user data:', err);
+      }
+    }
+  }, []);
 
   const handleChange1 = (event) => {
     setLocation(event.target.value);
   };
-
-  //   currency
-  const [currency, setCurrency] = React.useState('india');
 
   const handleChange2 = (event) => {
     setCurrency(event.target.value);
@@ -110,7 +136,20 @@ const AccountTab = () => {
             <Typography color="textSecondary" mb={3}>
               To change your password please confirm here
             </Typography>
-            <form>
+            
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
+
+            <form onSubmit={handleChangePassword}>
               <CustomFormLabel
                 sx={{
                   mt: 0,
@@ -121,29 +160,55 @@ const AccountTab = () => {
               </CustomFormLabel>
               <CustomTextField
                 id="text-cpwd"
-                value="MathewAnderson"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
                 variant="outlined"
                 fullWidth
                 type="password"
+                required
               />
               {/* 2 */}
               <CustomFormLabel htmlFor="text-npwd">New Password</CustomFormLabel>
               <CustomTextField
                 id="text-npwd"
-                value="MathewAnderson"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
                 variant="outlined"
                 fullWidth
                 type="password"
+                required
+                helperText="Minimal 8 karakter, harus mengandung huruf besar, huruf kecil, angka, dan karakter khusus"
               />
               {/* 3 */}
               <CustomFormLabel htmlFor="text-conpwd">Confirm Password</CustomFormLabel>
               <CustomTextField
                 id="text-conpwd"
-                value="MathewAnderson"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 variant="outlined"
                 fullWidth
                 type="password"
+                required
               />
+              
+              <Box mt={3} display="flex" gap={2}>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? 'Updating...' : 'Update Password'}
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="secondary" 
+                  onClick={reset}
+                  disabled={loading}
+                >
+                  Reset
+                </Button>
+              </Box>
             </form>
           </CardContent>
         </BlankCard>

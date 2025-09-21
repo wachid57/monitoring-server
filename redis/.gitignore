@@ -1,0 +1,8 @@
+# Ignore Redis data files
+dump.rdb
+appendonly.aof
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp

@@ -10,8 +10,15 @@ func CreateDefaultUser(db *gorm.DB) error {
 	var count int64
 	db.Model(&model.User{}).Where("username = ?", "wpm-admin").Count(&count)
 	if count == 0 {
-		hash, _ := bcrypt.GenerateFromPassword([]byte("masuk-wpm"), bcrypt.DefaultCost)
-		return db.Create(&model.User{Username: "wpm-admin", Password: string(hash)}).Error
+		// Use higher bcrypt cost for better security (same as auth.go)
+		hash, err := bcrypt.GenerateFromPassword([]byte("masuk-wpm"), bcrypt.DefaultCost+2)
+		if err != nil {
+			return err
+		}
+		return db.Create(&model.User{
+			Username: "wpm-admin", 
+			Password: string(hash),
+		}).Error
 	}
 	return nil
 }
