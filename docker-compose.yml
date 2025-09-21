@@ -9,7 +9,7 @@ services:
       retries: 5
     image: harbor-regs.wachid.web.id/library/monitoring/backend:202509171419
     ports:
-      - "9080:8080"
+      - "7080:8080"
     depends_on:
       - mariadb
     env_file:
@@ -26,7 +26,7 @@ services:
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
     ports:
-      - "9081:8080"
+      - "7081:8080"
     env_file:
       - .env
     depends_on:
