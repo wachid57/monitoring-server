@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  auth.ChangePasswordRequest:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        type: string
+    type: object
   auth.LoginRequest:
     properties:
       password:
@@ -9,6 +16,10 @@ definitions:
     type: object
   auth.RegisterRequest:
     properties:
+      email:
+        type: string
+      name:
+        type: string
       password:
         type: string
       username:
@@ -238,12 +249,16 @@ definitions:
         type: string
       deletedAt:
         type: string
+      email:
+        type: string
       groups:
         items:
           $ref: '#/definitions/model.Group'
         type: array
       id:
         type: integer
+      name:
+        type: string
       password:
         type: string
       roles:
@@ -2311,6 +2326,43 @@ paths:
       summary: Update role by ID
       tags:
       - Roles
+  /auth/change-password:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Password change request
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/auth.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Change user password
+      tags:
+      - Auth
   /auth/login:
     post:
       consumes:
@@ -2357,6 +2409,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Logout user
       tags:
       - Auth
@@ -2393,6 +2447,21 @@ paths:
               type: string
             type: object
       summary: Register user
+      tags:
+      - Auth
+  /auth/sessions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get active sessions for current user
       tags:
       - Auth
 schemes:
