@@ -59,90 +59,175 @@ import {
 } from '@tabler/icons-react';
 
 const Menuitems = [
-    {
+  {
     navlabel: true,
-    subheader: 'Dashboards',
+    subheader: 'Dashboard',
   },
-
   {
     id: uniqueId(),
-    title: 'Summary Dashboard',
-    icon: IconAperture,
+    title: 'Overview',
+    icon: IconChartArea,
     href: '/dashboards/modern',
   },
-  {
-    navlabel: true,
-    subheader: 'Monitoring  ',
-  },
 
   {
-    id: uniqueId(),
-    title: 'All Hosts',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    id: uniqueId(),
-    title: 'All Services',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    id: uniqueId(),
-    title: 'Hosts Groups',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    id: uniqueId(),
-    title: 'Services Groups',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-  {
     navlabel: true,
-    subheader: 'Konfigurasi  ',
-  },
-
-  {
-    id: uniqueId(),
-    title: 'Lists Hosts',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    id: uniqueId(),
-    title: 'Lists Notifications',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    id: uniqueId(),
-    title: 'Lists Contacts Groups',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-    {
-    navlabel: true,
-    subheader: 'Reports  ',
+    subheader: 'Monitoring Services',
   },
   {
     id: uniqueId(),
-    title: 'Availability Report',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
+    title: 'ICMP Monitoring',
+    icon: IconChartLine,
+    href: '/monitoring/icmp',
   },
-    {
+  {
     id: uniqueId(),
-    title: 'Matrix Report',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
+    title: 'Website Monitoring',
+    icon: IconChartDots,
+    href: '/monitoring/website',
   },
+  {
+    id: uniqueId(),
+    title: 'System Metrics',
+    icon: IconChartHistogram,
+    href: '/monitoring/metrics',
+    children: [
       {
-    navlabel: true,
-    subheader: 'Administrations  ',
+        id: uniqueId(),
+        title: 'CPU Metrics',
+        icon: IconPoint,
+        href: '/monitoring/metrics/cpu',
+      },
+      {
+        id: uniqueId(),
+        title: 'Memory Metrics',
+        icon: IconPoint,
+        href: '/monitoring/metrics/memory',
+      },
+      {
+        id: uniqueId(),
+        title: 'Disk Metrics',
+        icon: IconPoint,
+        href: '/monitoring/metrics/disk',
+      },
+    ],
   },
 
+  {
+    navlabel: true,
+    subheader: 'Infrastructure',
+  },
+  {
+    id: uniqueId(),
+    title: 'Hosts Management',
+    icon: IconApps,
+    href: '/infrastructure/hosts',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'All Hosts',
+        icon: IconPoint,
+        href: '/infrastructure/hosts/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Host',
+        icon: IconPoint,
+        href: '/infrastructure/hosts/add',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Host Groups',
+    icon: IconPackage,
+    href: '/infrastructure/hostgroups',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Groups',
+        icon: IconPoint,
+        href: '/infrastructure/hostgroups/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Group',
+        icon: IconPoint,
+        href: '/infrastructure/hostgroups/add',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Service Groups',
+    icon: IconLayout,
+    href: '/infrastructure/services',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Services',
+        icon: IconPoint,
+        href: '/infrastructure/services/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Service',
+        icon: IconPoint,
+        href: '/infrastructure/services/add',
+      },
+    ],
+  },
+
+  {
+    navlabel: true,
+    subheader: 'Notifications',
+  },
+  {
+    id: uniqueId(),
+    title: 'Contact Groups',
+    icon: IconMail,
+    href: '/notifications/contactgroups',
+  },
+  {
+    id: uniqueId(),
+    title: 'Notifications',
+    icon: IconNotes,
+    href: '/notifications/list',
+  },
+  {
+    id: uniqueId(),
+    title: 'Acknowledgments',
+    icon: IconTicket,
+    href: '/notifications/acknowledged',
+  },
+
+  {
+    navlabel: true,
+    subheader: 'Reports',
+  },
+  {
+    id: uniqueId(),
+    title: 'Availability Reports',
+    icon: IconChartPie2,
+    href: '/reports/availability',
+  },
+  {
+    id: uniqueId(),
+    title: 'Manual Reports',
+    icon: IconFileDescription,
+    href: '/reports/manual',
+  },
+  {
+    id: uniqueId(),
+    title: 'Automatic Reports',
+    icon: IconFiles,
+    href: '/reports/automatic',
+  },
+
+  {
+    navlabel: true,
+    subheader: 'Administration',
+  },
   {
     id: uniqueId(),
     title: 'Users Management',
@@ -204,41 +289,21 @@ const Menuitems = [
     ],
   },
 
-
-
-
-
-    {
-    id: uniqueId(),
-    title: 'System Settings',
-    icon: IconAperture,
-    href: '/dashboards/ecommerce',
-  },
-  ,
-    {
-    id: uniqueId(),
-    title: 'Account Settings',
-    icon: IconAperture,
-    href: '/pages/account-settings',
-  },
   {
     navlabel: true,
-    subheader: 'Home  ',
-  },
-
-  {
-    id: uniqueId(),
-    title: 'Modern',
-    icon: IconAperture,
-    href: '/dashboards/modern',
-    chip: 'New',
-    chipColor: 'secondary',
+    subheader: 'Settings',
   },
   {
     id: uniqueId(),
-    title: 'eCommerce',
-    icon: IconShoppingCart,
-    href: '/dashboards/ecommerce',
+    title: 'Profile Settings',
+    icon: IconUserCircle,
+    href: '/settings/profile',
+  },
+  {
+    id: uniqueId(),
+    title: 'System Settings',
+    icon: IconSettings,
+    href: '/settings/system',
   },
   {
     id: uniqueId(),
