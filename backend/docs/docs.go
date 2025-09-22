@@ -3686,10 +3686,10 @@ const docTemplate = `{
         "model.Group": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "type": "string"
                 },
                 "id": {
@@ -3698,7 +3698,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -3819,6 +3819,44 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Permission": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "e.g., \"create\", \"read\", \"update\", \"delete\"",
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "module": {
+                    "description": "e.g., \"users\", \"hosts\", \"reports\"",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "Many-to-many relationship with Role",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Role"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "model.ProfileSetting": {
             "type": "object",
             "properties": {
@@ -3873,10 +3911,13 @@ const docTemplate = `{
         "model.Role": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {
@@ -3885,7 +3926,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "updatedAt": {
+                "permissions": {
+                    "description": "Many-to-many relationship with Permission",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Permission"
+                    }
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -3893,16 +3941,22 @@ const docTemplate = `{
         "model.RoleBinding": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "type": "string"
                 },
                 "group": {
-                    "$ref": "#/definitions/model.Group"
+                    "description": "Made nullable with pointer",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Group"
+                        }
+                    ]
                 },
-                "groupID": {
+                "group_id": {
+                    "description": "Made nullable with pointer",
                     "type": "integer"
                 },
                 "id": {
@@ -3911,16 +3965,16 @@ const docTemplate = `{
                 "role": {
                     "$ref": "#/definitions/model.Role"
                 },
-                "roleID": {
+                "role_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "user": {
                     "$ref": "#/definitions/model.User"
                 },
-                "userID": {
+                "user_id": {
                     "type": "integer"
                 }
             }
@@ -3942,10 +3996,10 @@ const docTemplate = `{
         "model.User": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "deletedAt": {
+                "deleted_at": {
                     "type": "string"
                 },
                 "email": {
@@ -3963,6 +4017,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "native": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 },
@@ -3972,7 +4029,7 @@ const docTemplate = `{
                         "$ref": "#/definitions/model.Role"
                     }
                 },
-                "updatedAt": {
+                "updated_at": {
                     "type": "string"
                 },
                 "username": {

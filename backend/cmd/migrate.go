@@ -32,7 +32,11 @@ var migrations = []struct {
     {16, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
     {17, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
     {18, "CreateAvailabilityWebsiteTable", func(db *gorm.DB) error { return migration.CreateAvailabilityWebsiteTable(db) }},
-    {19, "AddEmailAndNameToUsers", func(db *gorm.DB) error { return migration.AddEmailAndNameToUsers(db) }},
+    {19, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
+    {20, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
+    {21, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
+    {22, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},
+
 }
 
 func main() {

@@ -4,11 +4,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"monitoring-server/database"
-	"monitoring-server/database/migration"
-	"monitoring-server/cors"
-	"monitoring-server/router"
 	"monitoring-server/handler"
 	redisSession "monitoring-server/session"
+	"monitoring-server/cors"
+	"monitoring-server/router"
 	"log"
 	_ "monitoring-server/docs"
 )
@@ -43,7 +42,9 @@ func main() {
 	swaggerHandler := handler.NewSwaggerHandler(store)
 
 	cors.SetupCORS(app)
-	if err := migration.CreateDefaultUser(database.DB); err != nil {
+	
+	// Ensure default data exists (uses /app/migrate all when DB empty)
+	if err := handler.EnsureDefaultData(database.DB); err != nil {
 		panic(err)
 	}
 

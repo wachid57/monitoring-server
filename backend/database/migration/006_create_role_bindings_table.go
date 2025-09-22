@@ -1,8 +1,8 @@
 package migration
 
 import (
-    "gorm.io/gorm"
     "monitoring-server/model"
+    "gorm.io/gorm"
 )
 
 func CreateRoleBindingsTable(db *gorm.DB) error {

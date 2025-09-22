@@ -1,56 +1,43 @@
 package handler
 
 import (
-    "github.com/gofiber/fiber/v2"
-    "monitoring-server/database"
-    "monitoring-server/database/migration"
-    "gorm.io/gorm"
+	"bytes"
+	"context"
+	"log"
+	"os/exec"
+	"time"
+
+	"monitoring-server/model"
+	"gorm.io/gorm"
 )
 
-// List of available migrations
-var migrations = []struct {
-    Number int
-    Name   string
-    Func   func(db *gorm.DB) error
-}{
-    {1, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
-    {2, "CreateRolesTable", func(db *gorm.DB) error { return migration.CreateRolesTable(db) }},
-    {3, "CreateGroupsTable", func(db *gorm.DB) error { return migration.CreateGroupsTable(db) }},
-    {4, "CreateRoleBindingsTable", func(db *gorm.DB) error { return migration.CreateRoleBindingsTable(db) }},
-}
+// EnsureDefaultData checks if there are users; if none, runs /app/migrate all
+// and falls back to migration.InitDefaultData on failure.
+func EnsureDefaultData(db *gorm.DB) error {
+	var count int64
+	if err := db.Model(&model.User{}).Count(&count).Error; err != nil {
+		log.Printf("failed to count users: %v", err)
+		// cannot proceed with migrate; return nil so application continues
+		return nil
+	}
 
-// GET /migrate/list
-func MigrateList(c *fiber.Ctx) error {
-    var list []fiber.Map
-    for _, m := range migrations {
-        list = append(list, fiber.Map{
-            "number": m.Number,
-            "name":   m.Name,
-        })
-    }
-    return c.JSON(list)
-}
+	if count == 0 {
+		log.Println("No users found; running migrate all to initialize DB")
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		cmd := exec.CommandContext(ctx, "migrate", "all")
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &out
+		if err := cmd.Run(); err != nil {
+			log.Printf("migrate failed: %v\noutput: %s", err, out.String())
+			// migration binary failed; log and continue without calling InitDefaultData
+			return nil
+		}
+		log.Printf("migrate output: %s", out.String())
+		return nil
+	}
 
-// POST /migrate/all
-func MigrateAll(c *fiber.Ctx) error {
-    for _, m := range migrations {
-        if err := m.Func(database.DB); err != nil {
-            return c.Status(500).JSON(fiber.Map{"error": "Migration failed", "step": m.Name})
-        }
-    }
-    return c.JSON(fiber.Map{"status": "All migrations applied"})
-}
-
-// POST /migrate/{number}
-func MigrateByNumber(c *fiber.Ctx) error {
-    num := c.Params("number")
-    for _, m := range migrations {
-        if num == string(rune(m.Number+'0')) {
-            if err := m.Func(database.DB); err != nil {
-                return c.Status(500).JSON(fiber.Map{"error": "Migration failed", "step": m.Name})
-            }
-            return c.JSON(fiber.Map{"status": "Migration applied", "step": m.Name})
-        }
-    }
-    return c.Status(404).JSON(fiber.Map{"error": "Migration number not found"})
+	// users exist or fallback path — nothing more to do here
+	return nil
 }

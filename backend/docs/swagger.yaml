@@ -78,15 +78,15 @@ definitions:
     type: object
   model.Group:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         type: string
       id:
         type: integer
       name:
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   model.Host:
@@ -165,6 +165,32 @@ definitions:
       type:
         type: string
     type: object
+  model.Permission:
+    properties:
+      action:
+        description: e.g., "create", "read", "update", "delete"
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      module:
+        description: e.g., "users", "hosts", "reports"
+        type: string
+      name:
+        type: string
+      roles:
+        description: Many-to-many relationship with Role
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      updated_at:
+        type: string
+    type: object
   model.ProfileSetting:
     properties:
       id:
@@ -200,38 +226,48 @@ definitions:
     type: object
   model.Role:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
+        type: string
+      description:
         type: string
       id:
         type: integer
       name:
         type: string
-      updatedAt:
+      permissions:
+        description: Many-to-many relationship with Permission
+        items:
+          $ref: '#/definitions/model.Permission'
+        type: array
+      updated_at:
         type: string
     type: object
   model.RoleBinding:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         type: string
       group:
-        $ref: '#/definitions/model.Group'
-      groupID:
+        allOf:
+        - $ref: '#/definitions/model.Group'
+        description: Made nullable with pointer
+      group_id:
+        description: Made nullable with pointer
         type: integer
       id:
         type: integer
       role:
         $ref: '#/definitions/model.Role'
-      roleID:
+      role_id:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
       user:
         $ref: '#/definitions/model.User'
-      userID:
+      user_id:
         type: integer
     type: object
   model.ServiceGroup:
@@ -245,9 +281,9 @@ definitions:
     type: object
   model.User:
     properties:
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         type: string
       email:
         type: string
@@ -259,13 +295,15 @@ definitions:
         type: integer
       name:
         type: string
+      native:
+        type: boolean
       password:
         type: string
       roles:
         items:
           $ref: '#/definitions/model.Role'
         type: array
-      updatedAt:
+      updated_at:
         type: string
       username:
         type: string

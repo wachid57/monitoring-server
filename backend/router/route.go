@@ -59,6 +59,20 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         usersGroup.Put("/role-bindings/:id", handler.UpdateRoleBinding)
         usersGroup.Delete("/role-bindings/:id", handler.DeleteRoleBinding)
 
+        // CRUD Permissions
+        permissionsGroup := protected.Group("permissions")
+        permissionsGroup.Get("/", handler.GetPermissions)
+        permissionsGroup.Post("/", handler.CreatePermission)
+        permissionsGroup.Get("/:id", handler.GetPermission)
+        permissionsGroup.Put("/:id", handler.UpdatePermission)
+        permissionsGroup.Delete("/:id", handler.DeletePermission)
+
+        // Role-Permission Management
+        rolesGroup := protected.Group("roles")
+        rolesGroup.Get("/:id/permissions", handler.GetRolePermissions)
+        rolesGroup.Post("/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
+        rolesGroup.Delete("/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
+
         // CRUD Host
         hostsGroup := protected.Group("hosts")
         hostsGroup.Get("/", handler.GetHosts)

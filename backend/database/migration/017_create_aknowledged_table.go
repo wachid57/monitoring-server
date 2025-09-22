@@ -1,8 +1,8 @@
 package migration
 
 import (
-    "gorm.io/gorm"
     "monitoring-server/model"
+    "gorm.io/gorm"
 )
 
 func CreateAknowledgedTable(db *gorm.DB) error {

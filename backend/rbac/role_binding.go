@@ -22,7 +22,7 @@ func BindRoleToGroup(db *gorm.DB, userID, roleID, groupID uint) error {
     binding := model.RoleBinding{
         UserID:  userID,
         RoleID:  roleID,
-        GroupID: groupID,
+    GroupID: &groupID,
     }
     return db.Create(&binding).Error
 }
