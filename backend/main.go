@@ -44,9 +44,12 @@ func main() {
 	cors.SetupCORS(app)
 	
 	// Ensure default data exists (uses /app/migrate all when DB empty)
-	if err := handler.EnsureDefaultData(database.DB); err != nil {
+	log.Println("Checking and initializing default data (users, roles, permissions)...")
+	if err := handler.InitDefaultData(database.DB); err != nil {
+		log.Printf("Failed to initialize default data: %v", err)
 		panic(err)
 	}
+	log.Println("Default data initialization completed.")
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Backend Fiber API running!")

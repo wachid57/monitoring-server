@@ -11,9 +11,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// EnsureDefaultData checks if there are users; if none, runs /app/migrate all
-// and falls back to migration.InitDefaultData on failure.
-func EnsureDefaultData(db *gorm.DB) error {
+// InitDefaultData checks if there are users; if none, runs migrate all
+// and logs failures. Exported so `main` can call it.
+func InitDefaultData(db *gorm.DB) error {
 	var count int64
 	if err := db.Model(&model.User{}).Count(&count).Error; err != nil {
 		log.Printf("failed to count users: %v", err)
