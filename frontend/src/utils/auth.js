@@ -33,7 +33,11 @@ export const isTokenExpired = () => {
   const loginTime = getLoginTime();
   const expiresIn = getExpiresIn();
   
-  if (!loginTime || !expiresIn) return true;
+  // If we don't have login time or expires info, assume token is still valid
+  // This handles backward compatibility with existing sessions
+  if (!loginTime || !expiresIn) {
+    return false; // Assume valid, let server validate
+  }
   
   const expirationTime = new Date(loginTime.getTime() + parseInt(expiresIn) * 1000);
   return new Date() > expirationTime;
@@ -41,7 +45,11 @@ export const isTokenExpired = () => {
 
 export const isAuthenticated = () => {
   const token = getToken();
-  return token && !isTokenExpired();
+  if (!token) return false;
+  
+  // For backward compatibility, if we have a token but no expiration info,
+  // assume it's valid and let the server validate it
+  return !isTokenExpired();
 };
 
 export const clearAuthData = () => {

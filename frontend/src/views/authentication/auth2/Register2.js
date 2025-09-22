@@ -9,7 +9,7 @@ import { Link } from 'react-router';
 import PageContainer from 'src/components/container/PageContainer';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 
-import AuthRegister from '../authForms/AuthRegister';
+import AuthRegister from '../registration/AuthRegister';
 
 const Register2 = () => (
   <PageContainer title="Register" description="this is Register page">

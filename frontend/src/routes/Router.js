@@ -128,7 +128,7 @@ const MuiTypography = Loadable(lazy(() => import('../views/ui-components/MuiTypo
 // authentication
 const Login = Loadable(lazy(() => import('../views/authentication/auth/Login')));
 const Login2 = Loadable(lazy(() => import('../views/authentication/auth2/Login2')));
-const Register = Loadable(lazy(() => import('../views/authentication/auth1/Register')));
+const Register = Loadable(lazy(() => import('../views/authentication/registration')));
 const Register2 = Loadable(lazy(() => import('../views/authentication/auth2/Register2')));
 const ForgotPassword = Loadable(lazy(() => import('../views/authentication/auth1/ForgotPassword')));
 const ForgotPassword2 = Loadable(

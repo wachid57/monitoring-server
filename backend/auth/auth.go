@@ -41,6 +41,8 @@ type LoginRequest struct {
 // RegisterRequest is the request body for register
 type RegisterRequest struct {
 	Username string `json:"username"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
 	Password string `json:"password"`
 }
 
@@ -160,6 +162,7 @@ func LoginHandler(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"token":      t,
 		"expires_in": 86400, // 24 hours in seconds
+		"session_id": sessionToken,
 		"user":       fiber.Map{"username": req.Username},
 	})
 }
@@ -204,6 +207,21 @@ func RegisterHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request"})
 	}
 	
+	// Validate required fields
+	if req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Name is required"})
+	}
+	
+	if req.Email == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Email is required"})
+	}
+	
+	// Basic email validation
+	emailRegex := regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+	if !emailRegex.MatchString(req.Email) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid email format"})
+	}
+	
 	// Validate username
 	if err := validateUsername(req.Username); err != nil {
 		return err
@@ -214,9 +232,15 @@ func RegisterHandler(c *fiber.Ctx) error {
 		return err
 	}
 	
-	var user model.User
-	if err := database.DB.Where("username = ?", req.Username).First(&user).Error; err == nil {
+	var existingUser model.User
+	// Check if username already exists
+	if err := database.DB.Where("username = ?", req.Username).First(&existingUser).Error; err == nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Username already exists"})
+	}
+	
+	// Check if email already exists
+	if err := database.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Email already exists"})
 	}
 	
 	// Use higher cost for better security
@@ -224,14 +248,26 @@ func RegisterHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to hash password"})
 	}
+	
 	newUser := model.User{
 		Username: req.Username,
+		Email:    req.Email,
+		Name:     req.Name,
 		Password: string(hashed),
 	}
+	
 	if err := database.DB.Create(&newUser).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create user"})
 	}
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "User registered successfully"})
+	
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "User registered successfully",
+		"user": fiber.Map{
+			"username": newUser.Username,
+			"email":    newUser.Email,
+			"name":     newUser.Name,
+		},
+	})
 }
 
 // ChangePasswordHandler godoc

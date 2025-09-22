@@ -9,7 +9,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import img1 from 'src/assets/images/backgrounds/login-bg.svg';
 import Logo from 'src/layouts/full/shared/logo/Logo';
 
-import AuthRegister from '../authForms/AuthRegister';
+import AuthRegister from '../registration/AuthRegister';
 
 const Register = () => (
   <PageContainer title="Register" description="this is Register page">

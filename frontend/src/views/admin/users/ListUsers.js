@@ -65,38 +65,26 @@ const ListUsers = () => {
     setError('');
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Anda tidak terautentikasi');
-        window.location.href = '/auth/login';
-        return;
-      }
-
-      console.log('Fetching users from:', BACKEND_URL + API_PREFIX + '/users');
-      console.log('Using token:', token ? 'Token exists' : 'No token');
-
       const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
         method: 'GET',
         headers: getAuthHeaders()
       });
 
-      console.log('Response status:', res.status);
-      console.log('Response ok:', res.ok);
+      if (res.status === 401 || res.status === 403) {
+        handleAuthError({ status: res.status });
+        return;
+      }
 
       const data = await res.json();
-      console.log('Response data:', data);
 
       if (res.ok) {
         setUsers(data.users || data || []);
       } else {
         setError(data.error || data.message || 'Gagal mengambil data users');
-        if (res.status === 401 || res.status === 403) {
-          handleAuthError({ status: res.status });
-        }
       }
     } catch (err) {
       console.error('Fetch users error:', err);
-      setError('Terjadi kesalahan saat mengambil data users: ' + err.message);
+      setError('Terjadi kesalahan saat mengambil data users');
     } finally {
       setLoading(false);
     }
@@ -104,16 +92,15 @@ const ListUsers = () => {
 
   const handleDelete = async (userId) => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Anda tidak terautentikasi');
-        return;
-      }
-
       const res = await fetch(BACKEND_URL + API_PREFIX + `/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
+
+      if (res.status === 401 || res.status === 403) {
+        handleAuthError({ status: res.status });
+        return;
+      }
 
       if (res.ok) {
         setUsers(prev => prev.filter(user => user.id !== userId));
@@ -121,17 +108,12 @@ const ListUsers = () => {
       } else {
         const data = await res.json();
         setError(data.error || data.message || 'Gagal menghapus user');
-        if (res.status === 401 || res.status === 403) {
-          handleAuthError({ status: res.status });
-        }
       }
     } catch (err) {
       console.error('Delete user error:', err);
       setError('Terjadi kesalahan saat menghapus user');
     }
-  };
-
-  const filteredUsers = users.filter(user =>
+  };  const filteredUsers = users.filter(user =>
     user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchTerm.toLowerCase())
