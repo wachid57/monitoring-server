@@ -59,9 +59,105 @@ import {
 } from '@tabler/icons-react';
 
 const Menuitems = [
+    {
+    navlabel: true,
+    subheader: 'Dashboards',
+  },
+
+  {
+    id: uniqueId(),
+    title: 'Summary Dashboard',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
   {
     navlabel: true,
-    subheader: 'Home',
+    subheader: 'Monitoring  ',
+  },
+
+  {
+    id: uniqueId(),
+    title: 'All Hosts',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'All Services',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'Hosts Groups',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'Services Groups',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+  {
+    navlabel: true,
+    subheader: 'Konfigurasi  ',
+  },
+
+  {
+    id: uniqueId(),
+    title: 'Lists Hosts',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'Lists Notifications',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'Lists Contacts Groups',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    navlabel: true,
+    subheader: 'Reports  ',
+  },
+  {
+    id: uniqueId(),
+    title: 'Availability Report',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'Matrix Report',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+      {
+    navlabel: true,
+    subheader: 'Administrations  ',
+  },
+
+  {
+    id: uniqueId(),
+    title: 'Users Management',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+    {
+    id: uniqueId(),
+    title: 'System Settings',
+    icon: IconAperture,
+    href: '/dashboards/modern',
+  },
+  {
+    navlabel: true,
+    subheader: 'Home  ',
   },
 
   {

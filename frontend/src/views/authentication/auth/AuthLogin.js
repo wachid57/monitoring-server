@@ -22,6 +22,7 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
     password,
     setPassword,
     error,
+    loading,
     handleLogin,
   } = useLogin();
 
@@ -93,8 +94,9 @@ const AuthLogin = ({ title, subtitle, subtext }) => {
             size="large"
             fullWidth
             type="submit"
+            disabled={loading}
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </Button>
         </Box>
         {error && <Typography color="error" mt={2}>{error}</Typography>}
