@@ -4,7 +4,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"os"
-	"mini-npm-backend/model"
+	"monitoring-server/model"
 	"github.com/joho/godotenv"
 )
 

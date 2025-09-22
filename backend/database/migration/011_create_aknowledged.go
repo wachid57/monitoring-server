@@ -2,7 +2,7 @@ package migration
 
 import (
     "gorm.io/gorm"
-    "mini-npm-backend/model"
+    "monitoring-server/model"
 )
 
 func CreateAknowledgedTable(db *gorm.DB) error {

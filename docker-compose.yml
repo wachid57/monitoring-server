@@ -7,11 +7,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    image: harbor-regs.wachid.web.id/library/monitoring/backend:202509171419
+    build:
+      context: ./backend
     ports:
       - "7080:8080"
     depends_on:
       - mariadb
+      - redis
     env_file:
       - .env
   frontend:
@@ -31,6 +33,19 @@ services:
       - .env
     depends_on:
       - mariadb
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   mariadb:
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASS}"]
@@ -47,5 +62,5 @@ services:
     ports:
       - "9306:3306"
     volumes:
-      - ./mariadb_data:/var/lib/mysql
+      - ./mariadb-data:/var/lib/mysql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci

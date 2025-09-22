@@ -3,7 +3,7 @@ package middlewares
 import (
     "github.com/gofiber/fiber/v2"
     "github.com/golang-jwt/jwt/v4"
-    "mini-npm-backend/session"
+    "monitoring-server/session"
     "os"
     "strings"
     "time"
@@ -48,6 +48,7 @@ func JwtMiddleware(c *fiber.Ctx) error {
             c.Locals("username", username)
         }
         
+        // Handle session_id if present (Redis mode)
         if sessionID, ok := claims["session_id"].(string); ok {
             c.Locals("session_id", sessionID)
             c.Locals("token", tokenStr)
@@ -65,6 +66,7 @@ func JwtMiddleware(c *fiber.Ctx) error {
                 c.Locals("session_data", sessionData)
             }
         }
+        // If no session_id in claims, it's stateless JWT mode - which is OK
     }
     
     return c.Next()

@@ -2,7 +2,7 @@ package rbac
 
 import (
     "github.com/gofiber/fiber/v2"
-    "mini-npm-backend/model"
+    "monitoring-server/model"
     "gorm.io/gorm"
 )
 

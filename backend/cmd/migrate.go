@@ -2,8 +2,8 @@ package main
 
 import (
     "fmt"
-    "mini-npm-backend/database"
-    "mini-npm-backend/database/migration"
+    "monitoring-server/database"
+    "monitoring-server/database/migration"
     "os"
     "strconv"
     "gorm.io/gorm"

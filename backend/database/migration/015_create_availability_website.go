@@ -2,7 +2,7 @@ package migration
 
 import (
     "gorm.io/gorm"
-    "mini-npm-backend/model"
+    "monitoring-server/model"
 )
 
 func CreateAvailabilityWebsiteTable(db *gorm.DB) error {

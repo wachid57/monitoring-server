@@ -62,6 +62,7 @@ export const clearAuthData = () => {
 
 export const getAuthHeaders = () => {
   const token = getToken();
+  console.log('Getting auth headers, token:', token ? 'exists' : 'missing');
   return token ? {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json'

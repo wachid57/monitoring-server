@@ -2,7 +2,7 @@ package migration
 
 import (
     "gorm.io/gorm"
-    "mini-npm-backend/model"
+    "monitoring-server/model"
 )
 
 func CreateContactGroupsTable(db *gorm.DB) error {

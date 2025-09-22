@@ -2,9 +2,9 @@ package router
 
 import (
     "github.com/gofiber/fiber/v2"
-    "mini-npm-backend/auth"
-    "mini-npm-backend/middlewares"
-    "mini-npm-backend/handler"
+    "monitoring-server/auth"
+    "monitoring-server/middlewares"
+    "monitoring-server/handler"
 )
 
 func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {

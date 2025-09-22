@@ -3,7 +3,7 @@ package migration
 import (
 	"gorm.io/gorm"
 	"golang.org/x/crypto/bcrypt"
-	"mini-npm-backend/model"
+	"monitoring-server/model"
 )
 
 func CreateDefaultUser(db *gorm.DB) error {

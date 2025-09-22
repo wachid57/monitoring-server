@@ -2,8 +2,8 @@ package handler
 
 import (
     "github.com/gofiber/fiber/v2"
-    "mini-npm-backend/model"
-    "mini-npm-backend/database"
+    "monitoring-server/model"
+    "monitoring-server/database"
 )
 
 // GetRoleBindings godoc

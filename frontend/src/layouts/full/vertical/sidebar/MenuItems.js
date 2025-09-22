@@ -146,8 +146,8 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Users Management',
-    icon: IconChartDonut3,
-    href: '/frontend-pages/blog/',
+    icon: IconUserCircle,
+    href: '/admin/users/',
     children: [
       {
         id: uniqueId(),
@@ -157,9 +157,49 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
-        title: 'Detail',
+        title: 'Add User',
         icon: IconPoint,
-        href: '/frontend-pages/blog/detail/streaming-video-way-before-it-was-cool-go-dark-tomorrow',
+        href: '/admin/users/add',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Roles Management',
+    icon: IconSettings,
+    href: '/admin/roles/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Roles',
+        icon: IconPoint,
+        href: '/admin/roles/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Role',
+        icon: IconPoint,
+        href: '/admin/roles/add',
+      },
+    ],
+  },
+  {
+    id: uniqueId(),
+    title: 'Groups Management',
+    icon: IconPackage,
+    href: '/admin/groups/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Groups',
+        icon: IconPoint,
+        href: '/admin/groups/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Group',
+        icon: IconPoint,
+        href: '/admin/groups/add',
       },
     ],
   },

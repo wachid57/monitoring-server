@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
-	"mini-npm-backend/database"
-	"mini-npm-backend/database/migration"
-	"mini-npm-backend/cors"
-	"mini-npm-backend/router"
-	"mini-npm-backend/handler"
-	"mini-npm-backend/session"
+	"monitoring-server/database"
+	"monitoring-server/database/migration"
+	"monitoring-server/cors"
+	"monitoring-server/router"
+	"monitoring-server/handler"
+	redisSession "monitoring-server/session"
 	"log"
-	_ "mini-npm-backend/docs"
+	_ "monitoring-server/docs"
 )
 
 // @title Monitoring Server Backend API
@@ -32,7 +32,7 @@ func main() {
 	}
 	
 	// Initialize Redis (optional - graceful fallback if Redis is not available)
-	if err := session.InitRedis(); err != nil {
+	if err := redisSession.InitRedis(); err != nil {
 		log.Printf("Redis not available, falling back to stateless JWT: %v", err)
 	} else {
 		log.Println("Redis session management initialized")

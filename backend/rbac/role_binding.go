@@ -1,7 +1,7 @@
 package rbac
 
 import (
-    "mini-npm-backend/model"
+    "monitoring-server/model"
     "gorm.io/gorm"
 )
 

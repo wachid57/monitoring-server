@@ -65,17 +65,24 @@ const ListUsers = () => {
     setError('');
     
     try {
+      console.log('Fetching users from:', BACKEND_URL + API_PREFIX + '/users');
+      console.log('Auth headers:', getAuthHeaders());
+      
       const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
         method: 'GET',
         headers: getAuthHeaders()
       });
 
+      console.log('Response status:', res.status);
+
       if (res.status === 401 || res.status === 403) {
+        console.log('Auth error, redirecting to login');
         handleAuthError({ status: res.status });
         return;
       }
 
       const data = await res.json();
+      console.log('Response data:', data);
 
       if (res.ok) {
         setUsers(data.users || data || []);
