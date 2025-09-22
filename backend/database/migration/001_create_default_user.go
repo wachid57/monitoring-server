@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 	"golang.org/x/crypto/bcrypt"
 	"monitoring-server/model"
+	"monitoring-server/rbac"
 )
 
 func CreateDefaultUser(db *gorm.DB) error {
@@ -72,6 +73,12 @@ func CreateDefaultUser(db *gorm.DB) error {
 			// GroupID is optional, so we don't set it to avoid foreign key constraint
 		}
 		if err := db.Create(&roleBinding).Error; err != nil {
+			return err
+		}
+
+		// Also ensure the many-to-many user_roles association is created so
+		// Preload("Roles") returns the Administrator role for the user in API responses.
+		if err := rbac.AssignRoleToUser(db, user.ID, adminRole.ID); err != nil {
 			return err
 		}
 	}

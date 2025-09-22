@@ -59,6 +59,10 @@ const ListUsers = () => {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: 'User' });
+  const [formError, setFormError] = useState('');
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -155,6 +159,7 @@ const ListUsers = () => {
               variant="contained"
               startIcon={<IconPlus />}
               color="primary"
+              onClick={() => { setAddDialogOpen(true); setFormError(''); }}
             >
               Add New User
             </Button>
@@ -294,6 +299,104 @@ const ListUsers = () => {
             variant="contained"
           >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add New User Dialog */}
+      <Dialog
+        open={addDialogOpen}
+        onClose={() => { setAddDialogOpen(false); setFormError(''); }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Add New User</DialogTitle>
+        <DialogContent>
+          {formError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {formError}
+            </Alert>
+          )}
+
+          <TextField
+            label="Username"
+            fullWidth
+            margin="dense"
+            value={newUser.username}
+            onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+          />
+          <TextField
+            label="Email"
+            fullWidth
+            margin="dense"
+            value={newUser.email}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+          />
+          <TextField
+            label="Full name"
+            fullWidth
+            margin="dense"
+            value={newUser.name}
+            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            margin="dense"
+            value={newUser.password}
+            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+          />
+          <TextField
+            label="Role"
+            fullWidth
+            margin="dense"
+            value={newUser.role}
+            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            helperText="Use role name (e.g. Administrator, User)"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              setFormError('');
+              if (!newUser.username || !newUser.password) {
+                setFormError('Username and password are required');
+                return;
+              }
+              setSubmitLoading(true);
+              try {
+                const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                  body: JSON.stringify(newUser),
+                });
+                if (res.status === 401 || res.status === 403) {
+                  handleAuthError({ status: res.status });
+                  return;
+                }
+                const data = await res.json();
+                if (res.ok) {
+                  // refresh users
+                  fetchUsers();
+                  setAddDialogOpen(false);
+                  setNewUser({ username: '', email: '', name: '', password: '', role: 'User' });
+                } else {
+                  setFormError(data.error || data.message || 'Failed to create user');
+                }
+              } catch (err) {
+                console.error('Create user error:', err);
+                setFormError('Failed to create user');
+              } finally {
+                setSubmitLoading(false);
+              }
+            }}
+            disabled={submitLoading}
+          >
+            {submitLoading ? <CircularProgress size={20} /> : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>
