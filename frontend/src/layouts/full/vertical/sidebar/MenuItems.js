@@ -79,25 +79,25 @@ const Menuitems = [
     id: uniqueId(),
     title: 'All Hosts',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'All Services',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'Hosts Groups',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'Services Groups',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
   {
     navlabel: true,
@@ -108,19 +108,19 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Lists Hosts',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'Lists Notifications',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'Lists Contacts Groups',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     navlabel: true,
@@ -130,13 +130,13 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Availability Report',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
     {
     id: uniqueId(),
     title: 'Matrix Report',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
   },
       {
     navlabel: true,
@@ -146,14 +146,40 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Users Management',
-    icon: IconAperture,
-    href: '/dashboards/modern',
+    icon: IconChartDonut3,
+    href: '/frontend-pages/blog/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Users',
+        icon: IconPoint,
+        href: '/admin/users/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Detail',
+        icon: IconPoint,
+        href: '/frontend-pages/blog/detail/streaming-video-way-before-it-was-cool-go-dark-tomorrow',
+      },
+    ],
   },
+
+
+
+
+
     {
     id: uniqueId(),
     title: 'System Settings',
     icon: IconAperture,
-    href: '/dashboards/modern',
+    href: '/dashboards/ecommerce',
+  },
+  ,
+    {
+    id: uniqueId(),
+    title: 'Account Settings',
+    icon: IconAperture,
+    href: '/pages/account-settings',
   },
   {
     navlabel: true,

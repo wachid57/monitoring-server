@@ -99,6 +99,9 @@ const ReactRowSelectionTable = Loadable(
 const ReactSortingTable = Loadable(lazy(() => import('../views/react-tables/sorting/page')));
 const ReactStickyTable = Loadable(lazy(() => import('../views/react-tables/sticky/page')));
 
+// Admin Pages
+const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
+
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
 const GredientChart = Loadable(lazy(() => import('../views/charts/GredientChart')));
@@ -195,6 +198,9 @@ const Router = [
       { path: '/apps/friends', element: <ProtectedRoute><Friends /></ProtectedRoute> },
       { path: '/apps/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
       { path: '/user-profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+      
+      // Admin Routes
+      { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
       { path: '/pages/pricing', element: <Pricing /> },
