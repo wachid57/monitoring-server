@@ -71,7 +71,7 @@ const ListUsers = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + '/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -82,8 +82,10 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
+      console.log('GET /users/roles', res.status, data);
       if (res.ok) {
-        setRoles(data.roles || data || []);
+        // API returns array of roles; support both {roles: [...]} and [] shapes
+        setRoles(Array.isArray(data) ? data : (data.roles || []));
       } else {
         setError(data.error || data.message || 'Gagal mengambil data roles');
       }
@@ -97,7 +99,7 @@ const ListUsers = () => {
 
   const handleDelete = async (roleId) => {
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/roles/${roleId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/users/roles/${roleId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -128,7 +130,7 @@ const ListUsers = () => {
     setAdding(true);
     setError('');
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + '/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ name: newRoleName, description: newRoleDesc })
@@ -140,6 +142,7 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
+      console.log('POST /users/roles', res.status, data);
       if (res.ok) {
         setAddOpen(false);
         setNewRoleName('');

@@ -15,8 +15,10 @@ import (
 // @Router /api/v1.0/users/roles [get]
 func GetRoles(c *fiber.Ctx) error {
     var roles []model.Role
-    if err := database.DB.Find(&roles).Error; err != nil {
-        return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch roles"})
+    // preload permissions so API returns role permissions too
+    if err := database.DB.Preload("Permissions").Find(&roles).Error; err != nil {
+        // return detailed error for debugging
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch roles", "detail": err.Error()})
     }
     return c.JSON(roles)
 }

@@ -4,7 +4,6 @@ import (
 	"gorm.io/gorm"
 	"monitoring-server/model"
 	"log"
-	"gorm.io/gorm"
 )
 
 func CreateDefaultRoles(db *gorm.DB) error {
