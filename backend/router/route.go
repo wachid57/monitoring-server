@@ -45,6 +45,22 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         usersGroup.Put("/roles/:id", handler.UpdateRole)
         usersGroup.Delete("/roles/:id", handler.DeleteRole)
 
+        // User-role assignments (list and assign)
+        usersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
+        usersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+
+        // Role bindings accessible under users/roles/binding
+        usersGroup.Get("/roles/binding", handler.GetRoleBindings)
+        usersGroup.Post("/roles/binding", handler.CreateRoleBinding)
+        usersGroup.Get("/roles/binding/:id", handler.GetRoleBindingByID)
+        usersGroup.Put("/roles/binding/:id", handler.UpdateRoleBinding)
+        usersGroup.Delete("/roles/binding/:id", handler.DeleteRoleBinding)
+
+        // Role-permission management accessible under users/roles/permission
+        usersGroup.Get("/roles/permission/:id", handler.GetRolePermissions)
+        usersGroup.Post("/roles/permission/:roleId/:permissionId", handler.AssignPermissionToRole)
+        usersGroup.Delete("/roles/permission/:roleId/:permissionId", handler.RemovePermissionFromRole)
+
         // CRUD Group
         usersGroup.Get("/groups", handler.GetGroups)
         usersGroup.Post("/groups", handler.CreateGroup)
@@ -66,6 +82,13 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         permissionsGroup.Get("/:id", handler.GetPermission)
         permissionsGroup.Put("/:id", handler.UpdatePermission)
         permissionsGroup.Delete("/:id", handler.DeletePermission)
+
+        // Also expose permissions under users/permissions for symmetry
+        usersGroup.Get("/permissions", handler.GetPermissions)
+        usersGroup.Post("/permissions", handler.CreatePermission)
+        usersGroup.Get("/permissions/:id", handler.GetPermission)
+        usersGroup.Put("/permissions/:id", handler.UpdatePermission)
+        usersGroup.Delete("/permissions/:id", handler.DeletePermission)
 
         // Role-Permission Management
         rolesGroup := protected.Group("roles")

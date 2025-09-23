@@ -156,6 +156,49 @@ cd backend
 go run cmd/migrate.go
 ```
 
+### RBAC automatic seeding
+
+When the database is empty the migration scripts will create default RBAC data automatically:
+
+- Default roles: Administrator, User, Moderator, Viewer
+- Default permissions table is created (permissions can be extended)
+- Default user: `wpm-admin` with password `masuk-wpm` will be created and assigned the Administrator role
+
+If you run migrations with `./migrate all` or `go run cmd/migrate.go` the seeding is included.
+
+Verify RBAC seeding in MariaDB:
+
+```sql
+SELECT * FROM roles;
+SELECT * FROM users WHERE username = 'wpm-admin';
+SELECT * FROM user_roles WHERE user_id = <wpm-admin id>;
+SELECT * FROM role_bindings WHERE user_id = <wpm-admin id>;
+```
+
+## 🔐 RBAC & API Endpoints
+
+The project exposes role, permission and binding management under the `/api/v1.0/users` namespace. Useful endpoints:
+
+- List roles: GET `/api/v1.0/users/roles`
+- Create role: POST `/api/v1.0/users/roles`  (body: { name, description })
+- Assign role to user (simple API): POST `/api/v1.0/users/roles/users` (body: { user_id, role_id } or { user_id, role_name })
+- List user-role assignments: GET `/api/v1.0/users/roles/users?user_id=<id>`
+- Role bindings (CRUD): `/api/v1.0/users/roles/binding` (GET/POST/GET/:id/PUT/:id/DELETE/:id)
+- Role-permission management: `/api/v1.0/users/roles/permission` (GET/POST/DELETE)
+- Permissions CRUD: `/api/v1.0/users/permissions` (GET/POST/GET/:id/PUT/:id/DELETE/:id)
+
+Frontend Add User dialog will fetch roles from GET `/api/v1.0/users/roles` and let you pick a role during user creation.
+
+## ✅ Quick RBAC example (assign admin to user 1)
+
+```bash
+# Using curl, include Authorization header with a valid Bearer token
+curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer <token>" \
+   -d '{"user_id":1,"role_name":"Administrator"}' \
+   http://localhost:7080/api/v1.0/users/roles/users
+```
+
+
 ## 🌐 Environment Variables
 
 ```env

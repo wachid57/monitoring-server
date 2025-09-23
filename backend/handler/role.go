@@ -4,6 +4,7 @@ import (
     "github.com/gofiber/fiber/v2"
     "monitoring-server/model"
     "monitoring-server/database"
+    "monitoring-server/rbac"
 )
 
 // GetRoles godoc
@@ -105,4 +106,102 @@ func DeleteRole(c *fiber.Ctx) error {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to delete role"})
     }
     return c.SendStatus(204)
+}
+
+// GetUserRoleAssignments lists role assignments for a user or all assignments
+// @Summary Get user-role assignments
+// @Tags Roles
+// @Produce json
+// @Param user_id query int false "User ID"
+// @Success 200 {array} map[string]interface{}
+// @Security BearerAuth
+// @Router /api/v1.0/users/roles/users [get]
+func GetUserRoleAssignments(c *fiber.Ctx) error {
+    userID := c.Query("user_id")
+    var results []map[string]interface{}
+    if userID != "" {
+        // join users -> user_roles -> roles
+        rows, err := database.DB.Raw(`SELECT u.id as user_id, u.username, r.id as role_id, r.name as role_name FROM users u JOIN user_roles ur ON u.id = ur.user_id JOIN roles r ON ur.role_id = r.id WHERE u.id = ?`, userID).Rows()
+        if err != nil {
+            return c.Status(500).JSON(fiber.Map{"error": "Failed to query assignments", "detail": err.Error()})
+        }
+        defer rows.Close()
+        for rows.Next() {
+            var userID uint
+            var username string
+            var roleID uint
+            var roleName string
+            _ = rows.Scan(&userID, &username, &roleID, &roleName)
+            results = append(results, map[string]interface{}{"user_id": userID, "username": username, "role_id": roleID, "role_name": roleName})
+        }
+        return c.JSON(results)
+    }
+
+    // all assignments
+    rows, err := database.DB.Raw(`SELECT u.id as user_id, u.username, r.id as role_id, r.name as role_name FROM users u JOIN user_roles ur ON u.id = ur.user_id JOIN roles r ON ur.role_id = r.id`).Rows()
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to query assignments", "detail": err.Error()})
+    }
+    defer rows.Close()
+    for rows.Next() {
+        var userID uint
+        var username string
+        var roleID uint
+        var roleName string
+        _ = rows.Scan(&userID, &username, &roleID, &roleName)
+        results = append(results, map[string]interface{}{"user_id": userID, "username": username, "role_id": roleID, "role_name": roleName})
+    }
+    return c.JSON(results)
+}
+
+// AssignRoleToUserAPI assigns a role to a user by role_id or role name
+// @Summary Assign role to user
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param body body map[string]interface{} true "{user_id, role_id?, role_name?}"
+// @Success 200 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1.0/users/roles/users [post]
+func AssignRoleToUserAPI(c *fiber.Ctx) error {
+    var req struct {
+        UserID  uint   `json:"user_id"`
+        RoleID  uint   `json:"role_id"`
+        RoleName string `json:"role_name"`
+    }
+    if err := c.BodyParser(&req); err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "Invalid request"})
+    }
+    if req.UserID == 0 {
+        return c.Status(400).JSON(fiber.Map{"error": "user_id is required"})
+    }
+    var role model.Role
+    if req.RoleID != 0 {
+        if err := database.DB.First(&role, req.RoleID).Error; err != nil {
+            return c.Status(404).JSON(fiber.Map{"error": "Role not found"})
+        }
+    } else if req.RoleName != "" {
+        if err := database.DB.Where("name = ?", req.RoleName).First(&role).Error; err != nil {
+            // create role if missing
+            role = model.Role{Name: req.RoleName}
+            if err := database.DB.Create(&role).Error; err != nil {
+                return c.Status(500).JSON(fiber.Map{"error": "Failed to create role"})
+            }
+        }
+    } else {
+        return c.Status(400).JSON(fiber.Map{"error": "role_id or role_name is required"})
+    }
+
+    // create role_binding row if missing
+    rb := model.RoleBinding{UserID: req.UserID, RoleID: role.ID}
+    if err := database.DB.Where("user_id = ? AND role_id = ?", req.UserID, role.ID).FirstOrCreate(&rb).Error; err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to create role binding"})
+    }
+
+    // ensure many-to-many association
+    if err := rbac.AssignRoleToUser(database.DB, req.UserID, role.ID); err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user", "detail": err.Error()})
+    }
+
+    return c.JSON(fiber.Map{"status": "ok"})
 }

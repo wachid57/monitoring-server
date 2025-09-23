@@ -4,6 +4,8 @@ import (
     "github.com/gofiber/fiber/v2"
     "monitoring-server/model"
     "monitoring-server/database"
+    "monitoring-server/rbac"
+    "golang.org/x/crypto/bcrypt"
 )
 
 // GetUsers godoc
@@ -33,12 +35,58 @@ func GetUsers(c *fiber.Ctx) error {
 // @Security BearerAuth
 // @Router /api/v1.0/users [post]
 func CreateUser(c *fiber.Ctx) error {
-    var user model.User
-    if err := c.BodyParser(&user); err != nil {
+    // Use a request struct to accept a role name from the client
+    var req struct {
+        Username string `json:"username"`
+        Email    string `json:"email"`
+        Name     string `json:"name"`
+        Password string `json:"password"`
+        Role     string `json:"role"`
+    }
+    if err := c.BodyParser(&req); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid request"})
     }
+
+    // Hash password
+    hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Failed to hash password"})
+    }
+
+    user := model.User{
+        Username: req.Username,
+        Email:    req.Email,
+        Name:     req.Name,
+        Password: string(hash),
+        Native:   true,
+    }
+
     if err := database.DB.Create(&user).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to create user"})
+    }
+
+    // If a role name is provided, ensure role exists and assign to user
+    if req.Role != "" {
+        var role model.Role
+        if err := database.DB.Where("name = ?", req.Role).First(&role).Error; err != nil {
+            // create role if not exists
+            role = model.Role{Name: req.Role}
+            if err := database.DB.Create(&role).Error; err != nil {
+                return c.Status(500).JSON(fiber.Map{"error": "Failed to create role"})
+            }
+        }
+        // create role_binding record if missing
+        rb := model.RoleBinding{UserID: user.ID, RoleID: role.ID}
+        _ = database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&rb)
+        // ensure many-to-many association
+        if err := rbac.AssignRoleToUser(database.DB, user.ID, role.ID); err != nil {
+            return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user"})
+        }
+    }
+
+    // return created user with roles preloaded
+    if err := database.DB.Preload("Roles").First(&user, user.ID).Error; err != nil {
+        return c.JSON(user)
     }
     return c.JSON(user)
 }

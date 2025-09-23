@@ -61,6 +61,8 @@ const ListUsers = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: 'User' });
+  const [availableRoles, setAvailableRoles] = useState([]);
+  const [rolesError, setRolesError] = useState('');
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
 
@@ -145,6 +147,25 @@ const ListUsers = () => {
 
   useEffect(() => {
     fetchUsers();
+    // fetch roles for role select
+    (async () => {
+      try {
+        const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() });
+        const data = await res.json().catch(() => null);
+        if (res.ok) {
+          setAvailableRoles(Array.isArray(data) ? data : (data?.roles || []));
+          setRolesError('');
+        } else {
+          console.warn('Failed to fetch roles', res.status, data);
+          setAvailableRoles([]);
+          setRolesError(data?.error || data?.message || `Failed to fetch roles (status ${res.status})`);
+        }
+      } catch (err) {
+        console.error('Failed to fetch roles', err);
+        setAvailableRoles([]);
+        setRolesError('Failed to fetch roles');
+      }
+    })();
   }, []);
 
   return (
@@ -347,14 +368,32 @@ const ListUsers = () => {
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
-          <TextField
-            label="Role"
-            fullWidth
-            margin="dense"
-            value={newUser.role}
-            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-            helperText="Use role name (e.g. Administrator, User)"
-          />
+          {availableRoles && availableRoles.length > 0 ? (
+            <TextField
+              select
+              SelectProps={{ native: true }}
+              label="Role"
+              fullWidth
+              margin="dense"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              helperText={rolesError || 'Choose a role'}
+            >
+              <option value="">Select role</option>
+              {availableRoles.map((r) => (
+                <option key={r.id} value={r.name}>{r.name}</option>
+              ))}
+            </TextField>
+          ) : (
+            <TextField
+              label="Role (fallback)"
+              fullWidth
+              margin="dense"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              helperText={rolesError || 'Enter role name (roles list not available)'}
+            />
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>

@@ -104,6 +104,7 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 
 // const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
 const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
+const ListHosts = Loadable(lazy(() => import('../views/monitoring/hosts/lists/ListHosts.js')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -205,6 +206,7 @@ const Router = [
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
       { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
+  { path: '/monitoring/hosts/lists', element: <ProtectedRoute><ListHosts /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
