@@ -147,7 +147,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'List Groups',
         icon: IconPoint,
-        href: '/monitoring/groups/hosts/list',
+        href: '/monitoring/groups/hosts/lists',
       },
       {
         id: uniqueId(),
@@ -167,7 +167,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'List Services',
         icon: IconPoint,
-        href: '/monitoring/groups/services/list',
+        href: '/monitoring/groups/services/lists',
       },
       {
         id: uniqueId(),

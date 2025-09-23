@@ -222,8 +222,15 @@ const Router = [
       { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><ListIcmpHosts /></ProtectedRoute> },
       { path: '/monitoring/hosts/website', element: <ProtectedRoute><ListWebsiteHosts /></ProtectedRoute> },
 
-      { path: '/monitoring/groups/hosts/lists', element: <ProtectedRoute><ListHostGroups /></ProtectedRoute> },
-      { path: '/monitoring/groups/services/lists', element: <ProtectedRoute><ListServicesGroups /></ProtectedRoute> },
+  // Host groups routes (support legacy and canonical)
+  { path: '/monitoring/groups/hosts', element: <Navigate to="/monitoring/groups/hosts/lists" /> },
+  { path: '/monitoring/groups/hosts/list', element: <Navigate to="/monitoring/groups/hosts/lists" /> },
+  { path: '/monitoring/groups/hosts/lists', element: <ProtectedRoute><ListHostGroups /></ProtectedRoute> },
+
+  // Service groups routes (support legacy and canonical)
+  { path: '/monitoring/groups/services', element: <Navigate to="/monitoring/groups/services/lists" /> },
+  { path: '/monitoring/groups/services/list', element: <Navigate to="/monitoring/groups/services/lists" /> },
+  { path: '/monitoring/groups/services/lists', element: <ProtectedRoute><ListServicesGroups /></ProtectedRoute> },
 
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 

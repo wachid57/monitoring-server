@@ -79,7 +79,7 @@ const ListHosts = () => {
 
   const handleDelete = async (hostId) => {
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/hosts/${hostId}`, {
+      const res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/icmp/${hostId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -97,11 +97,13 @@ const ListHosts = () => {
     }
   };
 
-  const filteredHosts = hosts.filter(h =>
-    h.hostname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.ip?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.alias?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredHosts = hosts.filter(h => {
+    const hostname = (h.hostname || h.Host || h.URL || '').toString().toLowerCase();
+    const ip = (h.ip || '').toString().toLowerCase();
+    const alias = (h.alias || '').toString().toLowerCase();
+    const term = searchTerm.toLowerCase();
+    return hostname.includes(term) || ip.includes(term) || alias.includes(term);
+  });
 
   useEffect(() => { fetchHosts(); }, []);
 
@@ -134,38 +136,32 @@ const ListHosts = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>IP</TableCell>
-                    <TableCell>Hostname</TableCell>
-                    <TableCell>Alias</TableCell>
-                    <TableCell>Service</TableCell>
-                    <TableCell>Tags</TableCell>
-                    <TableCell>Created</TableCell>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Host</TableCell>
+                    <TableCell>Status</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredHosts.length === 0 ? (
-                    <TableRow><TableCell colSpan={7} align="center">No hosts found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={4} align="center">No hosts found</TableCell></TableRow>
                   ) : (
                     filteredHosts.map((h) => (
-                      <TableRow key={h.id}>
-                        <TableCell>{h.ip || '-'}</TableCell>
-                        <TableCell>{h.hostname || '-'}</TableCell>
-                        <TableCell>{h.alias || '-'}</TableCell>
-                        <TableCell>{h.service || '-'}</TableCell>
-                        <TableCell>{h.hosts_tags || '-'}</TableCell>
-                        <TableCell>{h.created_at ? new Date(h.created_at).toLocaleDateString() : '-'}</TableCell>
+                      <TableRow key={h.ID || h.id}>
+                        <TableCell>{h.ID || h.id || '-'}</TableCell>
+                        <TableCell>{h.Host || h.hostname || '-'}</TableCell>
+                        <TableCell>{h.Status || '-'}</TableCell>
                         <TableCell align="center">
-                                          <Stack direction="row" spacing={1} justifyContent="center">
-                                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
-                                            <IconButton size="small" color="warning" onClick={() => {
-                                              setEditMode(true);
-                                              setEditingHostId(h.id);
-                                              setNewHost({ ip: h.ip || '', hostname: h.hostname || '', alias: h.alias || '', service: h.service || '', hosts_tags: h.hosts_tags || '' });
-                                              setAddDialogOpen(true);
-                                            }}><IconEdit size={16} /></IconButton>
-                                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
-                                          </Stack>
+                          <Stack direction="row" spacing={1} justifyContent="center">
+                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
+                            <IconButton size="small" color="warning" onClick={() => {
+                              setEditMode(true);
+                              setEditingHostId(h.ID || h.id);
+                              setNewHost({ Host: h.Host || h.hostname || '', Status: h.Status || '' });
+                              setAddDialogOpen(true);
+                            }}><IconEdit size={16} /></IconButton>
+                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
+                          </Stack>
                         </TableCell>
                       </TableRow>
                     ))
