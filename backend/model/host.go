@@ -3,7 +3,6 @@ package model
 import "time"
 
 type Host struct {
-    ID         uint       `gorm:"primaryKey"`
     ID         uint       `gorm:"primaryKey" json:"id"`
     IP         string     `json:"ip"`
     Hostname   string     `json:"hostname"`

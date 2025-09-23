@@ -104,7 +104,11 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 
 // const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
 const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
+
+// Monitoring Pages
 const ListHosts = Loadable(lazy(() => import('../views/monitoring/hosts/lists/ListHosts.js')));
+const ListIcmpHosts = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/ListIcmpHosts.js')));
+const ListWebsiteHosts = Loadable(lazy(() => import('../views/monitoring/hosts/website/ListWebsiteHosts.js')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -212,7 +216,9 @@ const Router = [
   { path: '/monitoring/hosts', element: <Navigate to="/monitoring/hosts/lists" /> },
   { path: '/monitoring/hosts/list', element: <Navigate to="/monitoring/hosts/lists" /> },
   { path: '/monitoring/hosts/lists', element: <ProtectedRoute><ListHosts /></ProtectedRoute> },
-      
+  { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><ListIcmpHosts /></ProtectedRoute> },
+  { path: '/monitoring/hosts/website', element: <ProtectedRoute><ListWebsiteHosts /></ProtectedRoute> },
+
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
       { path: '/pages/pricing', element: <Pricing /> },
