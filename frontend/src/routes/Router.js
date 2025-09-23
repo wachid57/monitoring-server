@@ -203,9 +203,14 @@ const Router = [
       { path: '/apps/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
       { path: '/user-profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
       
-      // Admin Routes
-      { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
-      { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
+  // Admin Routes
+  { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
+  { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
+
+  // Monitoring Routes
+  // Redirect parent and legacy paths to the canonical lists route to avoid 404
+  { path: '/monitoring/hosts', element: <Navigate to="/monitoring/hosts/lists" /> },
+  { path: '/monitoring/hosts/list', element: <Navigate to="/monitoring/hosts/lists" /> },
   { path: '/monitoring/hosts/lists', element: <ProtectedRoute><ListHosts /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },

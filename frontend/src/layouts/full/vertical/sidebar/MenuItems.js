@@ -127,7 +127,7 @@ const Menuitems = [
         id: uniqueId(),
         title: 'All Hosts',
         icon: IconPoint,
-        href: '/monitoring/hosts/list',
+        href: '/monitoring/hosts/lists',
       },
       {
         id: uniqueId(),

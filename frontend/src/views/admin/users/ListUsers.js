@@ -63,6 +63,7 @@ const ListUsers = () => {
   const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: 'User' });
   const [availableRoles, setAvailableRoles] = useState([]);
   const [rolesError, setRolesError] = useState('');
+  const [rolesLoading, setRolesLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -151,6 +152,7 @@ const ListUsers = () => {
     fetchUsers();
     // fetch roles for role select
     (async () => {
+      setRolesLoading(true);
       try {
         const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() });
         const data = await res.json().catch(() => null);
@@ -166,6 +168,8 @@ const ListUsers = () => {
         console.error('Failed to fetch roles', err);
         setAvailableRoles([]);
         setRolesError('Failed to fetch roles');
+      } finally {
+        setRolesLoading(false);
       }
     })();
   }, []);
@@ -391,7 +395,21 @@ const ListUsers = () => {
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
-          {availableRoles && availableRoles.length > 0 ? (
+          {rolesLoading ? (
+            <TextField
+              select
+              SelectProps={{ native: true }}
+              label="Role"
+              fullWidth
+              margin="dense"
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              helperText={rolesError || 'Loading roles...'}
+              disabled
+            >
+              <option>Loading roles...</option>
+            </TextField>
+          ) : (availableRoles && availableRoles.length > 0 ? (
             <TextField
               select
               SelectProps={{ native: true }}
@@ -416,7 +434,7 @@ const ListUsers = () => {
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
               helperText={rolesError || 'Enter role name (roles list not available)'}
             />
-          )}
+          ))}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>

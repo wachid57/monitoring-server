@@ -53,7 +53,7 @@ const BCrumb = [
   },
 ];
 
-const ListUsers = () => {
+const ListRoles = () => {
   // Roles state
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -71,7 +71,8 @@ const ListUsers = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
+      console.log('Auth headers for roles:', getAuthHeaders());
+      const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -81,13 +82,17 @@ const ListUsers = () => {
         return;
       }
 
-      const data = await res.json();
-      console.log('GET /users/roles', res.status, data);
-      if (res.ok) {
-        // API returns array of roles; support both {roles: [...]} and [] shapes
-        setRoles(Array.isArray(data) ? data : (data.roles || []));
+  const data = await res.json().catch(() => null);
+  console.log('GET /users/roles', res.status, data);
+      // Accept array or { roles: [...] } even if res.ok is false (some APIs return payload with error)
+      const parsed = Array.isArray(data) ? data : (data?.roles || []);
+      if (parsed && parsed.length > 0) {
+        setRoles(parsed);
+      } else if (res.ok) {
+        // res ok but no roles
+        setRoles([]);
       } else {
-        setError(data.error || data.message || 'Gagal mengambil data roles');
+        setError(data?.error || data?.message || `Gagal mengambil data roles (status ${res.status})`);
       }
     } catch (err) {
       console.error('Fetch roles error:', err);
@@ -335,4 +340,4 @@ const ListUsers = () => {
   );
 };
 
-export default ListUsers;
+export default ListRoles;
