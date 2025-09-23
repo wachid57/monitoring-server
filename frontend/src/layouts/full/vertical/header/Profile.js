@@ -109,11 +109,17 @@ const Profile = () => {
             <Stack direction="row" py={3} spacing={2} alignItems="center">
               <Avatar src={ProfileImg} alt={ProfileImg} sx={{ width: 95, height: 95 }} />
               <Box>
-                <Typography variant="subtitle2" color="textPrimary" fontWeight={600}>
-                  {userInfo?.username || 'User'}
+                <Typography variant="subtitle2" color="textPrimary" fontWeight={600} noWrap sx={{ maxWidth: 200 }}>
+                  {(() => {
+                    const u = userInfo?.username || 'User';
+                    return u.length > 6 ? u.slice(0, 6) + '..' : u;
+                  })()}
                 </Typography>
-                <Typography variant="subtitle2" color="textSecondary">
-                  {userInfo?.role || 'User'}
+                <Typography variant="subtitle2" color="textSecondary" noWrap sx={{ maxWidth: 200 }}>
+                  {(() => {
+                    const r = userInfo?.role || 'User';
+                    return r.length > 6 ? r.slice(0, 6) + '..' : r;
+                  })()}
                 </Typography>
                 <Typography
                   variant="subtitle2"

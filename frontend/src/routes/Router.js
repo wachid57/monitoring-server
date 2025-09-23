@@ -110,7 +110,7 @@ const ListHosts = Loadable(lazy(() => import('../views/monitoring/hosts/lists/Li
 const ListIcmpHosts = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/ListIcmpHosts.js')));
 const ListWebsiteHosts = Loadable(lazy(() => import('../views/monitoring/hosts/website/ListWebsiteHosts.js')));
 const ListServicesGroups = Loadable(lazy(() => import('../views/monitoring/groups/services/ListServicesGroups.js')));
-const ListHostGroups = Loadable(lazy(() => import('../views/monitoring/groups/hosts/ListHostGroups.js')));
+const ListHostGroups = Loadable(lazy(() => import('../views/monitoring/groups/hosts/ListHostsGroups.js')));
 
 
 // chart

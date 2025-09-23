@@ -111,14 +111,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         // so frontend can call /api/v1.0/monitoring/hosts/icmp and /api/v1.0/monitoring/hosts/website
         monitoringHosts := protected.Group("monitoring/hosts")
         {
-            // CRUD Hosts (list/add/get/update/delete)
-            hostsMon := monitoringHosts.Group("")
-            hostsMon.Get("/", handler.GetHosts)
-            hostsMon.Post("/", handler.CreateHost)
-            hostsMon.Get("/:id", handler.GetHostByID)
-            hostsMon.Put("/:id", handler.UpdateHost)
-            hostsMon.Delete("/:id", handler.DeleteHost)
-
+            // Register static subpaths first so they are not shadowed by parameterized routes
             // ICMP under /api/v1.0/monitoring/hosts/icmp
             icmpMon := monitoringHosts.Group("icmp")
             icmpMon.Get("/", handler.GetICMPServices)
@@ -134,6 +127,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             websiteMon.Get("/:id", handler.GetAvailabilityWebsiteByID)
             websiteMon.Put("/:id", handler.UpdateAvailabilityWebsite)
             websiteMon.Delete("/:id", handler.DeleteAvailabilityWebsite)
+
+            // CRUD Hosts (list/add/get/update/delete)
+            hostsMon := monitoringHosts.Group("")
+            hostsMon.Get("/", handler.GetHosts)
+            hostsMon.Post("/", handler.CreateHost)
+            hostsMon.Get("/:id", handler.GetHostByID)
+            hostsMon.Put("/:id", handler.UpdateHost)
+            hostsMon.Delete("/:id", handler.DeleteHost)
         }
 
 
