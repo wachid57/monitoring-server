@@ -98,8 +98,9 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         usersGroup.Put("/:id", handler.UpdateUser)
         usersGroup.Delete("/:id", handler.DeleteUser)
 
-        // CRUD Host Group
-        hostGroups := protected.Group("hosts/groups")
+        // CRUD Host Group -> move to monitoring/groups/hosts
+        monitoringGroups := protected.Group("monitoring/groups")
+        hostGroups := monitoringGroups.Group("hosts")
         hostGroups.Get("/", handler.GetHostGroups)
         hostGroups.Post("/", handler.CreateHostGroup)
         hostGroups.Get("/:id", handler.GetHostGroupByID)
@@ -177,13 +178,13 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         diskGroup.Put("/:id", handler.UpdateDiskMetric)
         diskGroup.Delete("/:id", handler.DeleteDiskMetric)
 
-        // CRUD Service Group
-        serviceGroup := protected.Group("services/groups")
-        serviceGroup.Get("/", handler.GetServiceGroups)
-        serviceGroup.Post("/", handler.CreateServiceGroup)
-        serviceGroup.Get("/:id", handler.GetServiceGroupByID)
-        serviceGroup.Put("/:id", handler.UpdateServiceGroup)
-        serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
+        // CRUD Service Group -> move to monitoring/groups/services
+        serviceGroups := monitoringGroups.Group("services")
+        serviceGroups.Get("/", handler.GetServiceGroups)
+        serviceGroups.Post("/", handler.CreateServiceGroup)
+        serviceGroups.Get("/:id", handler.GetServiceGroupByID)
+        serviceGroups.Put("/:id", handler.UpdateServiceGroup)
+        serviceGroups.Delete("/:id", handler.DeleteServiceGroup)
 
         // Contact API: expose contact groups and notifications under /api/v1.0/contact
         contact := protected.Group("contact")
