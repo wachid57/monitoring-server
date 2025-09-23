@@ -50,6 +50,8 @@ const ListHosts = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, host: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newHost, setNewHost] = useState({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
+  const [editMode, setEditMode] = useState(false);
+  const [editingHostId, setEditingHostId] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
   const fetchHosts = async () => {
@@ -154,11 +156,16 @@ const ListHosts = () => {
                         <TableCell>{h.hosts_tags || '-'}</TableCell>
                         <TableCell>{h.created_at ? new Date(h.created_at).toLocaleDateString() : '-'}</TableCell>
                         <TableCell align="center">
-                          <Stack direction="row" spacing={1} justifyContent="center">
-                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
-                            <IconButton size="small" color="warning"><IconEdit size={16} /></IconButton>
-                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
-                          </Stack>
+                                          <Stack direction="row" spacing={1} justifyContent="center">
+                                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
+                                            <IconButton size="small" color="warning" onClick={() => {
+                                              setEditMode(true);
+                                              setEditingHostId(h.id);
+                                              setNewHost({ ip: h.ip || '', hostname: h.hostname || '', alias: h.alias || '', service: h.service || '', hosts_tags: h.hosts_tags || '' });
+                                              setAddDialogOpen(true);
+                                            }}><IconEdit size={16} /></IconButton>
+                                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
+                                          </Stack>
                         </TableCell>
                       </TableRow>
                     ))
@@ -181,8 +188,8 @@ const ListHosts = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Add Host</DialogTitle>
+      <Dialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setEditMode(false); setEditingHostId(null); }} fullWidth maxWidth="sm">
+        <DialogTitle>{editMode ? 'Edit Host' : 'Add Host'}</DialogTitle>
         <DialogContent>
           <TextField label="IP" fullWidth margin="dense" value={newHost.ip} onChange={e => setNewHost({...newHost, ip: e.target.value})} />
           <TextField label="Hostname" fullWidth margin="dense" value={newHost.hostname} onChange={e => setNewHost({...newHost, hostname: e.target.value})} />
@@ -195,14 +202,24 @@ const ListHosts = () => {
           <Button variant="contained" color="primary" onClick={async () => {
             setSubmitLoading(true);
             try {
-              const res = await fetch(BACKEND_URL + API_PREFIX + '/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+              let res;
+              if (editMode && editingHostId) {
+                res = await fetch(BACKEND_URL + API_PREFIX + `/hosts/${editingHostId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+              } else {
+                res = await fetch(BACKEND_URL + API_PREFIX + '/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+              }
               if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
               const data = await res.json();
-              if (res.ok) { fetchHosts(); setAddDialogOpen(false); setNewHost({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' }); }
-              else setError(data.error || 'Failed to create host');
-            } catch (err) { console.error(err); setError('Failed to create host'); }
+              if (res.ok) {
+                fetchHosts();
+                setAddDialogOpen(false);
+                setNewHost({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
+                setEditMode(false);
+                setEditingHostId(null);
+              } else setError(data.error || (editMode ? 'Failed to update host' : 'Failed to create host'));
+            } catch (err) { console.error(err); setError(editMode ? 'Failed to update host' : 'Failed to create host'); }
             finally { setSubmitLoading(false); }
-          }}>{submitLoading ? <CircularProgress size={20} /> : 'Create'}</Button>
+          }}>{submitLoading ? <CircularProgress size={20} /> : (editMode ? 'Save' : 'Create')}</Button>
         </DialogActions>
       </Dialog>
     </PageContainer>

@@ -65,6 +65,8 @@ const ListUsers = () => {
   const [rolesError, setRolesError] = useState('');
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editingUserId, setEditingUserId] = useState(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -126,23 +128,23 @@ const ListUsers = () => {
       console.error('Delete user error:', err);
       setError('Terjadi kesalahan saat menghapus user');
     }
-  };  const filteredUsers = users.filter(user =>
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  };
+  const filteredUsers = users.filter(user => {
+    const roleName = user?.roles && user.roles.length > 0 ? (user.roles[0].name || '') : (user.role || '');
+    return (
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      roleName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const getRoleColor = (role) => {
-    switch (role?.toLowerCase()) {
-      case 'admin':
-        return 'error';
-      case 'user':
-        return 'primary';
-      case 'moderator':
-        return 'warning';
-      default:
-        return 'default';
-    }
+    const r = (role || '').toString().toLowerCase();
+    if (r.includes('admin')) return 'error';
+    if (r.includes('moderator')) return 'warning';
+    if (r.includes('viewer') || r.includes('read')) return 'info';
+    if (r.includes('user')) return 'primary';
+    return 'default';
   };
 
   useEffect(() => {
@@ -252,11 +254,16 @@ const ListUsers = () => {
                         </TableCell>
                         <TableCell>{user.email || '-'}</TableCell>
                         <TableCell>
-                          <Chip
-                            label={user.role || 'User'}
-                            color={getRoleColor(user.role)}
-                            size="small"
-                          />
+                          {(() => {
+                            const roleName = user?.roles && user.roles.length > 0 ? (user.roles[0].name) : (user.role || 'User');
+                            return (
+                              <Chip
+                                label={roleName}
+                                color={getRoleColor(roleName)}
+                                size="small"
+                              />
+                            );
+                          })()}
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -273,7 +280,23 @@ const ListUsers = () => {
                             <IconButton size="small" color="primary">
                               <IconEye size={16} />
                             </IconButton>
-                            <IconButton size="small" color="warning">
+                            <IconButton
+                              size="small"
+                              color="warning"
+                              onClick={() => {
+                                // open edit dialog with user data
+                                setEditMode(true);
+                                setEditingUserId(user.id);
+                                setNewUser({
+                                  username: user.username || '',
+                                  email: user.email || '',
+                                  name: user.name || '',
+                                  password: '',
+                                  role: user?.roles && user.roles.length > 0 ? user.roles[0].name : (user.role || 'User')
+                                });
+                                setAddDialogOpen(true);
+                              }}
+                            >
                               <IconEdit size={16} />
                             </IconButton>
                             <IconButton 
@@ -402,40 +425,55 @@ const ListUsers = () => {
             color="primary"
             onClick={async () => {
               setFormError('');
-              if (!newUser.username || !newUser.password) {
+              if (!newUser.username || (!editMode && !newUser.password)) {
                 setFormError('Username and password are required');
                 return;
               }
               setSubmitLoading(true);
               try {
-                const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                  body: JSON.stringify(newUser),
-                });
+                let res;
+                if (editMode && editingUserId) {
+                  // update user
+                  res = await fetch(BACKEND_URL + API_PREFIX + `/users/${editingUserId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify(newUser),
+                  });
+                } else {
+                  // create
+                  res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify(newUser),
+                  });
+                }
+
                 if (res.status === 401 || res.status === 403) {
                   handleAuthError({ status: res.status });
                   return;
                 }
+
                 const data = await res.json();
                 if (res.ok) {
                   // refresh users
                   fetchUsers();
                   setAddDialogOpen(false);
                   setNewUser({ username: '', email: '', name: '', password: '', role: 'User' });
+                  setEditMode(false);
+                  setEditingUserId(null);
                 } else {
-                  setFormError(data.error || data.message || 'Failed to create user');
+                  setFormError(data.error || data.message || (editMode ? 'Failed to update user' : 'Failed to create user'));
                 }
               } catch (err) {
-                console.error('Create user error:', err);
-                setFormError('Failed to create user');
+                console.error(editMode ? 'Update user error:' : 'Create user error:', err);
+                setFormError(editMode ? 'Failed to update user' : 'Failed to create user');
               } finally {
                 setSubmitLoading(false);
               }
             }}
             disabled={submitLoading}
           >
-            {submitLoading ? <CircularProgress size={20} /> : 'Create'}
+            {submitLoading ? <CircularProgress size={20} /> : (editMode ? 'Save' : 'Create')}
           </Button>
         </DialogActions>
       </Dialog>
