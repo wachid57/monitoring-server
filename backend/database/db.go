@@ -31,5 +31,20 @@ func InitDB() error {
 		return err
 	}
 	DB = db
-	return db.AutoMigrate(&model.User{})
+
+	// AutoMigrate all main models to ensure tables exist when the app starts.
+	// Keep this list small and stable to avoid accidental schema drift from running the app.
+	return db.AutoMigrate(
+		&model.Role{},
+		&model.Permission{},
+		&model.RolePermission{},
+		&model.RoleBinding{},
+		&model.User{},
+		&model.Group{},
+		&model.Host{},
+		&model.HostGroup{},
+		&model.CPUMetric{},
+		&model.MemoryMetric{},
+		&model.DiskMetric{},
+	)
 }

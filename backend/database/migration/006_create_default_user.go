@@ -33,6 +33,27 @@ func CreateDefaultUser(db *gorm.DB) error {
 	}
 
 	log.Println("Created default user wpm-admin")
-	// assign roles via separate migration
+
+	// Ensure Administrator role exists and bind to user
+	var adminRole model.Role
+	if err := db.Where("name = ?", "Administrator").First(&adminRole).Error; err != nil {
+		// create admin role
+		adminRole = model.Role{Name: "Administrator", Description: "Full access"}
+		if err := db.Create(&adminRole).Error; err != nil {
+			return err
+		}
+	}
+
+	// Create role binding (role_bindings table)
+	rb := model.RoleBinding{UserID: user.ID, RoleID: adminRole.ID}
+	if err := db.Create(&rb).Error; err != nil {
+		return err
+	}
+
+	// Also ensure many-to-many user_roles association
+	if err := rbac.AssignRoleToUser(db, user.ID, adminRole.ID); err != nil {
+		return err
+	}
+
 	return nil
 }

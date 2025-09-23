@@ -7,14 +7,20 @@ import (
 
 // AssignRoleToUser assigns a role to a user
 func AssignRoleToUser(db *gorm.DB, userID, roleID uint) error {
-    return db.Model(&model.User{}).Where("id = ?", userID).
-        Association("Roles").Append(&model.Role{ID: roleID})
+    var user model.User
+    if err := db.First(&user, userID).Error; err != nil {
+        return err
+    }
+    return db.Model(&user).Association("Roles").Append(&model.Role{ID: roleID})
 }
 
 // AssignUserToGroup assigns a user to a group
 func AssignUserToGroup(db *gorm.DB, userID, groupID uint) error {
-    return db.Model(&model.User{}).Where("id = ?", userID).
-        Association("Groups").Append(&model.Group{ID: groupID})
+    var user model.User
+    if err := db.First(&user, userID).Error; err != nil {
+        return err
+    }
+    return db.Model(&user).Association("Groups").Append(&model.Group{ID: groupID})
 }
 
 // BindRoleToGroup binds a role to a user in a group

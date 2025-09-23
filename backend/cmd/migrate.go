@@ -14,10 +14,11 @@ var migrations = []struct {
     Name   string
     Func   func(db *gorm.DB) error
 }{
-    {1, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
-    {2, "CreateRolesTable", func(db *gorm.DB) error { return migration.CreateRolesTable(db) }},
-    {3, "CreateGroupsTable", func(db *gorm.DB) error { return migration.CreateGroupsTable(db) }},
-    {4, "CreateRoleBindingsTable", func(db *gorm.DB) error { return migration.CreateRoleBindingsTable(db) }},
+    // Schema migrations - create tables
+    {1, "CreateRolesTable", func(db *gorm.DB) error { return migration.CreateRolesTable(db) }},
+    {2, "CreateRolePermissionsTable", func(db *gorm.DB) error { return migration.CreateRolePermissionsTable(db) }},
+    {3, "CreateRoleBindingsTable", func(db *gorm.DB) error { return migration.CreateRoleBindingsTable(db) }},
+    {4, "CreateGroupsTable", func(db *gorm.DB) error { return migration.CreateGroupsTable(db) }},
     {5, "CreateHostsTable", func(db *gorm.DB) error { return migration.CreateHostsTable(db) }},
     {6, "CreateHostGroupsTable", func(db *gorm.DB) error { return migration.CreateHostGroupsTable(db) }},
     {7, "CreateICMPTable", func(db *gorm.DB) error { return migration.CreateICMPTable(db) }},
@@ -32,11 +33,12 @@ var migrations = []struct {
     {16, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
     {17, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
     {18, "CreateAvailabilityWebsiteTable", func(db *gorm.DB) error { return migration.CreateAvailabilityWebsiteTable(db) }},
-    {19, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
-    {20, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
-    {21, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
-    {22, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},
 
+    // Seed data (run after schema)
+    {19, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},
+    {20, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
+    {21, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
+    {22, "AssignAdminToWpmAdmin", func(db *gorm.DB) error { return migration.AssignAdminToWpmAdmin(db) }},
 }
 
 func main() {
