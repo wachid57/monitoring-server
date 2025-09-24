@@ -3,34 +3,21 @@ import { Avatar, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLanguage } from 'src/store/customizer/CustomizerSlice';
 import FlagEn from 'src/assets/images/flag/icon-flag-en.svg';
-import FlagFr from 'src/assets/images/flag/icon-flag-fr.svg';
-import FlagCn from 'src/assets/images/flag/icon-flag-cn.svg';
-import FlagSa from 'src/assets/images/flag/icon-flag-sa.svg';
+import FlagId from 'src/assets/images/flag/icon-flag-id.svg';
 import { Stack } from '@mui/system';
 import { useTranslation } from 'react-i18next';
 import { useEffect } from 'react';
 
 const Languages = [
   {
-    flagname: 'English (UK)',
+    flagname: 'English',
     icon: FlagEn,
     value: 'en',
   },
   {
-    flagname: '中国人 (Chinese)',
-    icon: FlagCn,
-    value: 'ch',
-  },
-  {
-    flagname: 'français (French)',
-    icon: FlagFr,
-    value: 'fr',
-  },
-
-  {
-    flagname: 'عربي (Arabic)',
-    icon: FlagSa,
-    value: 'ar',
+    flagname: 'Indonesia',
+    icon: FlagId,
+    value: 'id',
   },
 ];
 
@@ -40,7 +27,7 @@ const Language = () => {
   const open = Boolean(anchorEl);
   const customizer = useSelector((state) => state.customizer);
   const currentLang =
-    Languages.find((_lang) => _lang.value === customizer.isLanguage) || Languages[1];
+    Languages.find((_lang) => _lang.value === customizer.isLanguage) || Languages[0];
   const { i18n } = useTranslation();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -50,7 +37,7 @@ const Language = () => {
   };
   useEffect(() => {
     i18n.changeLanguage(customizer.isLanguage);
-  }, []);
+  }, [customizer.isLanguage, i18n]);
 
   return (
     <>

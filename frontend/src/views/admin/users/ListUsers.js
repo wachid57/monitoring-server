@@ -276,7 +276,12 @@ const ListUsers = () => {
                             <IconButton size="small" color="primary">
                               <IconEye size={16} />
                             </IconButton>
-                            <IconButton size="small" color="warning">
+                            <IconButton
+                              size="small"
+                              color="warning"
+                              disabled={user.native}
+                              title={user.native ? 'Native user cannot be edited' : 'Edit user'}
+                            >
                               <IconEdit size={16} />
                             </IconButton>
                             <span>

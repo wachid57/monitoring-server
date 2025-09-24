@@ -78,13 +78,13 @@ const Menuitems = [
     id: uniqueId(),
     title: 'ICMP Monitoring',
     icon: IconChartLine,
-    href: '/monitoring/icmp',
+  href: '/monitoring/hosts/icmp',
   },
   {
     id: uniqueId(),
     title: 'Website Monitoring',
     icon: IconChartDots,
-    href: '/monitoring/website',
+  href: '/monitoring/website/lists',
   },
   {
     id: uniqueId(),
@@ -209,7 +209,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Availability Reports',
     icon: IconChartPie2,
-    href: '/reports/availability',
+  href: '/report/hosts/availability',
   },
   {
     id: uniqueId(),

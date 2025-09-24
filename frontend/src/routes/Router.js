@@ -106,6 +106,11 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
 const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
+const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
+const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
+const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
+// Reports
+const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -209,10 +214,17 @@ const Router = [
   { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
   { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
   { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
+  { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
+  { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
   
   // Infrastructure routes for hosts (alternate path used by sidebar)
   { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
   { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
+  { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
+  { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
+  
+  // Reports
+  { path: '/report/hosts/availability', element: <ProtectedRoute><HostsAvailabilityReport /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
