@@ -38,30 +38,19 @@ import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
-  {
-    to: '/',
-    title: 'Home',
-  },
-  {
-    title: 'Admin',
-  },
-  {
-    title: 'Roles',
-  },
-  {
-    title: 'List Roles',
-  },
+  { to: '/', title: 'Home' },
+  { title: 'Admin' },
+  { title: 'Roles' },
+  { title: 'List Roles' },
 ];
 
-const ListUsers = () => {
-  // Roles state
+const RolesList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, role: null });
 
-  // Add Role dialog
   const [addOpen, setAddOpen] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
@@ -71,9 +60,9 @@ const ListUsers = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', {
         method: 'GET',
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -82,10 +71,8 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-      console.log('GET /users/roles', res.status, data);
       if (res.ok) {
-        // API returns array of roles; support both {roles: [...]} and [] shapes
-        setRoles(Array.isArray(data) ? data : (data.roles || []));
+        setRoles(Array.isArray(data) ? data : data.roles || []);
       } else {
         setError(data.error || data.message || 'Gagal mengambil data roles');
       }
@@ -99,9 +86,9 @@ const ListUsers = () => {
 
   const handleDelete = async (roleId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/users/roles/${roleId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/roles/${roleId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -110,7 +97,7 @@ const ListUsers = () => {
       }
 
       if (res.ok) {
-        setRoles(prev => prev.filter(r => r.id !== roleId));
+        setRoles((prev) => prev.filter((r) => r.id !== roleId));
         setDeleteDialog({ open: false, role: null });
       } else {
         const data = await res.json();
@@ -130,10 +117,10 @@ const ListUsers = () => {
     setAdding(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ name: newRoleName, description: newRoleDesc })
+        body: JSON.stringify({ name: newRoleName, description: newRoleDesc }),
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -142,12 +129,10 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-      console.log('POST /users/roles', res.status, data);
       if (res.ok) {
         setAddOpen(false);
         setNewRoleName('');
         setNewRoleDesc('');
-        // Refresh list
         fetchRoles();
       } else {
         setError(data.error || data.message || 'Gagal menambahkan role');
@@ -160,9 +145,10 @@ const ListUsers = () => {
     }
   };
 
-  const filteredRoles = roles.filter(role =>
-    role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRoles = roles.filter(
+    (role) =>
+      role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -172,17 +158,12 @@ const ListUsers = () => {
   return (
     <PageContainer title="List Roles" description="Manage system roles">
       <Breadcrumb title="List Roles" items={BCrumb} />
-      
+
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
             <Typography variant="h5">Roles Management</Typography>
-            <Button
-              variant="contained"
-              startIcon={<IconPlus />}
-              color="primary"
-              onClick={() => setAddOpen(true)}
-            >
+            <Button variant="contained" startIcon={<IconPlus />} color="primary" onClick={() => setAddOpen(true)}>
               Add New Role
             </Button>
           </Stack>
@@ -221,6 +202,7 @@ const ListUsers = () => {
                     <TableCell>ID</TableCell>
                     <TableCell>Name</TableCell>
                     <TableCell>Description</TableCell>
+                    <TableCell>Native</TableCell>
                     <TableCell>Created</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
@@ -228,7 +210,7 @@ const ListUsers = () => {
                 <TableBody>
                   {filteredRoles.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                         <Typography variant="body1" color="textSecondary">
                           {searchTerm ? 'No roles found matching your search' : 'No roles found'}
                         </Typography>
@@ -244,9 +226,8 @@ const ListUsers = () => {
                           </Typography>
                         </TableCell>
                         <TableCell>{role.description || '-'}</TableCell>
-                        <TableCell>
-                          {role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}
-                        </TableCell>
+                        <TableCell>{role.native ? <Chip size="small" label="native" color="secondary" /> : '-'}</TableCell>
+                        <TableCell>{role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}</TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton size="small" color="primary">
@@ -255,13 +236,15 @@ const ListUsers = () => {
                             <IconButton size="small" color="warning">
                               <IconEdit size={16} />
                             </IconButton>
-                            <IconButton 
-                              size="small" 
-                              color="error"
-                              onClick={() => setDeleteDialog({ open: true, role })}
-                            >
-                              <IconTrash size={16} />
-                            </IconButton>
+                            {role.native ? (
+                              <IconButton size="small" color="inherit" disabled title="Native role cannot be deleted">
+                                <IconTrash size={16} />
+                              </IconButton>
+                            ) : (
+                              <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, role })}>
+                                <IconTrash size={16} />
+                              </IconButton>
+                            )}
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -274,54 +257,33 @@ const ListUsers = () => {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, role: null })}
-      >
+      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, role: null })}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete role "{deleteDialog.role?.name}"? 
-            This action cannot be undone.
-          </Typography>
+          {deleteDialog.role?.native ? (
+            <Alert severity="warning">Native role "{deleteDialog.role?.name}" cannot be deleted.</Alert>
+          ) : (
+            <Typography>
+              Are you sure you want to delete role "{deleteDialog.role?.name}"? This action cannot be undone.
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setDeleteDialog({ open: false, role: null })}
-            color="primary"
-          >
+          <Button onClick={() => setDeleteDialog({ open: false, role: null })} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={() => handleDelete(deleteDialog.role?.id)}
-            color="error"
-            variant="contained"
-          >
+          <Button onClick={() => handleDelete(deleteDialog.role?.id)} color="error" variant="contained" disabled={deleteDialog.role?.native}>
             Delete
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Add Role Dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Role</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField
-              label="Role Name"
-              value={newRoleName}
-              onChange={(e) => setNewRoleName(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={newRoleDesc}
-              onChange={(e) => setNewRoleDesc(e.target.value)}
-              fullWidth
-              multiline
-              rows={3}
-            />
+            <TextField label="Role Name" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} fullWidth />
+            <TextField label="Description" value={newRoleDesc} onChange={(e) => setNewRoleDesc(e.target.value)} fullWidth multiline rows={3} />
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -335,4 +297,4 @@ const ListUsers = () => {
   );
 };
 
-export default ListUsers;
+export default RolesList;

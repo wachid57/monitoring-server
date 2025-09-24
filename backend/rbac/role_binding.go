@@ -32,3 +32,9 @@ func BindRoleToGroup(db *gorm.DB, userID, roleID, groupID uint) error {
     }
     return db.Create(&binding).Error
 }
+
+// CreateUserRole inserts into user_roles join table using the explicit model
+func CreateUserRole(db *gorm.DB, userID, roleID uint) error {
+    ur := model.UserRole{UserID: userID, RoleID: roleID}
+    return db.Create(&ur).Error
+}

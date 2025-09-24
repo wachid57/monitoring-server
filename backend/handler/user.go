@@ -78,8 +78,8 @@ func CreateUser(c *fiber.Ctx) error {
         // create role_binding record if missing
         rb := model.RoleBinding{UserID: user.ID, RoleID: role.ID}
         _ = database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&rb)
-        // ensure many-to-many association
-        if err := rbac.AssignRoleToUser(database.DB, user.ID, role.ID); err != nil {
+        // ensure many-to-many association using explicit join model
+        if err := rbac.CreateUserRole(database.DB, user.ID, role.ID); err != nil {
             return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user"})
         }
     }
@@ -147,6 +147,14 @@ func UpdateUser(c *fiber.Ctx) error {
 // @Router /api/v1.0/users/{id} [delete]
 func DeleteUser(c *fiber.Ctx) error {
     id := c.Params("id")
+    var user model.User
+    if err := database.DB.First(&user, id).Error; err != nil {
+        return c.Status(404).JSON(fiber.Map{"error": "User not found"})
+    }
+    // prevent deletion of native users
+    if user.Native {
+        return c.Status(403).JSON(fiber.Map{"error": "Cannot delete native user"})
+    }
     if err := database.DB.Delete(&model.User{}, id).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to delete user"})
     }

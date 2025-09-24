@@ -9,3 +9,5 @@ import (
 func CreateRolesTable(db *gorm.DB) error {
 	return db.AutoMigrate(&model.Role{})
 }
+
+// ...existing code...

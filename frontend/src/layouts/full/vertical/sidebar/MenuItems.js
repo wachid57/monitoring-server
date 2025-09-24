@@ -262,6 +262,12 @@ const Menuitems = [
       },
       {
         id: uniqueId(),
+        title: 'List Roles',
+        icon: IconPoint,
+        href: '/admin/roles/bindings',
+      },
+      {
+        id: uniqueId(),
         title: 'Add Role',
         icon: IconPoint,
         href: '/admin/roles/add',

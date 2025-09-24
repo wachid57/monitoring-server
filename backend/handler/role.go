@@ -102,6 +102,13 @@ func UpdateRole(c *fiber.Ctx) error {
 // @Router /api/v1.0/users/roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
     id := c.Params("id")
+    var role model.Role
+    if err := database.DB.First(&role, id).Error; err != nil {
+        return c.Status(404).JSON(fiber.Map{"error": "Role not found"})
+    }
+    if role.Native {
+        return c.Status(403).JSON(fiber.Map{"error": "Cannot delete native role"})
+    }
     if err := database.DB.Delete(&model.Role{}, id).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to delete role"})
     }
@@ -198,8 +205,8 @@ func AssignRoleToUserAPI(c *fiber.Ctx) error {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to create role binding"})
     }
 
-    // ensure many-to-many association
-    if err := rbac.AssignRoleToUser(database.DB, req.UserID, role.ID); err != nil {
+    // ensure many-to-many association (explicit join model)
+    if err := rbac.CreateUserRole(database.DB, req.UserID, role.ID); err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user", "detail": err.Error()})
     }
 

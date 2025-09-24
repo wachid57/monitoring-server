@@ -102,8 +102,8 @@ const ReactStickyTable = Loadable(lazy(() => import('../views/react-tables/stick
 // Admin Pages
 const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
 
-// const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
-const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
+// const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
+const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -204,7 +204,7 @@ const Router = [
       
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
-      { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
+  { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 

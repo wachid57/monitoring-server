@@ -39,6 +39,7 @@ func InitDB() error {
 		&model.Permission{},
 		&model.RolePermission{},
 		&model.RoleBinding{},
+		&model.UserRole{},
 		&model.User{},
 		&model.Group{},
 		&model.Host{},

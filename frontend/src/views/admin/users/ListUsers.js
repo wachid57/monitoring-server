@@ -125,14 +125,20 @@ const ListUsers = () => {
       console.error('Delete user error:', err);
       setError('Terjadi kesalahan saat menghapus user');
     }
-  };  const filteredUsers = users.filter(user =>
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  };
+
+  const filteredUsers = users.filter(user => {
+    const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || '') : (user.role || '');
+    return (
+      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      roleLabel.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const getRoleColor = (role) => {
     switch (role?.toLowerCase()) {
+      case 'administrator':
       case 'admin':
         return 'error';
       case 'user':
@@ -149,7 +155,7 @@ const ListUsers = () => {
     // fetch roles for role select
     (async () => {
       try {
-        const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() });
+        const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', { headers: getAuthHeaders() });
         if (res.ok) {
           const data = await res.json();
           setAvailableRoles(Array.isArray(data) ? data : (data.roles || []));
@@ -244,11 +250,16 @@ const ListUsers = () => {
                         </TableCell>
                         <TableCell>{user.email || '-'}</TableCell>
                         <TableCell>
-                          <Chip
-                            label={user.role || 'User'}
-                            color={getRoleColor(user.role)}
-                            size="small"
-                          />
+                            {(() => {
+                              const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || 'User') : (user.role || 'User');
+                              return (
+                                <Chip
+                                  size="small"
+                                  label={roleLabel}
+                                  color={getRoleColor(roleLabel)}
+                                />
+                              );
+                            })()}
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -268,13 +279,21 @@ const ListUsers = () => {
                             <IconButton size="small" color="warning">
                               <IconEdit size={16} />
                             </IconButton>
-                            <IconButton 
-                              size="small" 
-                              color="error"
-                              onClick={() => setDeleteDialog({ open: true, user })}
-                            >
-                              <IconTrash size={16} />
-                            </IconButton>
+                            <span>
+                              {user.native ? (
+                                <IconButton size="small" color="inherit" disabled title="Native user cannot be deleted">
+                                  <IconTrash size={16} />
+                                </IconButton>
+                              ) : (
+                                <IconButton 
+                                  size="small" 
+                                  color="error"
+                                  onClick={() => setDeleteDialog({ open: true, user })}
+                                >
+                                  <IconTrash size={16} />
+                                </IconButton>
+                              )}
+                            </span>
                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -294,10 +313,14 @@ const ListUsers = () => {
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete user "{deleteDialog.user?.username}"? 
-            This action cannot be undone.
-          </Typography>
+          {deleteDialog.user?.native ? (
+            <Alert severity="warning">Native user "{deleteDialog.user?.username}" cannot be deleted.</Alert>
+          ) : (
+            <Typography>
+              Are you sure you want to delete user "{deleteDialog.user?.username}"? 
+              This action cannot be undone.
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button 
@@ -310,6 +333,7 @@ const ListUsers = () => {
             onClick={() => handleDelete(deleteDialog.user?.id)}
             color="error"
             variant="contained"
+            disabled={deleteDialog.user?.native}
           >
             Delete
           </Button>

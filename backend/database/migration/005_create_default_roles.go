@@ -13,6 +13,7 @@ func CreateDefaultRoles(db *gorm.DB) error {
 	if adminRoleCount == 0 {
 		adminRole := model.Role{
 			Name: "Administrator",
+			Native: true,
 		}
 		if err := db.Create(&adminRole).Error; err != nil {
 			return err
