@@ -53,8 +53,8 @@ const BCrumb = [
   },
 ];
 
-const ListUsers = () => {
-  // Roles state
+const PermissionBindings = () => {
+  // Role-permission state (simple: list roles and counts)
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -71,7 +71,7 @@ const ListUsers = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/permissions/bindings', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -82,24 +82,23 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-  console.log('GET /admin/roles', res.status, data);
       if (res.ok) {
-        // API returns array of roles; support both {roles: [...]} and [] shapes
+        // API returns roles with Permissions preloaded
         setRoles(Array.isArray(data) ? data : (data.roles || []));
       } else {
-        setError(data.error || data.message || 'Gagal mengambil data roles');
+        setError(data.error || data.message || 'Gagal mengambil data roles/permissions');
       }
     } catch (err) {
-      console.error('Fetch roles error:', err);
-      setError('Terjadi kesalahan saat mengambil data roles');
+      console.error('Fetch roles/permissions error:', err);
+      setError('Terjadi kesalahan saat mengambil data roles/permissions');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (roleId) => {
+  const handleRemovePermission = async (roleId, permissionId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/roles/${roleId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/roles/${roleId}/permissions/${permissionId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -110,30 +109,30 @@ const ListUsers = () => {
       }
 
       if (res.ok) {
-        setRoles(prev => prev.filter(r => r.id !== roleId));
-        setDeleteDialog({ open: false, role: null });
+        // Refresh role permissions
+        fetchRoles();
       } else {
         const data = await res.json();
-        setError(data.error || data.message || 'Gagal menghapus role');
+        setError(data.error || data.message || 'Gagal menghapus permission dari role');
       }
     } catch (err) {
-      console.error('Delete role error:', err);
-      setError('Terjadi kesalahan saat menghapus role');
+      console.error('Remove permission error:', err);
+      setError('Terjadi kesalahan saat menghapus permission');
     }
   };
 
-  const handleAddRole = async () => {
-    if (!newRoleName) {
-      setError('Role name is required');
+  const handleAddBinding = async () => {
+    if (!newRoleName || !newRoleDesc) {
+      setError('RoleId and PermissionId required');
       return;
     }
     setAdding(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', {
+      // For simplicity this example keeps add dialog placeholder; real UI should select role and permission
+      const res = await fetch(BACKEND_URL + API_PREFIX + `/roles/${newRoleName}/permissions/${newRoleDesc}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ name: newRoleName, description: newRoleDesc })
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -142,7 +141,6 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-  console.log('POST /admin/roles', res.status, data);
       if (res.ok) {
         setAddOpen(false);
         setNewRoleName('');
@@ -150,11 +148,11 @@ const ListUsers = () => {
         // Refresh list
         fetchRoles();
       } else {
-        setError(data.error || data.message || 'Gagal menambahkan role');
+        setError(data.error || data.message || 'Gagal menambahkan binding');
       }
     } catch (err) {
-      console.error('Add role error:', err);
-      setError('Terjadi kesalahan saat menambahkan role');
+      console.error('Add binding error:', err);
+      setError('Terjadi kesalahan saat menambahkan binding');
     } finally {
       setAdding(false);
     }
@@ -170,20 +168,20 @@ const ListUsers = () => {
   }, []);
 
   return (
-    <PageContainer title="List Roles" description="Manage system roles">
-      <Breadcrumb title="List Roles" items={BCrumb} />
+    <PageContainer title="Role Permission Bindings" description="Manage role-permission relationships">
+      <Breadcrumb title="Role Permission Bindings" items={BCrumb} />
       
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Roles Management</Typography>
+            <Typography variant="h5">Roles & Permissions</Typography>
             <Button
               variant="contained"
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => setAddOpen(true)}
             >
-              Add New Role
+              Add Binding (roleId/permissionId quick)
             </Button>
           </Stack>
 
@@ -218,10 +216,9 @@ const ListUsers = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>ID</TableCell>
-                    <TableCell>Name</TableCell>
+                    <TableCell>Role</TableCell>
                     <TableCell>Description</TableCell>
-                    <TableCell>Created</TableCell>
+                    <TableCell>Permissions</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
@@ -237,30 +234,21 @@ const ListUsers = () => {
                   ) : (
                     filteredRoles.map((role) => (
                       <TableRow key={role.id}>
-                        <TableCell>{role.id}</TableCell>
                         <TableCell>
-                          <Typography variant="subtitle2" fontWeight={600}>
-                            {role.name}
-                          </Typography>
+                          <Typography variant="subtitle2" fontWeight={600}>{role.name}</Typography>
                         </TableCell>
                         <TableCell>{role.description || '-'}</TableCell>
                         <TableCell>
-                          {role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}
+                          <Stack direction="row" spacing={1} flexWrap="wrap">
+                            {(role.Permissions || role.permissions || []).map((p) => (
+                              <Chip key={p.id} label={p.name} size="small" onDelete={() => handleRemovePermission(role.id, p.id)} />
+                            ))}
+                          </Stack>
                         </TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={1} justifyContent="center">
                             <IconButton size="small" color="primary">
                               <IconEye size={16} />
-                            </IconButton>
-                            <IconButton size="small" color="warning">
-                              <IconEdit size={16} />
-                            </IconButton>
-                            <IconButton 
-                              size="small" 
-                              color="error"
-                              onClick={() => setDeleteDialog({ open: true, role })}
-                            >
-                              <IconTrash size={16} />
                             </IconButton>
                           </Stack>
                         </TableCell>
@@ -305,29 +293,17 @@ const ListUsers = () => {
 
       {/* Add Role Dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Role</DialogTitle>
+        <DialogTitle>Add Binding (Quick)</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField
-              label="Role Name"
-              value={newRoleName}
-              onChange={(e) => setNewRoleName(e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={newRoleDesc}
-              onChange={(e) => setNewRoleDesc(e.target.value)}
-              fullWidth
-              multiline
-              rows={3}
-            />
+            <TextField label="Role ID" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} fullWidth />
+            <TextField label="Permission ID" value={newRoleDesc} onChange={(e) => setNewRoleDesc(e.target.value)} fullWidth />
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddRole} variant="contained" disabled={adding}>
-            {adding ? <CircularProgress size={18} /> : 'Add Role'}
+          <Button onClick={handleAddBinding} variant="contained" disabled={adding}>
+            {adding ? <CircularProgress size={18} /> : 'Add Binding'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -335,4 +311,4 @@ const ListUsers = () => {
   );
 };
 
-export default ListUsers;
+export default PermissionBindings;

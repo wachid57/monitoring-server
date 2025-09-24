@@ -112,6 +112,9 @@ const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/
 const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
 // Reports
 const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
+// Admin Permission pages
+const PermissionList = Loadable(lazy(() => import('../views/admin/roles/PermissionList')));
+const PermissionBindings = Loadable(lazy(() => import('../views/admin/roles/PermissionBindings')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -214,6 +217,9 @@ const Router = [
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
   { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
   { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
+    // Permission management
+    { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
+    { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
   { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
   { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
   { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },

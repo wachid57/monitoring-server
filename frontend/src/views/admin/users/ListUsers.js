@@ -269,9 +269,9 @@ const ListUsers = () => {
                         </TableCell>
                         <TableCell>
                           {user.native ? (
-                            <Chip label="Native" size="small" color="default" />
+                            <Chip label="native" size="small" color="secondary" />
                           ) : (
-                            <Chip label="Custom" size="small" color="info" />
+                            '-'
                           )}
                         </TableCell>
                         <TableCell>
@@ -292,10 +292,8 @@ const ListUsers = () => {
                             <IconButton
                               size="small"
                               color="warning"
-                              disabled={user.native}
-                              title={user.native ? 'Native user cannot be edited' : 'Edit user'}
+                              title={'Edit user'}
                               onClick={() => {
-                                if (user.native) return;
                                 const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || 'User') : (user.role || 'User');
                                 setEditUser(user);
                                 setEditForm({
@@ -499,6 +497,11 @@ const ListUsers = () => {
               ))}
             </TextField>
           </Stack>
+          {editUser?.native && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              This is a native user. Some fields may be restricted by the backend.
+            </Alert>
+          )}
           <Alert severity="info" sx={{ mt: 2 }}>
             To change password, use the Change Password feature.
           </Alert>

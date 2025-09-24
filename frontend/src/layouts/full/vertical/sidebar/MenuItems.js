@@ -294,6 +294,26 @@ const Menuitems = [
       },
     ],
   },
+  {
+    id: uniqueId(),
+    title: 'Permission Management',
+    icon: IconSettings,
+    href: '/admin/permission/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'Permission List',
+        icon: IconPoint,
+        href: '/admin/permission/lists',
+      },
+      {
+        id: uniqueId(),
+        title: 'Permission Binding',
+        icon: IconPoint,
+        href: '/admin/permission/bindings',
+      },
+    ],
+  },
 
   {
     navlabel: true,

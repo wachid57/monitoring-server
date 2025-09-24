@@ -5,6 +5,7 @@ import (
     "monitoring-server/model"
     "monitoring-server/database"
     "monitoring-server/rbac"
+    "gorm.io/gorm"
 )
 
 // GetRoles godoc
@@ -199,14 +200,29 @@ func AssignRoleToUserAPI(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{"error": "role_id or role_name is required"})
     }
 
-    // create role_binding row if missing
-    rb := model.RoleBinding{UserID: req.UserID, RoleID: role.ID}
-    if err := database.DB.Where("user_id = ? AND role_id = ?", req.UserID, role.ID).FirstOrCreate(&rb).Error; err != nil {
-        return c.Status(500).JSON(fiber.Map{"error": "Failed to create role binding"})
-    }
+    // Replace any existing roles for this user with the specified one in a transaction
+    err := database.DB.Transaction(func(tx *gorm.DB) error {
+        // Remove existing assignments to enforce single-role policy
+        if err := tx.Where("user_id = ?", req.UserID).Delete(&model.UserRole{}).Error; err != nil {
+            return err
+        }
+        if err := tx.Where("user_id = ?", req.UserID).Delete(&model.RoleBinding{}).Error; err != nil {
+            return err
+        }
 
-    // ensure many-to-many association (explicit join model)
-    if err := rbac.CreateUserRole(database.DB, req.UserID, role.ID); err != nil {
+        // Create role_binding row (idempotent)
+        rb := model.RoleBinding{UserID: req.UserID, RoleID: role.ID}
+        if err := tx.Where("user_id = ? AND role_id = ?", req.UserID, role.ID).FirstOrCreate(&rb).Error; err != nil {
+            return err
+        }
+
+        // Ensure many-to-many association (explicit join model)
+        if err := rbac.CreateUserRole(tx, req.UserID, role.ID); err != nil {
+            return err
+        }
+        return nil
+    })
+    if err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user", "detail": err.Error()})
     }
 

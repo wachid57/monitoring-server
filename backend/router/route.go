@@ -35,23 +35,25 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     usersGroup.Get("/", handler.GetUsers)
     usersGroup.Post("/", handler.CreateUser)
 
-        // CRUD Role
-        usersGroup.Get("/roles", handler.GetRoles)
-        usersGroup.Post("/roles", handler.CreateRole)
-        usersGroup.Get("/roles/:id", handler.GetRoleByID)
-        usersGroup.Put("/roles/:id", handler.UpdateRole)
-        usersGroup.Delete("/roles/:id", handler.DeleteRole)
+    // CRUD Role (order matters: static paths before ":id" to avoid shadowing)
+    usersGroup.Get("/roles", handler.GetRoles)
 
-        // User-role assignments (list and assign)
-        usersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
-        usersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+    // User-role assignments (list and assign) - must come before /roles/:id
+    usersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
+    usersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
 
-        // Role bindings accessible under users/roles/bindings
-        usersGroup.Get("/roles/bindings", handler.GetRoleBindings)
-        usersGroup.Post("/roles/bindings", handler.CreateRoleBinding)
-        usersGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
-        usersGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
-        usersGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+    // Role bindings accessible under users/roles/bindings - before /roles/:id
+    usersGroup.Get("/roles/bindings", handler.GetRoleBindings)
+    usersGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+    usersGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
+    usersGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
+    usersGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+
+    // Parametric role routes after static subpaths
+    usersGroup.Post("/roles", handler.CreateRole)
+    usersGroup.Get("/roles/:id", handler.GetRoleByID)
+    usersGroup.Put("/roles/:id", handler.UpdateRole)
+    usersGroup.Delete("/roles/:id", handler.DeleteRole)
 
         // Role-permission management accessible under users/roles/permission
         usersGroup.Get("/roles/permission/:id", handler.GetRolePermissions)
@@ -78,15 +80,17 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         adminGroup.Get("/permissions/list", handler.GetPermissions)
         adminGroup.Get("/permissions/bindings", handler.GetPermissions)
 
-        // Admin aliases for roles and bindings
-        adminGroup.Get("/roles", handler.GetRoles)
-        adminGroup.Post("/roles", handler.CreateRole)
-        adminGroup.Get("/roles/:id", handler.GetRoleByID)
-        adminGroup.Put("/roles/:id", handler.UpdateRole)
-        adminGroup.Delete("/roles/:id", handler.DeleteRole)
-        adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
-        adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
-        adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+    // Admin aliases for roles and bindings (order matters)
+    adminGroup.Get("/roles", handler.GetRoles)
+    // Bindings first to avoid /roles/:id capturing "bindings"
+    adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
+    adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+    adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+    // Parametric role routes after
+    adminGroup.Post("/roles", handler.CreateRole)
+    adminGroup.Get("/roles/:id", handler.GetRoleByID)
+    adminGroup.Put("/roles/:id", handler.UpdateRole)
+    adminGroup.Delete("/roles/:id", handler.DeleteRole)
 
         // Also expose permissions under users/permissions for symmetry
         usersGroup.Get("/permissions", handler.GetPermissions)

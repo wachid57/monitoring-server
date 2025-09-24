@@ -65,7 +65,19 @@ const ListHosts = () => {
       }
       const data = await res.json();
       if (res.ok) {
-        setHosts(data || []);
+        // Normalize API shape: backend returns capitalized keys
+        const normalized = Array.isArray(data)
+          ? data.map((d) => ({
+              id: d.ID ?? d.id,
+              ip: d.IP ?? d.ip,
+              hostname: d.Hostname ?? d.hostname,
+              alias: d.Alias ?? d.alias,
+              service: d.Service ?? d.service,
+              hosts_tags: d.HostsTags ?? d.hosts_tags ?? d.hostsTags,
+              created_at: d.CreatedAt ?? d.created_at,
+            }))
+          : [];
+        setHosts(normalized);
       } else {
         setError(data.error || 'Failed to fetch hosts');
       }

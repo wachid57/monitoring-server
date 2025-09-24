@@ -53,9 +53,9 @@ const BCrumb = [
   },
 ];
 
-const ListUsers = () => {
-  // Roles state
-  const [roles, setRoles] = useState([]);
+const PermissionList = () => {
+  // Permissions state
+  const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,11 +67,11 @@ const ListUsers = () => {
   const [newRoleDesc, setNewRoleDesc] = useState('');
   const [adding, setAdding] = useState(false);
 
-  const fetchRoles = async () => {
+  const fetchPermissions = async () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/permissions/list', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/permissions/', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -82,12 +82,10 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-  console.log('GET /admin/roles', res.status, data);
       if (res.ok) {
-        // API returns array of roles; support both {roles: [...]} and [] shapes
-        setRoles(Array.isArray(data) ? data : (data.roles || []));
+        setPermissions(Array.isArray(data) ? data : (data.permissions || []));
       } else {
-        setError(data.error || data.message || 'Gagal mengambil data roles');
+        setError(data.error || data.message || 'Gagal mengambil data permissions');
       }
     } catch (err) {
       console.error('Fetch roles error:', err);
@@ -97,9 +95,9 @@ const ListUsers = () => {
     }
   };
 
-  const handleDelete = async (roleId) => {
+  const handleDelete = async (permId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/roles/${roleId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/permissions/${permId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -110,11 +108,11 @@ const ListUsers = () => {
       }
 
       if (res.ok) {
-        setRoles(prev => prev.filter(r => r.id !== roleId));
+        setPermissions(prev => prev.filter(p => p.id !== permId));
         setDeleteDialog({ open: false, role: null });
       } else {
         const data = await res.json();
-        setError(data.error || data.message || 'Gagal menghapus role');
+        setError(data.error || data.message || 'Gagal menghapus permission');
       }
     } catch (err) {
       console.error('Delete role error:', err);
@@ -122,18 +120,18 @@ const ListUsers = () => {
     }
   };
 
-  const handleAddRole = async () => {
-    if (!newRoleName) {
-      setError('Role name is required');
+  const handleAddPermission = async () => {
+    if (!newRoleName || !newRoleDesc) {
+      setError('Permission name and description are required');
       return;
     }
     setAdding(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/permissions/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ name: newRoleName, description: newRoleDesc })
+        body: JSON.stringify({ name: newRoleName, description: newRoleDesc, module: 'general', action: 'read' })
       });
 
       if (res.status === 401 || res.status === 403) {
@@ -142,15 +140,14 @@ const ListUsers = () => {
       }
 
       const data = await res.json();
-  console.log('POST /admin/roles', res.status, data);
       if (res.ok) {
         setAddOpen(false);
         setNewRoleName('');
         setNewRoleDesc('');
         // Refresh list
-        fetchRoles();
+        fetchPermissions();
       } else {
-        setError(data.error || data.message || 'Gagal menambahkan role');
+        setError(data.error || data.message || 'Gagal menambahkan permission');
       }
     } catch (err) {
       console.error('Add role error:', err);
@@ -160,36 +157,38 @@ const ListUsers = () => {
     }
   };
 
-  const filteredRoles = roles.filter(role =>
-    role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPermissions = permissions.filter(p =>
+    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.module?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.action?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
-    fetchRoles();
+  fetchPermissions();
   }, []);
 
   return (
-    <PageContainer title="List Roles" description="Manage system roles">
-      <Breadcrumb title="List Roles" items={BCrumb} />
+    <PageContainer title="List Permissions" description="Manage system permissions">
+      <Breadcrumb title="List Permissions" items={BCrumb} />
       
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Roles Management</Typography>
+            <Typography variant="h5">Permissions</Typography>
             <Button
               variant="contained"
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => setAddOpen(true)}
             >
-              Add New Role
+              Add Permission
             </Button>
           </Stack>
 
           <Box mb={3}>
             <TextField
-              placeholder="Search roles..."
+              placeholder="Search permissions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -221,31 +220,35 @@ const ListUsers = () => {
                     <TableCell>ID</TableCell>
                     <TableCell>Name</TableCell>
                     <TableCell>Description</TableCell>
+                    <TableCell>Module</TableCell>
+                    <TableCell>Action</TableCell>
                     <TableCell>Created</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredRoles.length === 0 ? (
+                  {filteredPermissions.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                         <Typography variant="body1" color="textSecondary">
-                          {searchTerm ? 'No roles found matching your search' : 'No roles found'}
+                          {searchTerm ? 'No permissions found matching your search' : 'No permissions found'}
                         </Typography>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredRoles.map((role) => (
-                      <TableRow key={role.id}>
-                        <TableCell>{role.id}</TableCell>
+                    filteredPermissions.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>{p.id}</TableCell>
                         <TableCell>
                           <Typography variant="subtitle2" fontWeight={600}>
-                            {role.name}
+                            {p.name}
                           </Typography>
                         </TableCell>
-                        <TableCell>{role.description || '-'}</TableCell>
+                        <TableCell>{p.description || '-'}</TableCell>
+                        <TableCell>{p.module || '-'}</TableCell>
+                        <TableCell>{p.action || '-'}</TableCell>
                         <TableCell>
-                          {role.created_at ? new Date(role.created_at).toLocaleDateString() : '-'}
+                          {p.created_at ? new Date(p.created_at).toLocaleDateString() : '-'}
                         </TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={1} justifyContent="center">
@@ -258,7 +261,7 @@ const ListUsers = () => {
                             <IconButton 
                               size="small" 
                               color="error"
-                              onClick={() => setDeleteDialog({ open: true, role })}
+                              onClick={() => setDeleteDialog({ open: true, role: p })}
                             >
                               <IconTrash size={16} />
                             </IconButton>
@@ -275,14 +278,14 @@ const ListUsers = () => {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
+  <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, role: null })}
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete role "{deleteDialog.role?.name}"? 
+    Are you sure you want to delete permission "{deleteDialog.role?.name}"? 
             This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -294,7 +297,7 @@ const ListUsers = () => {
             Cancel
           </Button>
           <Button 
-            onClick={() => handleDelete(deleteDialog.role?.id)}
+    onClick={() => handleDelete(deleteDialog.role?.id)}
             color="error"
             variant="contained"
           >
@@ -305,11 +308,11 @@ const ListUsers = () => {
 
       {/* Add Role Dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Role</DialogTitle>
+        <DialogTitle>Add Permission</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
             <TextField
-              label="Role Name"
+              label="Permission Name"
               value={newRoleName}
               onChange={(e) => setNewRoleName(e.target.value)}
               fullWidth
@@ -326,8 +329,8 @@ const ListUsers = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddRole} variant="contained" disabled={adding}>
-            {adding ? <CircularProgress size={18} /> : 'Add Role'}
+          <Button onClick={handleAddPermission} variant="contained" disabled={adding}>
+            {adding ? <CircularProgress size={18} /> : 'Add Permission'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -335,4 +338,4 @@ const ListUsers = () => {
   );
 };
 
-export default ListUsers;
+export default PermissionList;
