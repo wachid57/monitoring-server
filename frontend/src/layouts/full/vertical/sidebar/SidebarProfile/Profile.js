@@ -4,7 +4,8 @@ import { useSelector } from 'react-redux';
 import img1 from 'src/assets/images/profile/user-1.jpg';
 import { IconPower } from '@tabler/icons';
 import { Link } from "react-router";
-import { getUserInfo } from 'src/utils/auth';
+import { getUserInfo, clearAuthData, getAuthHeaders } from 'src/utils/auth';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
 export const Profile = () => {
   const customizer = useSelector((state) => state.customizer);
@@ -19,6 +20,23 @@ export const Profile = () => {
     }
   }, []);
 
+  const truncate = (s, n = 6) => {
+    if (!s) return '';
+    return s.length > n ? s.substring(0, n) + '..' : s;
+  };
+
+  const handleLogout = async () => {
+    try {
+      // call backend logout to invalidate session
+      await fetch(BACKEND_URL + API_PREFIX + '/auth/logout', { method: 'POST', headers: getAuthHeaders() });
+    } catch (err) {
+      console.warn('logout request failed', err);
+    }
+    // clear local auth data and redirect to login
+    clearAuthData();
+    window.location.href = '/auth/login';
+  };
+
   return (
     <Box
       display={'flex'}
@@ -32,15 +50,15 @@ export const Profile = () => {
 
           <Box>
             <Typography variant="h6" color="textPrimary">
-              {userInfo?.name || userInfo?.username || 'Administrator'}
+              {truncate(userInfo?.name || userInfo?.username || 'Administrator', 8)}
             </Typography>
             <Typography variant="caption" color="textSecondary">
-              {userInfo?.role || 'System Administrator'}
+              {truncate(userInfo?.role || 'System Administrator', 8)}
             </Typography>
           </Box>
           <Box sx={{ ml: 'auto' }}>
             <Tooltip title="Logout" placement="top">
-              <IconButton color="primary" component={Link} to="/auth/login" aria-label="logout" size="small">
+              <IconButton color="primary" onClick={handleLogout} aria-label="logout" size="small">
                 <IconPower size="20" />
               </IconButton>
             </Tooltip>

@@ -42,7 +42,7 @@ const BCrumb = [
   { title: 'List Hosts' },
 ];
 
-const ListHosts = () => {
+const HostLists = () => {
   const [hosts, setHosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,7 +63,17 @@ const ListHosts = () => {
       }
       const data = await res.json();
       if (res.ok) {
-        setHosts(data || []);
+        // normalize backend field names to frontend-friendly keys
+        const normalized = (data || []).map(item => ({
+          id: item.ID ?? item.id,
+          ip: item.IP ?? item.ip,
+          hostname: item.Hostname ?? item.hostname,
+          alias: item.Alias ?? item.alias,
+          service: item.Service ?? item.service,
+          hosts_tags: item.HostsTags ?? item.hosts_tags ?? item.hostsTags ?? '',
+          created_at: item.CreatedAt ?? item.created_at,
+        }));
+        setHosts(normalized);
       } else {
         setError(data.error || 'Failed to fetch hosts');
       }
@@ -102,6 +112,11 @@ const ListHosts = () => {
   );
 
   useEffect(() => { fetchHosts(); }, []);
+
+  const goToDetails = (id) => {
+    // project often uses window navigation, keep consistent
+    window.location.href = `/infrastructure/hosts/${id}`;
+  };
 
   return (
     <PageContainer title="List Hosts" description="Manage monitored hosts">
@@ -148,14 +163,16 @@ const ListHosts = () => {
                     filteredHosts.map((h) => (
                       <TableRow key={h.id}>
                         <TableCell>{h.ip || '-'}</TableCell>
-                        <TableCell>{h.hostname || '-'}</TableCell>
+                        <TableCell>
+                          <Button variant="text" onClick={() => goToDetails(h.id)}>{h.hostname || '-'}</Button>
+                        </TableCell>
                         <TableCell>{h.alias || '-'}</TableCell>
                         <TableCell>{h.service || '-'}</TableCell>
                         <TableCell>{h.hosts_tags || '-'}</TableCell>
                         <TableCell>{h.created_at ? new Date(h.created_at).toLocaleDateString() : '-'}</TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={1} justifyContent="center">
-                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
+                            <IconButton size="small" color="primary" onClick={() => goToDetails(h.id)}><IconEye size={16} /></IconButton>
                             <IconButton size="small" color="warning"><IconEdit size={16} /></IconButton>
                             <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
                           </Stack>
@@ -209,5 +226,4 @@ const ListHosts = () => {
   );
 };
 
-export default ListHosts;
-
+export default HostLists;

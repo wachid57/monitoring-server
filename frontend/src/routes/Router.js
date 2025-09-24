@@ -104,6 +104,8 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 
 // const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
+const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
+const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -205,6 +207,12 @@ const Router = [
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
   { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
+  { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+  { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
+  
+  // Infrastructure routes for hosts (alternate path used by sidebar)
+  { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+  { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 

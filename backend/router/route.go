@@ -78,6 +78,16 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         adminGroup.Get("/permissions/list", handler.GetPermissions)
         adminGroup.Get("/permissions/bindings", handler.GetPermissions)
 
+        // Admin aliases for roles and bindings
+        adminGroup.Get("/roles", handler.GetRoles)
+        adminGroup.Post("/roles", handler.CreateRole)
+        adminGroup.Get("/roles/:id", handler.GetRoleByID)
+        adminGroup.Put("/roles/:id", handler.UpdateRole)
+        adminGroup.Delete("/roles/:id", handler.DeleteRole)
+        adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
+        adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+        adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+
         // Also expose permissions under users/permissions for symmetry
         usersGroup.Get("/permissions", handler.GetPermissions)
         usersGroup.Post("/permissions", handler.CreatePermission)
@@ -103,6 +113,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         hostsGroup.Get("/:id", handler.GetHostByID)
         hostsGroup.Put("/:id", handler.UpdateHost)
         hostsGroup.Delete("/:id", handler.DeleteHost)
+
+    // Infrastructure API aliases for hosts (frontend may use /infrastructure/hosts/...)
+    infrastructureGroup := protected.Group("infrastructure")
+    infrastructureGroup.Get("/hosts/list", handler.GetHosts)
+    infrastructureGroup.Post("/hosts", handler.CreateHost)
+    infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
+    infrastructureGroup.Put("/hosts/:id", handler.UpdateHost)
+    infrastructureGroup.Delete("/hosts/:id", handler.DeleteHost)
 
         // CRUD Host Group
         hostGroups := protected.Group("hosts/groups")
