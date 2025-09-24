@@ -64,6 +64,11 @@ const ListUsers = () => {
   const [availableRoles, setAvailableRoles] = useState([]);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
+  // Edit user state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', role: '' });
+  const [editSaving, setEditSaving] = useState(false);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -218,6 +223,7 @@ const ListUsers = () => {
                     <TableCell>User</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Role</TableCell>
+                    <TableCell>Native</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Created</TableCell>
                     <TableCell align="center">Actions</TableCell>
@@ -226,7 +232,7 @@ const ListUsers = () => {
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                      <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                         <Typography variant="body1" color="textSecondary">
                           {searchTerm ? 'No users found matching your search' : 'No users found'}
                         </Typography>
@@ -262,6 +268,13 @@ const ListUsers = () => {
                             })()}
                         </TableCell>
                         <TableCell>
+                          {user.native ? (
+                            <Chip label="Native" size="small" color="default" />
+                          ) : (
+                            <Chip label="Custom" size="small" color="info" />
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Chip
                             label="Active"
                             color="success"
@@ -281,6 +294,18 @@ const ListUsers = () => {
                               color="warning"
                               disabled={user.native}
                               title={user.native ? 'Native user cannot be edited' : 'Edit user'}
+                              onClick={() => {
+                                if (user.native) return;
+                                const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || 'User') : (user.role || 'User');
+                                setEditUser(user);
+                                setEditForm({
+                                  username: user.username || '',
+                                  email: user.email || '',
+                                  name: user.name || '',
+                                  role: roleLabel || '',
+                                });
+                                setEditOpen(true);
+                              }}
                             >
                               <IconEdit size={16} />
                             </IconButton>
@@ -434,7 +459,8 @@ const ListUsers = () => {
                   setAddDialogOpen(false);
                   setNewUser({ username: '', email: '', name: '', password: '', role: 'User' });
                 } else {
-                  setFormError(data.error || data.message || 'Failed to create user');
+                  // Backend may create user but fail role binding; show explicit message
+                  setFormError(data.error || data.message || 'Failed to create user (role assignment may have failed)');
                 }
               } catch (err) {
                 console.error('Create user error:', err);
@@ -446,6 +472,76 @@ const ListUsers = () => {
             disabled={submitLoading}
           >
             {submitLoading ? <CircularProgress size={20} /> : 'Create'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit User Dialog */}
+      <Dialog open={editOpen} onClose={() => { setEditOpen(false); setEditUser(null); }} fullWidth maxWidth="sm">
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <TextField label="Username" value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} fullWidth />
+            <TextField label="Email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} fullWidth />
+            <TextField label="Full name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} fullWidth />
+            <TextField
+              select
+              SelectProps={{ native: true }}
+              label="Role"
+              fullWidth
+              value={editForm.role}
+              onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+              helperText="Choose a role"
+            >
+              <option value="">Select role</option>
+              {availableRoles.map((r) => (
+                <option key={r.id} value={r.name}>{r.name}</option>
+              ))}
+            </TextField>
+          </Stack>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            To change password, use the Change Password feature.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setEditOpen(false); setEditUser(null); }} disabled={editSaving}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              if (!editUser) return;
+              setEditSaving(true);
+              try {
+                // Update basic info
+                const res = await fetch(BACKEND_URL + API_PREFIX + `/users/${editUser.id}` , {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                  body: JSON.stringify({ username: editForm.username, email: editForm.email, name: editForm.name })
+                });
+                if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
+                const data = await res.json();
+                if (!res.ok) {
+                  setError(data.error || data.message || 'Failed to update user');
+                  setEditSaving(false);
+                  return;
+                }
+                // Assign role if provided
+                if (editForm.role) {
+                  await fetch(BACKEND_URL + API_PREFIX + '/users/roles/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role })
+                  });
+                }
+                setEditOpen(false);
+                setEditUser(null);
+                fetchUsers();
+              } catch (e) {
+                console.error('Edit user error', e);
+                setError('Failed to update user');
+              } finally { setEditSaving(false); }
+            }}
+          >
+            {editSaving ? <CircularProgress size={18} /> : 'Save Changes'}
           </Button>
         </DialogActions>
       </Dialog>

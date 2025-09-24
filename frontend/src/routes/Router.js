@@ -104,6 +104,7 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 
 // const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
+const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
 const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
 const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
 const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
@@ -212,6 +213,7 @@ const Router = [
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
   { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
+  { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
   { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
   { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
   { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },

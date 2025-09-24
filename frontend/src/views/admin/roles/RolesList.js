@@ -52,6 +52,11 @@ const RolesList = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, role: null });
 
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingRole, setEditingRole] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDesc, setNewRoleDesc] = useState('');
   const [adding, setAdding] = useState(false);
@@ -233,7 +238,12 @@ const RolesList = () => {
                             <IconButton size="small" color="primary">
                               <IconEye size={16} />
                             </IconButton>
-                            <IconButton size="small" color="warning">
+                            <IconButton size="small" color="warning" onClick={() => {
+                              setEditingRole(role);
+                              setEditName(role.name || '');
+                              setEditDesc(role.description || '');
+                              setEditOpen(true);
+                            }}>
                               <IconEdit size={16} />
                             </IconButton>
                             {role.native ? (
@@ -290,6 +300,53 @@ const RolesList = () => {
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
           <Button onClick={handleAddRole} variant="contained" disabled={adding}>
             {adding ? <CircularProgress size={18} /> : 'Add Role'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Role</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+            <TextField label="Role Name" value={editName} onChange={(e) => setEditName(e.target.value)} fullWidth />
+            <TextField label="Description" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} fullWidth multiline rows={3} />
+            {editingRole?.native && (
+              <Alert severity="info">This is a native role. Name may be restricted by the backend.</Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button
+            onClick={async () => {
+              if (!editingRole) return;
+              setSavingEdit(true);
+              try {
+                const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/roles/${editingRole.id}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                  body: JSON.stringify({ name: editName, description: editDesc }),
+                });
+                if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
+                const data = await res.json();
+                if (!res.ok) {
+                  setError(data.error || data.message || 'Gagal memperbarui role');
+                } else {
+                  setEditOpen(false);
+                  setEditingRole(null);
+                  fetchRoles();
+                }
+              } catch (err) {
+                console.error('Edit role error:', err);
+                setError('Terjadi kesalahan saat memperbarui role');
+              } finally {
+                setSavingEdit(false);
+              }
+            }}
+            variant="contained"
+            disabled={savingEdit}
+          >
+            {savingEdit ? <CircularProgress size={18} /> : 'Save Changes'}
           </Button>
         </DialogActions>
       </Dialog>

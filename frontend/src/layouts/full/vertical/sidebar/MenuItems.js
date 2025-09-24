@@ -256,13 +256,13 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'List Roles',
+        title: 'Role Lists',
         icon: IconPoint,
         href: '/admin/roles/list',
       },
       {
         id: uniqueId(),
-        title: 'List Roles',
+        title: 'Role Bindings',
         icon: IconPoint,
         href: '/admin/roles/bindings',
       },

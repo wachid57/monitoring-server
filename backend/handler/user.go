@@ -4,8 +4,8 @@ import (
     "github.com/gofiber/fiber/v2"
     "monitoring-server/model"
     "monitoring-server/database"
-    "monitoring-server/rbac"
     "golang.org/x/crypto/bcrypt"
+    "log"
 )
 
 // GetUsers godoc
@@ -77,10 +77,14 @@ func CreateUser(c *fiber.Ctx) error {
         }
         // create role_binding record if missing
         rb := model.RoleBinding{UserID: user.ID, RoleID: role.ID}
-        _ = database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&rb)
-        // ensure many-to-many association using explicit join model
-        if err := rbac.CreateUserRole(database.DB, user.ID, role.ID); err != nil {
-            return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user"})
+        if err := database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&rb).Error; err != nil {
+            log.Printf("Failed to ensure role_binding for user %d and role %d: %v", user.ID, role.ID, err)
+        }
+        // ensure many-to-many association using explicit join model (idempotent)
+        ur := model.UserRole{UserID: user.ID, RoleID: role.ID}
+        if err := database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&ur).Error; err != nil {
+            // Do not fail user creation if join insert has a benign race/duplicate; just log it
+            log.Printf("Failed to ensure user_roles mapping for user %d and role %d: %v", user.ID, role.ID, err)
         }
     }
 
