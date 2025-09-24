@@ -3785,10 +3785,10 @@ const docTemplate = `{
                 "alias": {
                     "type": "string"
                 },
-                "created_at": {
+                "createdAt": {
                     "type": "string"
                 },
-                "deleted_at": {
+                "deletedAt": {
                     "type": "string"
                 },
                 "deskripsi": {
@@ -3797,7 +3797,7 @@ const docTemplate = `{
                 "hostname": {
                     "type": "string"
                 },
-                "hosts_tags": {
+                "hostsTags": {
                     "type": "string"
                 },
                 "id": {
@@ -3812,7 +3812,7 @@ const docTemplate = `{
                 "service": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -4001,6 +4001,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "native": {
+                    "type": "boolean"
                 },
                 "permissions": {
                     "description": "Many-to-many relationship with Permission",
