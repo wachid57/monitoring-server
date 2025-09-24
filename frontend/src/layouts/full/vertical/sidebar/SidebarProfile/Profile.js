@@ -50,10 +50,10 @@ export const Profile = () => {
 
           <Box>
             <Typography variant="h6" color="textPrimary">
-              {truncate(userInfo?.name || userInfo?.username || 'Administrator', 8)}
+              {truncate(userInfo?.name || userInfo?.username || 'Administrator', 6)}
             </Typography>
             <Typography variant="caption" color="textSecondary">
-              {truncate(userInfo?.role || 'System Administrator', 8)}
+              {truncate(userInfo?.role || 'System Administrator', 6)}
             </Typography>
           </Box>
           <Box sx={{ ml: 'auto' }}>
