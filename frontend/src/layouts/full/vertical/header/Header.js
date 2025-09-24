@@ -12,10 +12,10 @@ import { IconMenu2, IconMoon, IconSun } from '@tabler/icons';
 // components
 import Notifications from './Notifications';
 import Profile from './Profile';
-import Cart from './Cart';
+//import Cart from './Cart';
 import Search from './Search';
 import Language from './Language';
-import Navigation from './Navigation';
+//import Navigation from './Navigation';
 import MobileRightSidebar from './MobileRightSidebar';
 
 const Header = () => {
@@ -59,7 +59,7 @@ const Header = () => {
         <Search />
         {lgUp ? (
           <>
-            <Navigation />
+            {/* <Navigation /> */}
           </>
         ) : null}
 
@@ -69,7 +69,7 @@ const Header = () => {
           {/* ------------------------------------------- */}
           {/* Ecommerce Dropdown */}
           {/* ------------------------------------------- */}
-          <Cart />
+          {/* <Cart /> */}
 
           {customizer.activeMode === 'light' ? (
             <IconButton size="large" color="inherit" onClick={() => dispatch(setDarkMode('dark'))}>
