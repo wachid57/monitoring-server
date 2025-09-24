@@ -128,62 +128,11 @@ func UpdateUser(c *fiber.Ctx) error {
     if err := database.DB.First(&user, id).Error; err != nil {
         return c.Status(404).JSON(fiber.Map{"error": "User not found"})
     }
-    // Use a request struct to control updatable fields and role handling
-    var req struct {
-        Username string `json:"username"`
-        Email    string `json:"email"`
-        Name     string `json:"name"`
-        Password string `json:"password"`
-        Role     string `json:"role"`
-    }
-    if err := c.BodyParser(&req); err != nil {
+    if err := c.BodyParser(&user); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid request"})
     }
-
-    // Update simple fields
-    if req.Username != "" {
-        user.Username = req.Username
-    }
-    if req.Email != "" {
-        user.Email = req.Email
-    }
-    if req.Name != "" {
-        user.Name = req.Name
-    }
-
-    // Update password if provided
-    if req.Password != "" {
-        hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-        if err != nil {
-            return c.Status(500).JSON(fiber.Map{"error": "Failed to hash password"})
-        }
-        user.Password = string(hash)
-    }
-
-    // Save base user fields
     if err := database.DB.Save(&user).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to update user"})
-    }
-
-    // Handle role update: if Role provided, ensure role exists and replace association
-    if req.Role != "" {
-        var role model.Role
-        if err := database.DB.Where("name = ?", req.Role).First(&role).Error; err != nil {
-            // create role if not exists
-            role = model.Role{Name: req.Role}
-            if err := database.DB.Create(&role).Error; err != nil {
-                return c.Status(500).JSON(fiber.Map{"error": "Failed to create role"})
-            }
-        }
-        // replace roles association with the single selected role
-        if err := database.DB.Model(&user).Association("Roles").Replace(&role); err != nil {
-            return c.Status(500).JSON(fiber.Map{"error": "Failed to assign role to user"})
-        }
-    }
-
-    // Return updated user with preloaded relations
-    if err := database.DB.Preload("Roles").Preload("Groups").First(&user, user.ID).Error; err != nil {
-        return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch updated user"})
     }
     return c.JSON(user)
 }

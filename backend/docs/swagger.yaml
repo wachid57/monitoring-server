@@ -93,15 +93,15 @@ definitions:
     properties:
       alias:
         type: string
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         type: string
       deskripsi:
         type: string
       hostname:
         type: string
-      hostsTags:
+      hosts_tags:
         type: string
       id:
         type: integer
@@ -111,7 +111,7 @@ definitions:
         type: string
       service:
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   model.HostGroup:
@@ -2362,6 +2362,53 @@ paths:
       security:
       - BearerAuth: []
       summary: Update role by ID
+      tags:
+      - Roles
+  /api/v1.0/users/roles/users:
+    get:
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user-role assignments
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '{user_id, role_id?, role_name?}'
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign role to user
       tags:
       - Roles
   /auth/change-password:

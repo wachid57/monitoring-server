@@ -309,6 +309,46 @@ curl -H "Authorization: Bearer <token>" \
    - Clear node_modules: `rm -rf node_modules && npm install`
    - Check Node.js version compatibility
 
+### Common Backend / Docker build issues
+
+If you see Go build errors during `docker build` like:
+
+```
+# monitoring-server/handler
+handler/role.go:201:15: undefined: rbac
+```
+
+This usually means a package reference (`rbac`) is used in a file but the package wasn't imported at the top of that file. Quick fixes:
+
+1. Open the file that the compiler reports (example: `backend/handler/role.go`) and add the import:
+
+```go
+import (
+   // ... other imports ...
+   "monitoring-server/rbac"
+)
+```
+
+2. Ensure other files that reference `rbac` (migrations, handlers) have the correct imports.
+
+3. Locally validate the backend builds before Dockerizing:
+
+```bash
+cd backend
+go mod tidy
+go build ./...
+```
+
+4. Rebuild Docker image after fixes:
+
+```bash
+# from project root
+docker compose build --no-cache backend
+docker compose up -d
+```
+
+If the error persists, run `go build` inside the Docker build context or container to capture the full compile error and stack trace.
+
 ## 📈 Monitoring & Logs
 
 ```bash

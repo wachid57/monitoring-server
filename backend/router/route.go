@@ -31,9 +31,12 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         protected.Get("/dashboard", handler.DashboardHandler)
 
         // CRUD endpoints for users, roles, groups, role bindings
-    usersGroup := protected.Group("users")
-    usersGroup.Get("/", handler.GetUsers)
-    usersGroup.Post("/", handler.CreateUser)
+        usersGroup := protected.Group("users")
+        usersGroup.Get("/", handler.GetUsers)
+        usersGroup.Post("/", handler.CreateUser)
+        usersGroup.Get("/:id", handler.GetUserByID)
+        usersGroup.Put("/:id", handler.UpdateUser)
+        usersGroup.Delete("/:id", handler.DeleteUser)
 
         // CRUD Role
         usersGroup.Get("/roles", handler.GetRoles)
@@ -93,50 +96,21 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         rolesGroup.Post("/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
         rolesGroup.Delete("/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
 
-        // Parameterized user routes (must be registered after static subroutes)
-        usersGroup.Get("/:id", handler.GetUserByID)
-        usersGroup.Put("/:id", handler.UpdateUser)
-        usersGroup.Delete("/:id", handler.DeleteUser)
+        // CRUD Host
+        hostsGroup := protected.Group("hosts")
+        hostsGroup.Get("/", handler.GetHosts)
+        hostsGroup.Post("/", handler.CreateHost)
+        hostsGroup.Get("/:id", handler.GetHostByID)
+        hostsGroup.Put("/:id", handler.UpdateHost)
+        hostsGroup.Delete("/:id", handler.DeleteHost)
 
-        // CRUD Host Group -> move to monitoring/groups/hosts
-        monitoringGroups := protected.Group("monitoring/groups")
-        hostGroups := monitoringGroups.Group("hosts")
+        // CRUD Host Group
+        hostGroups := protected.Group("hosts/groups")
         hostGroups.Get("/", handler.GetHostGroups)
         hostGroups.Post("/", handler.CreateHostGroup)
         hostGroups.Get("/:id", handler.GetHostGroupByID)
         hostGroups.Put("/:id", handler.UpdateHostGroup)
         hostGroups.Delete("/:id", handler.DeleteHostGroup)
-
-        // Also expose the same ICMP and Website handlers under a monitoring-friendly path
-        // so frontend can call /api/v1.0/monitoring/hosts/icmp and /api/v1.0/monitoring/hosts/website
-        monitoringHosts := protected.Group("monitoring/hosts")
-        {
-            // Register static subpaths first so they are not shadowed by parameterized routes
-            // ICMP under /api/v1.0/monitoring/hosts/icmp
-            icmpMon := monitoringHosts.Group("icmp")
-            icmpMon.Get("/", handler.GetICMPServices)
-            icmpMon.Post("/", handler.CreateICMPService)
-            icmpMon.Get("/:id", handler.GetICMPServiceByID)
-            icmpMon.Put("/:id", handler.UpdateICMPService)
-            icmpMon.Delete("/:id", handler.DeleteICMPService)
-
-            // Website under /api/v1.0/monitoring/hosts/website
-            websiteMon := monitoringHosts.Group("website")
-            websiteMon.Get("/", handler.GetAvailabilityWebsites)
-            websiteMon.Post("/", handler.CreateAvailabilityWebsite)
-            websiteMon.Get("/:id", handler.GetAvailabilityWebsiteByID)
-            websiteMon.Put("/:id", handler.UpdateAvailabilityWebsite)
-            websiteMon.Delete("/:id", handler.DeleteAvailabilityWebsite)
-
-            // CRUD Hosts (list/add/get/update/delete)
-            hostsMon := monitoringHosts.Group("")
-            hostsMon.Get("/", handler.GetHosts)
-            hostsMon.Post("/", handler.CreateHost)
-            hostsMon.Get("/:id", handler.GetHostByID)
-            hostsMon.Put("/:id", handler.UpdateHost)
-            hostsMon.Delete("/:id", handler.DeleteHost)
-        }
-
 
         // CRUD ICMP Service
         icmpGroup := protected.Group("services/availability/icmp")
@@ -153,7 +127,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         availabilityWebsiteGroup.Get("/:id", handler.GetAvailabilityWebsiteByID)
         availabilityWebsiteGroup.Put("/:id", handler.UpdateAvailabilityWebsite)
         availabilityWebsiteGroup.Delete("/:id", handler.DeleteAvailabilityWebsite)
-
 
         // CRUD Metric CPU
         cpuGroup := protected.Group("services/metrics/cpu")
@@ -179,32 +152,29 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         diskGroup.Put("/:id", handler.UpdateDiskMetric)
         diskGroup.Delete("/:id", handler.DeleteDiskMetric)
 
-        // CRUD Service Group -> move to monitoring/groups/services
-        serviceGroups := monitoringGroups.Group("services")
-        serviceGroups.Get("/", handler.GetServiceGroups)
-        serviceGroups.Post("/", handler.CreateServiceGroup)
-        serviceGroups.Get("/:id", handler.GetServiceGroupByID)
-        serviceGroups.Put("/:id", handler.UpdateServiceGroup)
-        serviceGroups.Delete("/:id", handler.DeleteServiceGroup)
+        // CRUD Service Group
+        serviceGroup := protected.Group("services/groups")
+        serviceGroup.Get("/", handler.GetServiceGroups)
+        serviceGroup.Post("/", handler.CreateServiceGroup)
+        serviceGroup.Get("/:id", handler.GetServiceGroupByID)
+        serviceGroup.Put("/:id", handler.UpdateServiceGroup)
+        serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
 
-        // Contact API: expose contact groups and notifications under /api/v1.0/contact
-        contact := protected.Group("contact")
+        // CRUD Contact Groups
+        contactGroup := protected.Group("monitoring/contactgroups")
+        contactGroup.Get("/", handler.GetContactGroups)
+        contactGroup.Post("/", handler.CreateContactGroup)
+        contactGroup.Get("/:id", handler.GetContactGroupByID)
+        contactGroup.Put("/:id", handler.UpdateContactGroup)
+        contactGroup.Delete("/:id", handler.DeleteContactGroup)
 
-        // CRUD Contact Groups -> /api/v1.0/contact/groups
-        contactGroups := contact.Group("groups")
-        contactGroups.Get("/", handler.GetContactGroups)
-        contactGroups.Post("/", handler.CreateContactGroup)
-        contactGroups.Get("/:id", handler.GetContactGroupByID)
-        contactGroups.Put("/:id", handler.UpdateContactGroup)
-        contactGroups.Delete("/:id", handler.DeleteContactGroup)
-
-        // CRUD Notifications -> /api/v1.0/contact/notifications
-        notifications := contact.Group("notifications")
-        notifications.Get("/", handler.GetNotifications)
-        notifications.Post("/", handler.CreateNotification)
-        notifications.Get("/:id", handler.GetNotificationByID)
-        notifications.Put("/:id", handler.UpdateNotification)
-        notifications.Delete("/:id", handler.DeleteNotification)
+        // CRUD Notifications
+        notificationGroup := protected.Group("monitoring/notifications")
+        notificationGroup.Get("/", handler.GetNotifications)
+        notificationGroup.Post("/", handler.CreateNotification)
+        notificationGroup.Get("/:id", handler.GetNotificationByID)
+        notificationGroup.Put("/:id", handler.UpdateNotification)
+        notificationGroup.Delete("/:id", handler.DeleteNotification)
 
 
         // CRUD Aknowledged

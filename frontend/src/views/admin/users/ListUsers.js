@@ -62,12 +62,8 @@ const ListUsers = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: 'User' });
   const [availableRoles, setAvailableRoles] = useState([]);
-  const [rolesError, setRolesError] = useState('');
-  const [rolesLoading, setRolesLoading] = useState(false);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [editingUserId, setEditingUserId] = useState(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -129,47 +125,37 @@ const ListUsers = () => {
       console.error('Delete user error:', err);
       setError('Terjadi kesalahan saat menghapus user');
     }
-  };
-  const filteredUsers = users.filter(user => {
-    const roleName = user?.roles && user.roles.length > 0 ? (user.roles[0].name || '') : (user.role || '');
-    return (
-      user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      roleName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  });
+  };  const filteredUsers = users.filter(user =>
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getRoleColor = (role) => {
-    const r = (role || '').toString().toLowerCase();
-    if (r.includes('admin')) return 'error';
-    if (r.includes('moderator')) return 'warning';
-    if (r.includes('viewer') || r.includes('read')) return 'info';
-    if (r.includes('user')) return 'primary';
-    return 'default';
+    switch (role?.toLowerCase()) {
+      case 'admin':
+        return 'error';
+      case 'user':
+        return 'primary';
+      case 'moderator':
+        return 'warning';
+      default:
+        return 'default';
+    }
   };
 
   useEffect(() => {
     fetchUsers();
     // fetch roles for role select
     (async () => {
-      setRolesLoading(true);
       try {
         const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() });
-        const data = await res.json().catch(() => null);
         if (res.ok) {
-          setAvailableRoles(Array.isArray(data) ? data : (data?.roles || []));
-          setRolesError('');
-        } else {
-          console.warn('Failed to fetch roles', res.status, data);
-          setAvailableRoles([]);
-          setRolesError(data?.error || data?.message || `Failed to fetch roles (status ${res.status})`);
+          const data = await res.json();
+          setAvailableRoles(Array.isArray(data) ? data : (data.roles || []));
         }
       } catch (err) {
         console.error('Failed to fetch roles', err);
-        setAvailableRoles([]);
-        setRolesError('Failed to fetch roles');
-      } finally {
-        setRolesLoading(false);
       }
     })();
   }, []);
@@ -258,16 +244,11 @@ const ListUsers = () => {
                         </TableCell>
                         <TableCell>{user.email || '-'}</TableCell>
                         <TableCell>
-                          {(() => {
-                            const roleName = user?.roles && user.roles.length > 0 ? (user.roles[0].name) : (user.role || 'User');
-                            return (
-                              <Chip
-                                label={roleName}
-                                color={getRoleColor(roleName)}
-                                size="small"
-                              />
-                            );
-                          })()}
+                          <Chip
+                            label={user.role || 'User'}
+                            color={getRoleColor(user.role)}
+                            size="small"
+                          />
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -284,23 +265,7 @@ const ListUsers = () => {
                             <IconButton size="small" color="primary">
                               <IconEye size={16} />
                             </IconButton>
-                            <IconButton
-                              size="small"
-                              color="warning"
-                              onClick={() => {
-                                // open edit dialog with user data
-                                setEditMode(true);
-                                setEditingUserId(user.id);
-                                setNewUser({
-                                  username: user.username || '',
-                                  email: user.email || '',
-                                  name: user.name || '',
-                                  password: '',
-                                  role: user?.roles && user.roles.length > 0 ? user.roles[0].name : (user.role || 'User')
-                                });
-                                setAddDialogOpen(true);
-                              }}
-                            >
+                            <IconButton size="small" color="warning">
                               <IconEdit size={16} />
                             </IconButton>
                             <IconButton 
@@ -395,46 +360,21 @@ const ListUsers = () => {
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
-          {rolesLoading ? (
-            <TextField
-              select
-              SelectProps={{ native: true }}
-              label="Role"
-              fullWidth
-              margin="dense"
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              helperText={rolesError || 'Loading roles...'}
-              disabled
-            >
-              <option>Loading roles...</option>
-            </TextField>
-          ) : (availableRoles && availableRoles.length > 0 ? (
-            <TextField
-              select
-              SelectProps={{ native: true }}
-              label="Role"
-              fullWidth
-              margin="dense"
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              helperText={rolesError || 'Choose a role'}
-            >
-              <option value="">Select role</option>
-              {availableRoles.map((r) => (
-                <option key={r.id} value={r.name}>{r.name}</option>
-              ))}
-            </TextField>
-          ) : (
-            <TextField
-              label="Role (fallback)"
-              fullWidth
-              margin="dense"
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              helperText={rolesError || 'Enter role name (roles list not available)'}
-            />
-          ))}
+          <TextField
+            select
+            SelectProps={{ native: true }}
+            label="Role"
+            fullWidth
+            margin="dense"
+            value={newUser.role}
+            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            helperText="Choose a role"
+          >
+            <option value="">Select role</option>
+            {availableRoles.map((r) => (
+              <option key={r.id} value={r.name}>{r.name}</option>
+            ))}
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>
@@ -443,55 +383,40 @@ const ListUsers = () => {
             color="primary"
             onClick={async () => {
               setFormError('');
-              if (!newUser.username || (!editMode && !newUser.password)) {
+              if (!newUser.username || !newUser.password) {
                 setFormError('Username and password are required');
                 return;
               }
               setSubmitLoading(true);
               try {
-                let res;
-                if (editMode && editingUserId) {
-                  // update user
-                  res = await fetch(BACKEND_URL + API_PREFIX + `/users/${editingUserId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                    body: JSON.stringify(newUser),
-                  });
-                } else {
-                  // create
-                  res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                    body: JSON.stringify(newUser),
-                  });
-                }
-
+                const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                  body: JSON.stringify(newUser),
+                });
                 if (res.status === 401 || res.status === 403) {
                   handleAuthError({ status: res.status });
                   return;
                 }
-
                 const data = await res.json();
                 if (res.ok) {
                   // refresh users
                   fetchUsers();
                   setAddDialogOpen(false);
                   setNewUser({ username: '', email: '', name: '', password: '', role: 'User' });
-                  setEditMode(false);
-                  setEditingUserId(null);
                 } else {
-                  setFormError(data.error || data.message || (editMode ? 'Failed to update user' : 'Failed to create user'));
+                  setFormError(data.error || data.message || 'Failed to create user');
                 }
               } catch (err) {
-                console.error(editMode ? 'Update user error:' : 'Create user error:', err);
-                setFormError(editMode ? 'Failed to update user' : 'Failed to create user');
+                console.error('Create user error:', err);
+                setFormError('Failed to create user');
               } finally {
                 setSubmitLoading(false);
               }
             }}
             disabled={submitLoading}
           >
-            {submitLoading ? <CircularProgress size={20} /> : (editMode ? 'Save' : 'Create')}
+            {submitLoading ? <CircularProgress size={20} /> : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>

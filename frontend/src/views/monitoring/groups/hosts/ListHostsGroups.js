@@ -58,7 +58,7 @@ const ListHosts = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/groups/hosts', { headers: getAuthHeaders() });
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { headers: getAuthHeaders() });
       if (res.status === 401 || res.status === 403) {
         handleAuthError({ status: res.status });
         return;
@@ -79,7 +79,7 @@ const ListHosts = () => {
 
   const handleDelete = async (hostId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/groups/hosts/${hostId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${hostId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -204,9 +204,9 @@ const ListHosts = () => {
             try {
               let res;
               if (editMode && editingHostId) {
-                res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/groups/hosts/${editingHostId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+                res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${editingHostId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
               } else {
-                res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/groups/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+                res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
               }
               if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
               const data = await res.json();

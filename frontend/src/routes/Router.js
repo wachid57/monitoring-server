@@ -105,14 +105,6 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 // const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
 const ListRoles = Loadable(lazy(() => import('../views/admin/roles/ListRoles')));
 
-// Monitoring Pages
-const ListHosts = Loadable(lazy(() => import('../views/monitoring/hosts/lists/ListHosts.js')));
-const ListIcmpHosts = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/ListIcmpHosts.js')));
-const ListWebsiteHosts = Loadable(lazy(() => import('../views/monitoring/hosts/website/ListWebsiteHosts.js')));
-const ListServicesGroups = Loadable(lazy(() => import('../views/monitoring/groups/services/ListServicesGroups.js')));
-const ListHostGroups = Loadable(lazy(() => import('../views/monitoring/groups/hosts/ListHostsGroups.js')));
-
-
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
 const GredientChart = Loadable(lazy(() => import('../views/charts/GredientChart')));
@@ -210,28 +202,10 @@ const Router = [
       { path: '/apps/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
       { path: '/user-profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
       
-  // Admin Routes
-  { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
-  { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
-
-      // Monitoring Routes
-      // Redirect parent and legacy paths to the canonical lists route to avoid 404
-      { path: '/monitoring/hosts', element: <Navigate to="/monitoring/hosts/lists" /> },
-      { path: '/monitoring/hosts/list', element: <Navigate to="/monitoring/hosts/lists" /> },
-      { path: '/monitoring/hosts/lists', element: <ProtectedRoute><ListHosts /></ProtectedRoute> },
-      { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><ListIcmpHosts /></ProtectedRoute> },
-      { path: '/monitoring/hosts/website', element: <ProtectedRoute><ListWebsiteHosts /></ProtectedRoute> },
-
-  // Host groups routes (support legacy and canonical)
-  { path: '/monitoring/groups/hosts', element: <Navigate to="/monitoring/groups/hosts/lists" /> },
-  { path: '/monitoring/groups/hosts/list', element: <Navigate to="/monitoring/groups/hosts/lists" /> },
-  { path: '/monitoring/groups/hosts/lists', element: <ProtectedRoute><ListHostGroups /></ProtectedRoute> },
-
-  // Service groups routes (support legacy and canonical)
-  { path: '/monitoring/groups/services', element: <Navigate to="/monitoring/groups/services/lists" /> },
-  { path: '/monitoring/groups/services/list', element: <Navigate to="/monitoring/groups/services/lists" /> },
-  { path: '/monitoring/groups/services/lists', element: <ProtectedRoute><ListServicesGroups /></ProtectedRoute> },
-
+      // Admin Routes
+      { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
+      { path: '/admin/roles/list', element: <ProtectedRoute><ListRoles /></ProtectedRoute> },
+      
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
       { path: '/pages/pricing', element: <Pricing /> },
