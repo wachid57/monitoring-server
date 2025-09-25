@@ -106,6 +106,7 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
 const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
+const AddHost = Loadable(lazy(() => import('../views/monitoring/hosts/add/AddHost')));
 const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
 const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
 const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
@@ -221,12 +222,14 @@ const Router = [
     { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
     { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
   { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+  { path: '/monitoring/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
   { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
   { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
   { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
   
   // Infrastructure routes for hosts (alternate path used by sidebar)
   { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+  { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
   { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
   { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
   { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },

@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import Grid from '@mui/material/Grid2';
 import Button from '@mui/material/Button';
-import { API_PREFIX, BACKEND_URL } from '../../../config/constants';
-import CustomTextField from '../../../components/forms/theme-elements/CustomTextField';
-import CustomFormLabel from '../../../components/forms/theme-elements/CustomFormLabel';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import CustomFormLabel from '../../../../components/forms/theme-elements/CustomFormLabel';
+import CustomTextField from '../../../../components/forms/theme-elements/CustomTextField';
+
+// ✅ import helper dari utils/auth
+import {
+    getAuthHeaders,
+    isTokenExpired,
+    handleAuthError,
+    clearAuthData,
+} from 'src/utils/auth';
 
 export default function AddHostForm() {
     const [form, setForm] = useState({
@@ -23,23 +31,29 @@ export default function AddHostForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // ✅ cek token expired sebelum request
+        if (isTokenExpired()) {
+            clearAuthData();
+            window.location.href = '/auth/login';
+            return;
+        }
+
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            console.log('Token yang dikirim:', token);
-
             const res = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`, // kirim token
-                },
+                headers: getAuthHeaders(), // ✅ header otomatis dgn Authorization Bearer
                 body: JSON.stringify(form),
             });
 
-            if (!res.ok) throw new Error('Failed to save host');
+            if (!res.ok) {
+                // ✅ tangani 401/403
+                handleAuthError({ status: res.status });
+                throw new Error(`Failed to save host: ${res.status}`);
+            }
 
-            // Reset form
+            // reset form bila sukses
             setForm({
                 ip: '',
                 hostname: '',
@@ -57,7 +71,6 @@ export default function AddHostForm() {
             setLoading(false);
         }
     };
-
 
     return (
         <form onSubmit={handleSubmit}>
