@@ -210,14 +210,21 @@ func AssignRoleToUserAPI(c *fiber.Ctx) error {
             return err
         }
 
-        // Create role_binding row (idempotent)
-        rb := model.RoleBinding{UserID: req.UserID, RoleID: role.ID}
-        if err := tx.Where("user_id = ? AND role_id = ?", req.UserID, role.ID).FirstOrCreate(&rb).Error; err != nil {
+        // Insert role_binding if not exists (raw SQL, MySQL-compatible)
+        if err := tx.Exec(
+            "INSERT INTO role_bindings (user_id, role_id, created_at, updated_at) "+
+                "SELECT ?, ?, NOW(), NOW() FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM role_bindings WHERE user_id = ? AND role_id = ?)",
+            req.UserID, role.ID, req.UserID, role.ID,
+        ).Error; err != nil {
             return err
         }
 
-        // Ensure many-to-many association (explicit join model)
-        if err := rbac.CreateUserRole(tx, req.UserID, role.ID); err != nil {
+        // Insert user_roles mapping if not exists (raw SQL)
+        if err := tx.Exec(
+            "INSERT INTO user_roles (user_id, role_id, created_at, updated_at) "+
+                "SELECT ?, ?, NOW(), NOW() FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM user_roles WHERE user_id = ? AND role_id = ?)",
+            req.UserID, role.ID, req.UserID, role.ID,
+        ).Error; err != nil {
             return err
         }
         return nil

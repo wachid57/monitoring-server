@@ -58,14 +58,14 @@ func CreateUser(c *fiber.Ctx) error {
         Email:    req.Email,
         Name:     req.Name,
         Password: string(hash),
-        Native:   true,
+        Native:   false,
     }
 
     if err := database.DB.Create(&user).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to create user"})
     }
 
-    // If a role name is provided, ensure role exists and assign to user
+    // If a role name is provided, ensure role exists and assign to user (raw SQL to avoid RETURNING)
     if req.Role != "" {
         var role model.Role
         if err := database.DB.Where("name = ?", req.Role).First(&role).Error; err != nil {
@@ -75,16 +75,21 @@ func CreateUser(c *fiber.Ctx) error {
                 return c.Status(500).JSON(fiber.Map{"error": "Failed to create role"})
             }
         }
-        // create role_binding record if missing
-        rb := model.RoleBinding{UserID: user.ID, RoleID: role.ID}
-        if err := database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&rb).Error; err != nil {
-            log.Printf("Failed to ensure role_binding for user %d and role %d: %v", user.ID, role.ID, err)
+        // Insert into role_bindings if not exists
+        if err := database.DB.Exec(
+            "INSERT INTO role_bindings (user_id, role_id, created_at, updated_at) "+
+                "SELECT ?, ?, NOW(), NOW() FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM role_bindings WHERE user_id = ? AND role_id = ?)",
+            user.ID, role.ID, user.ID, role.ID,
+        ).Error; err != nil {
+            log.Printf("Failed to insert role_binding for user %d and role %d: %v", user.ID, role.ID, err)
         }
-        // ensure many-to-many association using explicit join model (idempotent)
-        ur := model.UserRole{UserID: user.ID, RoleID: role.ID}
-        if err := database.DB.Where("user_id = ? AND role_id = ?", user.ID, role.ID).FirstOrCreate(&ur).Error; err != nil {
-            // Do not fail user creation if join insert has a benign race/duplicate; just log it
-            log.Printf("Failed to ensure user_roles mapping for user %d and role %d: %v", user.ID, role.ID, err)
+        // Insert into user_roles if not exists
+        if err := database.DB.Exec(
+            "INSERT INTO user_roles (user_id, role_id, created_at, updated_at) "+
+                "SELECT ?, ?, NOW(), NOW() FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM user_roles WHERE user_id = ? AND role_id = ?)",
+            user.ID, role.ID, user.ID, role.ID,
+        ).Error; err != nil {
+            log.Printf("Failed to insert user_roles for user %d and role %d: %v", user.ID, role.ID, err)
         }
     }
 

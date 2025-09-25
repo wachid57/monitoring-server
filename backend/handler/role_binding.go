@@ -12,7 +12,7 @@ import (
 // @Produce json
 // @Success 200 {array} model.RoleBinding
 // @Security BearerAuth
-// @Router /api/v1.0/users/role-bindings [get]
+// @Router /api/v1.0/users/roles/bindings [get]
 func GetRoleBindings(c *fiber.Ctx) error {
     var bindings []model.RoleBinding
     if err := database.DB.Preload("User").Preload("Role").Preload("Group").Find(&bindings).Error; err != nil {
@@ -31,7 +31,7 @@ func GetRoleBindings(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/role-bindings [post]
+// @Router /api/v1.0/users/roles/bindings [post]
 func CreateRoleBinding(c *fiber.Ctx) error {
     var binding model.RoleBinding
     if err := c.BodyParser(&binding); err != nil {
@@ -51,7 +51,7 @@ func CreateRoleBinding(c *fiber.Ctx) error {
 // @Success 200 {object} model.RoleBinding
 // @Failure 404 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/role-bindings/{id} [get]
+// @Router /api/v1.0/users/roles/bindings/{id} [get]
 func GetRoleBindingByID(c *fiber.Ctx) error {
     var binding model.RoleBinding
     id := c.Params("id")
@@ -73,7 +73,7 @@ func GetRoleBindingByID(c *fiber.Ctx) error {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/role-bindings/{id} [put]
+// @Router /api/v1.0/users/roles/bindings/{id} [put]
 func UpdateRoleBinding(c *fiber.Ctx) error {
     var binding model.RoleBinding
     id := c.Params("id")
@@ -96,7 +96,7 @@ func UpdateRoleBinding(c *fiber.Ctx) error {
 // @Success 204
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/role-bindings/{id} [delete]
+// @Router /api/v1.0/users/roles/bindings/{id} [delete]
 func DeleteRoleBinding(c *fiber.Ctx) error {
     id := c.Params("id")
     if err := database.DB.Delete(&model.RoleBinding{}, id).Error; err != nil {
