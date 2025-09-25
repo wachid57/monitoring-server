@@ -51,7 +51,7 @@ const ListHostGroup = () => {
   const [newGroup, setNewGroup] = useState({
     group_name: '',
     alias: '',
-    host_id: '',
+  // host_id removed per spec
     groups_tags: '',
     keterangan: '',
   });
@@ -63,7 +63,7 @@ const ListHostGroup = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/Infrastruktur/hosts/groups`, {
+  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastruktur/hosts/groups`, {
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) {
@@ -156,7 +156,6 @@ const ListHostGroup = () => {
                   <TableRow>
                     <TableCell>Group Name</TableCell>
                     <TableCell>Alias</TableCell>
-                    <TableCell>Host ID</TableCell>
                     <TableCell>Tags</TableCell>
                     <TableCell>Keterangan</TableCell>
                     <TableCell>Created</TableCell>
@@ -175,7 +174,6 @@ const ListHostGroup = () => {
                       <TableRow key={g.id}>
                         <TableCell>{g.group_name || '-'}</TableCell>
                         <TableCell>{g.alias || '-'}</TableCell>
-                        <TableCell>{g.host_id || '-'}</TableCell>
                         <TableCell>{g.groups_tags || '-'}</TableCell>
                         <TableCell>{g.keterangan || '-'}</TableCell>
                         <TableCell>
@@ -279,15 +277,7 @@ const ListHostGroup = () => {
               setNewGroup({ ...newGroup, alias: e.target.value })
             }
           />
-          <TextField
-            label="Host ID"
-            fullWidth
-            margin="dense"
-            value={newGroup.host_id}
-            onChange={(e) =>
-              setNewGroup({ ...newGroup, host_id: e.target.value })
-            }
-          />
+          {/* Host ID removed */}
           <TextField
             label="Groups Tags"
             fullWidth
@@ -318,10 +308,9 @@ const ListHostGroup = () => {
               setSubmitLoading(true);
               try {
                 let res;
-                const payload = {
+                  const payload = {
                   group_name: newGroup.group_name,
                   alias: newGroup.alias,
-                  host_id: Number(newGroup.host_id) || 0,
                   groups_tags: newGroup.groups_tags,
                   keterangan: newGroup.keterangan,
                 };

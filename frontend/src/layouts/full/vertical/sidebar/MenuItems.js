@@ -155,6 +155,12 @@ const Menuitems = [
         icon: IconPoint,
         href: '/infrastructure/hostgroups/add',
       },
+      {
+        id: uniqueId(),
+        title: 'Bindings',
+        icon: IconPoint,
+        href: '/infrastructure/hostgroups/bindings',
+      },
     ],
   },
   {

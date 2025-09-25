@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"monitoring-server/model"
+	"monitoring-server/database/migration"
 	"github.com/joho/godotenv"
 )
 
@@ -34,7 +35,7 @@ func InitDB() error {
 
 	// AutoMigrate all main models to ensure tables exist when the app starts.
 	// Keep this list small and stable to avoid accidental schema drift from running the app.
-	return db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&model.Role{},
 		&model.Permission{},
 		&model.RolePermission{},
@@ -44,8 +45,18 @@ func InitDB() error {
 		&model.Group{},
 		&model.Host{},
 		&model.HostGroup{},
+		&model.HostGroupBinding{},
 		&model.CPUMetric{},
 		&model.MemoryMetric{},
 		&model.DiskMetric{},
-	)
+	); err != nil {
+		return err
+	}
+
+	// Targeted cleanup to align with latest spec
+	if err := migration.DropHostGroupsObsoleteColumns(DB); err != nil {
+		return err
+	}
+
+	return nil
 }

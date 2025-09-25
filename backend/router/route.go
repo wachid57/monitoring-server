@@ -119,14 +119,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         hostsGroup.Put("/:id", handler.UpdateHost)
         hostsGroup.Delete("/:id", handler.DeleteHost)
 
-    // Infrastructure API aliases for hosts (frontend may use /infrastructure/hosts/...)
-    infrastructureGroup := protected.Group("infrastructure")
-    infrastructureGroup.Get("/hosts/list", handler.GetHosts)
-    infrastructureGroup.Post("/hosts", handler.CreateHost)
-    infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
-    infrastructureGroup.Put("/hosts/:id", handler.UpdateHost)
-    infrastructureGroup.Delete("/hosts/:id", handler.DeleteHost)
-
         // CRUD Host Group
         hostGroups := protected.Group("hosts/groups")
         hostGroups.Get("/", handler.GetHostGroups)
@@ -134,6 +126,39 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         hostGroups.Get("/:id", handler.GetHostGroupByID)
         hostGroups.Put("/:id", handler.UpdateHostGroup)
         hostGroups.Delete("/:id", handler.DeleteHostGroup)
+
+        // Host Group Bindings
+        hgb := protected.Group("hosts/groups/bindings")
+        hgb.Get("/", handler.GetHostGroupBindings)
+        hgb.Post("/", handler.CreateHostGroupBinding)
+        hgb.Get("/:id", handler.GetHostGroupBindingByID)
+        hgb.Put("/:id", handler.UpdateHostGroupBinding)
+        hgb.Delete("/:id", handler.DeleteHostGroupBinding)
+
+    // Infrastructure API aliases for hosts (frontend may use /infrastructure/hosts/...)
+    infrastructureGroup := protected.Group("infrastructure")
+    infrastructureGroup.Get("/hosts/list", handler.GetHosts)
+    infrastructureGroup.Post("/hosts", handler.CreateHost)
+    infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
+    infrastructureGroup.Put("/hosts/:id", handler.UpdateHost)
+    infrastructureGroup.Delete("/hosts/:id", handler.DeleteHost)
+    // Host Groups under infrastructure alias
+    infrastructureGroup.Get("/hosts/groups", handler.GetHostGroups)
+    infrastructureGroup.Post("/hosts/groups", handler.CreateHostGroup)
+    infrastructureGroup.Get("/hosts/groups/:id", handler.GetHostGroupByID)
+    infrastructureGroup.Put("/hosts/groups/:id", handler.UpdateHostGroup)
+    infrastructureGroup.Delete("/hosts/groups/:id", handler.DeleteHostGroup)
+
+        // Host Group Bindings under infrastructure alias
+        infrastructureGroup.Get("/hosts/groups/bindings", handler.GetHostGroupBindings)
+        infrastructureGroup.Post("/hosts/groups/bindings", handler.CreateHostGroupBinding)
+        infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
+        infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
+        infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
+
+    // (Removed '/infrastruktur' alias routes per request)
+
+    // (removed capitalized Infrastruktur alias and duplicate hostGroups block)
 
         // CRUD ICMP Service
         icmpGroup := protected.Group("services/availability/icmp")
