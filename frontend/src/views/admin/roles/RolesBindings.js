@@ -53,6 +53,9 @@ const RolesBindings = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [newBinding, setNewBinding] = useState({ user_id: '', role_id: '' });
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editBinding, setEditBinding] = useState(null); // {id, user_id, role_id}
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchBindings = async () => {
     setLoading(true);
@@ -139,14 +142,58 @@ const RolesBindings = () => {
     }
   };
 
+  const openEdit = (binding) => {
+    setEditBinding({ id: binding.id, user_id: binding.user_id || binding.user?.id, role_id: binding.role_id || binding.role?.id });
+    setEditOpen(true);
+  };
+
+  const handleEdit = async () => {
+    if (!editBinding?.id || !editBinding.user_id || !editBinding.role_id) return setError('User and Role are required');
+    setSubmitLoading(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/admin/roles/bindings/${editBinding.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ user_id: editBinding.user_id, role_id: editBinding.role_id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEditOpen(false);
+        setEditBinding(null);
+        fetchBindings();
+      } else {
+        setError(data.error || 'Failed to update binding');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update binding');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   return (
     <PageContainer title="Role Bindings" description="Bind users to roles">
       <Breadcrumb title="Role Bindings" items={BCrumb} />
 
       <Card>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Role Bindings</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+            <Box sx={{ minWidth: 300, flex: 1, mr: 2 }}>
+              <TextField
+                placeholder="Search..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconSearch size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                fullWidth
+              />
+            </Box>
             <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddOpen(true)}>Add Binding</Button>
           </Stack>
 
@@ -164,7 +211,13 @@ const RolesBindings = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {bindings.map((b) => (
+                {(bindings || []).filter(b => {
+                  const q = (searchTerm || '').toLowerCase();
+                  if (!q) return true;
+                  const uname = b.user?.username?.toLowerCase() || '';
+                  const rname = b.role?.name?.toLowerCase() || '';
+                  return uname.includes(q) || rname.includes(q);
+    }).map((b) => (
                   <TableRow key={b.id}>
                     <TableCell>{b.id}</TableCell>
                     <TableCell>{b.user?.username || b.user_id}</TableCell>
@@ -172,6 +225,9 @@ const RolesBindings = () => {
                     <TableCell>{b.created_at ? new Date(b.created_at).toLocaleDateString() : '-'}</TableCell>
                     <TableCell align="center">
                       <Stack direction="row" spacing={1} justifyContent="center">
+      <IconButton size="small" color="warning" onClick={() => openEdit(b)}>
+                          <IconEdit size={16} />
+                        </IconButton>
                         <IconButton size="small" color="error" onClick={() => handleDelete(b.id)}>
                           <IconTrash size={16} />
                         </IconButton>
@@ -202,6 +258,24 @@ const RolesBindings = () => {
         <DialogActions>
           <Button onClick={() => setAddOpen(false)}>Cancel</Button>
           <Button onClick={handleAdd} variant="contained" disabled={submitLoading}>{submitLoading ? <CircularProgress size={18} /> : 'Bind'}</Button>
+        </DialogActions>
+      </Dialog>
+
+  {/* Edit Binding Dialog */}
+  <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Role Binding</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} mt={1}>
+    <TextField label="User" value={(users.find(u => u.id === (editBinding?.user_id))?.username) || editBinding?.user_id || ''} disabled fullWidth />
+    <TextField select label="Role" value={editBinding?.role_id || ''} onChange={(e) => setEditBinding({ ...editBinding, role_id: e.target.value })}>
+              <MenuItem value="">Select role</MenuItem>
+              {roles.map(r => <MenuItem key={r.id} value={r.id}>{r.name}</MenuItem>)}
+            </TextField>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+      <Button onClick={handleEdit} variant="contained" disabled={submitLoading}>{submitLoading ? <CircularProgress size={18} /> : 'Save'}</Button>
         </DialogActions>
       </Dialog>
     </PageContainer>

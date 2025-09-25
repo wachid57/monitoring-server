@@ -20,6 +20,43 @@ func GetUsers(c *fiber.Ctx) error {
     if err := database.DB.Preload("Roles").Preload("Groups").Find(&users).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch users"})
     }
+
+    // Fallback: if some users have no Roles preloaded (due to historical data),
+    // build a role map from user_roles and merge in.
+    var userIDs []uint
+    for _, u := range users {
+        userIDs = append(userIDs, u.ID)
+    }
+    if len(userIDs) > 0 {
+        type row struct {
+            UserID uint
+            RoleID uint
+            Name   string
+            Description string
+            Native bool
+            CreatedAt string
+            UpdatedAt string
+        }
+        var rows []row
+        if err := database.DB.Raw(
+            "SELECT ur.user_id AS user_id, r.id AS role_id, r.name, r.description, r.native, DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i:%s') as created_at, DATE_FORMAT(r.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at "+
+                "FROM user_roles ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id IN ?",
+            userIDs,
+        ).Scan(&rows).Error; err == nil && len(rows) > 0 {
+            roleMap := map[uint][]model.Role{}
+            for _, r := range rows {
+                roleMap[r.UserID] = append(roleMap[r.UserID], model.Role{ID: r.RoleID, Name: r.Name, Description: r.Description, Native: r.Native})
+            }
+            for i := range users {
+                if len(users[i].Roles) == 0 {
+                    if rs, ok := roleMap[users[i].ID]; ok {
+                        users[i].Roles = rs
+                    }
+                }
+            }
+        }
+    }
+
     return c.JSON(users)
 }
 
@@ -93,9 +130,27 @@ func CreateUser(c *fiber.Ctx) error {
         }
     }
 
-    // return created user with roles preloaded
+    // return created user with roles ensured
     if err := database.DB.Preload("Roles").First(&user, user.ID).Error; err != nil {
-        return c.JSON(user)
+        // ignore error and continue to fallback aggregation
+    }
+    if len(user.Roles) == 0 {
+        // Fallback: load roles via explicit join to ensure response includes role
+        type rrow struct {
+            RoleID uint
+            Name   string
+            Description string
+            Native bool
+        }
+        var rrows []rrow
+        if err := database.DB.Raw(
+            "SELECT r.id AS role_id, r.name, r.description, r.native FROM user_roles ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = ?",
+            user.ID,
+        ).Scan(&rrows).Error; err == nil {
+            for _, rr := range rrows {
+                user.Roles = append(user.Roles, model.Role{ID: rr.RoleID, Name: rr.Name, Description: rr.Description, Native: rr.Native})
+            }
+        }
     }
     return c.JSON(user)
 }

@@ -6,8 +6,8 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import { NavLink } from 'react-router';
 
-import breadcrumbImg from 'src/assets/images/breadcrumb/ChatBc.png';
-import { IconCircle } from '@tabler/icons';
+import breadcrumbImg from 'src/assets/images/breadcrumb/ServerBc.svg';
+import { IconChevronRight } from '@tabler/icons';
 
 const Breadcrumb = ({ subtitle, items, title, children }) => (
   <Grid
@@ -27,14 +27,7 @@ const Breadcrumb = ({ subtitle, items, title, children }) => (
         {subtitle}
       </Typography>
       <Breadcrumbs
-        separator={
-          <IconCircle
-            size="5"
-            fill="textSecondary"
-            fillOpacity={'0.6'}
-            style={{ margin: '0 5px' }}
-          />
-        }
+        separator={<IconChevronRight size={16} style={{ margin: '0 6px' }} />}
         sx={{ alignItems: 'center', mt: items ? '10px' : '' }}
         aria-label="breadcrumb"
       >

@@ -119,7 +119,21 @@ const ListHostGroup = () => {
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Host Groups</Typography>
+            <Box sx={{ minWidth: 300 }}>
+              <TextField
+                placeholder="Search group..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconSearch size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                fullWidth
+              />
+            </Box>
             <Button
               variant="contained"
               startIcon={<IconPlus />}
@@ -128,22 +142,6 @@ const ListHostGroup = () => {
               Add Group
             </Button>
           </Stack>
-
-          <Box mb={3}>
-            <TextField
-              placeholder="Search group..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IconSearch size={20} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ minWidth: 300 }}
-            />
-          </Box>
 
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 

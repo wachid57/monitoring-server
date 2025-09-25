@@ -85,6 +85,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     // Bindings first to avoid /roles/:id capturing "bindings"
     adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
     adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+    adminGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
     adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
     // Parametric role routes after
     adminGroup.Post("/roles", handler.CreateRole)
