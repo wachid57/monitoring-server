@@ -24,13 +24,36 @@ func truthy(s string) bool {
 // - CORS_DOMAIN=comma,separated,origins or hostnames (e.g., http://localhost:5173,https://app.example.com or localhost,192.168.21.167)
 //   If hostnames are provided without scheme/port, common dev variants are added automatically.
 func SetupCORS(app *fiber.App) {
-    if !truthy(os.Getenv("ENABLE_CORS")) {
-        // CORS disabled: no cross-origin allowed (browser will block). Secure default.
+    // Back-compat and new envs:
+    // - ENABLE_CORS=true|1|yes|on enables CORS
+    // - CORS_ENABLE=true|1|yes|on enables CORS
+    // - CORS_ENABLE=all enables CORS for all origins ("*")
+    // - CORS_DOMAIN=comma list of origins/hosts
+
+    ce := strings.ToLower(strings.TrimSpace(os.Getenv("CORS_ENABLE")))
+    ec := strings.ToLower(strings.TrimSpace(os.Getenv("ENABLE_CORS")))
+
+    // Shortcut: allow all if CORS_ENABLE=all or ENABLE_CORS=all
+    if ce == "all" || ec == "all" {
+        app.Use(fiberCors.New(fiberCors.Config{
+            AllowOrigins:     "*",
+            AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+            AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+            // With wildcard origins, do not allow credentials to satisfy CORS spec
+            AllowCredentials: false,
+        }))
+        return
+    }
+
+    // Determine if enabled (truthy in either var)
+    enabled := truthy(ec) || truthy(ce)
+    if !enabled {
+        // CORS disabled: do nothing
         return
     }
 
     raw := strings.TrimSpace(os.Getenv("CORS_DOMAIN"))
-    allowOrigins := "*"
+    allowOrigins := "*" // if none provided, default to all
     if raw != "" {
         // Build a list of acceptable origins
         tokens := strings.Split(raw, ",")
@@ -70,6 +93,7 @@ func SetupCORS(app *fiber.App) {
         AllowOrigins:     allowOrigins,
         AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
         AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
-        AllowCredentials: true,
+        // Credentials are only safe with explicit origins, not wildcard
+        AllowCredentials: allowOrigins != "*",
     }))
 }
