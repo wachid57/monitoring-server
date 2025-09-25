@@ -118,21 +118,20 @@ definitions:
     properties:
       alias:
         type: string
-      createdAt:
+      created_at:
         type: string
-      deletedAt:
+      deleted_at:
         type: string
-      groupName:
+      group_name:
+        description: Store main name in DB column `group_name` (existing schema)
         type: string
-      groupsTags:
+      groups_tags:
         type: string
-      hostID:
-        type: integer
       id:
         type: integer
       keterangan:
         type: string
-      updatedAt:
+      updated_at:
         type: string
     type: object
   model.ICMPService:
@@ -299,8 +298,6 @@ definitions:
         type: string
       native:
         type: boolean
-      password:
-        type: string
       roles:
         items:
           $ref: '#/definitions/model.Role'
@@ -2082,148 +2079,6 @@ paths:
       summary: Update group by ID
       tags:
       - Groups
-  /api/v1.0/users/role-bindings:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.RoleBinding'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Get all role bindings
-      tags:
-      - RoleBindings
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role binding data
-        in: body
-        name: binding
-        required: true
-        schema:
-          $ref: '#/definitions/model.RoleBinding'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create a new role binding
-      tags:
-      - RoleBindings
-  /api/v1.0/users/role-bindings/{id}:
-    delete:
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete role binding by ID
-      tags:
-      - RoleBindings
-    get:
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get role binding by ID
-      tags:
-      - RoleBindings
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Role binding data
-        in: body
-        name: binding
-        required: true
-        schema:
-          $ref: '#/definitions/model.RoleBinding'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update role binding by ID
-      tags:
-      - RoleBindings
   /api/v1.0/users/roles:
     get:
       produces:
@@ -2366,6 +2221,148 @@ paths:
       summary: Update role by ID
       tags:
       - Roles
+  /api/v1.0/users/roles/bindings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.RoleBinding'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all role bindings
+      tags:
+      - RoleBindings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role binding data
+        in: body
+        name: binding
+        required: true
+        schema:
+          $ref: '#/definitions/model.RoleBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new role binding
+      tags:
+      - RoleBindings
+  /api/v1.0/users/roles/bindings/{id}:
+    delete:
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete role binding by ID
+      tags:
+      - RoleBindings
+    get:
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get role binding by ID
+      tags:
+      - RoleBindings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Role binding data
+        in: body
+        name: binding
+        required: true
+        schema:
+          $ref: '#/definitions/model.RoleBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update role binding by ID
+      tags:
+      - RoleBindings
   /api/v1.0/users/roles/users:
     get:
       parameters:
