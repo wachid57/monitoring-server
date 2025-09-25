@@ -63,7 +63,7 @@ const ListHostGroup = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastruktur/hosts/groups`, {
+  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/groups`, {
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) {
