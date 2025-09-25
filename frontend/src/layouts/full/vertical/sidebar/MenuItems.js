@@ -230,7 +230,7 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'Users Management',
+    title: 'Users',
     icon: IconUserCircle,
     href: '/admin/users/',
     children: [
@@ -240,17 +240,11 @@ const Menuitems = [
         icon: IconPoint,
         href: '/admin/users/list',
       },
-      {
-        id: uniqueId(),
-        title: 'Add User',
-        icon: IconPoint,
-        href: '/admin/users/add',
-      },
     ],
   },
   {
     id: uniqueId(),
-    title: 'Roles Management',
+    title: 'Roles',
     icon: IconSettings,
     href: '/admin/roles/',
     children: [
@@ -266,12 +260,6 @@ const Menuitems = [
         icon: IconPoint,
         href: '/admin/roles/bindings',
       },
-      {
-        id: uniqueId(),
-        title: 'Add Role',
-        icon: IconPoint,
-        href: '/admin/roles/add',
-      },
     ],
   },
   {
@@ -286,17 +274,11 @@ const Menuitems = [
         icon: IconPoint,
         href: '/admin/groups/list',
       },
-      {
-        id: uniqueId(),
-        title: 'Add Group',
-        icon: IconPoint,
-        href: '/admin/groups/add',
-      },
     ],
   },
   {
     id: uniqueId(),
-    title: 'Permission Management',
+    title: 'Permissions',
     icon: IconSettings,
     href: '/admin/permission/',
     children: [
