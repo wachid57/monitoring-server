@@ -113,11 +113,13 @@ const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/
 const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
 const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
 const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
+const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/services/ListServicesGroups')));
+const ServicesGroupsBinding = Loadable(lazy(() => import('../views/infrastruktur/groups/services/ServicesGroupsBinding')));
 // Reports
 const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
-// Admin Permission pages
-const PermissionList = Loadable(lazy(() => import('../views/admin/roles/PermissionList')));
-const PermissionBindings = Loadable(lazy(() => import('../views/admin/roles/PermissionBindings')));
+// Admin Permission pages (moved)
+const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
+const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
 
 // chart
 const LineChart = Loadable(lazy(() => import('../views/charts/LineChart')));
@@ -237,6 +239,8 @@ const Router = [
   { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
   { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
   { path: '/infrastructure/hostgroups/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
+  { path: '/infrastructure/servicegroups/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
+  { path: '/infrastructure/servicegroups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
   
   // Reports
   { path: '/report/hosts/availability', element: <ProtectedRoute><HostsAvailabilityReport /></ProtectedRoute> },

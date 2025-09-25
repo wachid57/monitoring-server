@@ -198,7 +198,7 @@ const ListUsers = () => {
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => { setAddDialogOpen(true); setFormError(''); }}
-              sx={{ width: 300 }}
+              sx={{ width: 225 }}
             >
               Add New User
             </Button>

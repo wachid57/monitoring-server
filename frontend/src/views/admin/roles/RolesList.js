@@ -182,7 +182,7 @@ const RolesList = () => {
                 fullWidth
               />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} color="primary" onClick={() => setAddOpen(true)} sx={{ width: 300 }}>
+            <Button variant="contained" startIcon={<IconPlus />} color="primary" onClick={() => setAddOpen(true)} sx={{ width: 225 }}>
               Add New Role
             </Button>
           </Stack>

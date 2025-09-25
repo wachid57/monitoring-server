@@ -119,6 +119,13 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     hgb.Put("/:id", handler.UpdateHostGroupBinding)
     hgb.Delete("/:id", handler.DeleteHostGroupBinding)
 
+    // Also register without trailing slash to handle clients requesting exact path
+    protected.Get("hosts/groups/bindings", handler.GetHostGroupBindings)
+    protected.Post("hosts/groups/bindings", handler.CreateHostGroupBinding)
+    protected.Get("hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
+    protected.Put("hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
+    protected.Delete("hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
+
     // CRUD Host Group (register after bindings but before parametric /hosts/:id to avoid shadowing)
     hostGroups := protected.Group("hosts/groups")
         hostGroups.Get("/", handler.GetHostGroups)
@@ -146,6 +153,12 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
     infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
     infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
+    // Duplicate registrations without leading slash - Fiber treats both consistently but add for safety
+    infrastructureGroup.Get("hosts/groups/bindings", handler.GetHostGroupBindings)
+    infrastructureGroup.Post("hosts/groups/bindings", handler.CreateHostGroupBinding)
+    infrastructureGroup.Get("hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
+    infrastructureGroup.Put("hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
+    infrastructureGroup.Delete("hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
     // Host Groups under infrastructure alias
     infrastructureGroup.Get("/hosts/groups", handler.GetHostGroups)
     infrastructureGroup.Post("/hosts/groups", handler.CreateHostGroup)

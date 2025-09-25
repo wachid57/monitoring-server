@@ -125,7 +125,7 @@ const HostLists = () => {
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
             <Typography variant="h5">Hosts</Typography>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)}>Add Host</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 225 }}>Add Host</Button>
           </Stack>
 
           <Box mb={3}>

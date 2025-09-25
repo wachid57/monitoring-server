@@ -196,7 +196,7 @@ const PermissionBindings = () => {
               onClick={() => setAddOpen(true)}
               sx={{ width: 225 }}
             >
-              Add Binding (roleId/permissionId quick)
+              Add Binding
             </Button>
           </Stack>
 

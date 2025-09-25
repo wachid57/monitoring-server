@@ -141,13 +141,13 @@ const Menuitems = [
         id: uniqueId(),
         title: 'List Groups',
         icon: IconPoint,
-        href: '/infrastructure/hostgroups/list',
+        href: '/infrastructure/groups/hosts/list',
       },
       {
         id: uniqueId(),
         title: 'Bindings',
         icon: IconPoint,
-        href: '/infrastructure/hostgroups/bindings',
+        href: '/infrastructure/groups/hosts/bindings',
       },
     ],
   },
@@ -159,9 +159,15 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'List Services',
+        title: 'Group Lists',
         icon: IconPoint,
-        href: '/infrastructure/services/list',
+        href: '/infrastructure/groups/services/list',
+      },
+            {
+        id: uniqueId(),
+        title: 'Bindings',
+        icon: IconPoint,
+        href: '/infrastructure/groups/services/bindings',
       },
     ],
   },

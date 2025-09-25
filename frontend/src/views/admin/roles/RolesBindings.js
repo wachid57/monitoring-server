@@ -194,7 +194,7 @@ const RolesBindings = () => {
                 fullWidth
               />
             </Box>
-    <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddOpen(true)} sx={{ width: 300 }}>Add Binding</Button>
+  <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddOpen(true)} sx={{ width: 225 }}>Add Binding</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
