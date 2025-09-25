@@ -4,7 +4,6 @@ import (
     "github.com/gofiber/fiber/v2"
     "monitoring-server/model"
     "monitoring-server/database"
-    "monitoring-server/rbac"
     "gorm.io/gorm"
 )
 
