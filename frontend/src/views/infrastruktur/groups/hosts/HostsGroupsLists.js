@@ -22,7 +22,6 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-  MenuItem,
 } from '@mui/material';
 import {
   IconPlus,
@@ -38,89 +37,110 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
-  { title: 'Hosts' },
-  { title: 'List Hosts' },
+  { title: 'Host Groups' },
+  { title: 'List Host Groups' },
 ];
 
-const ListHosts = () => {
-  const [hosts, setHosts] = useState([]);
+const ListHostGroup = () => {
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, host: null });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, group: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newHost, setNewHost] = useState({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
+  const [newGroup, setNewGroup] = useState({
+    group_name: '',
+    alias: '',
+    host_id: '',
+    groups_tags: '',
+    keterangan: '',
+  });
   const [editMode, setEditMode] = useState(false);
-  const [editingHostId, setEditingHostId] = useState(null);
+  const [editingGroupId, setEditingGroupId] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const fetchHosts = async () => {
+  const fetchGroups = async () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { headers: getAuthHeaders() });
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/Infrastruktur/hosts/groups`, {
+        headers: getAuthHeaders(),
+      });
       if (res.status === 401 || res.status === 403) {
         handleAuthError({ status: res.status });
         return;
       }
       const data = await res.json();
       if (res.ok) {
-        setHosts(data || []);
+        setGroups(data || []);
       } else {
-        setError(data.error || 'Failed to fetch hosts');
+        setError(data.error || 'Failed to fetch host groups');
       }
     } catch (err) {
-      console.error('fetch hosts error', err);
-      setError('Failed to fetch hosts');
+      console.error('fetch groups error', err);
+      setError('Failed to fetch host groups');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (hostId) => {
+  const handleDelete = async (groupId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${hostId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-      if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
+      const res = await fetch(
+        `${BACKEND_URL}${API_PREFIX}/hosts/groups/${groupId}`,
+        { method: 'DELETE', headers: getAuthHeaders() }
+      );
+      if (res.status === 401 || res.status === 403)
+        return handleAuthError({ status: res.status });
       if (res.ok) {
-        setHosts(prev => prev.filter(h => h.id !== hostId));
-        setDeleteDialog({ open: false, host: null });
+        setGroups((prev) => prev.filter((g) => g.id !== groupId));
+        setDeleteDialog({ open: false, group: null });
       } else {
         const data = await res.json();
-        setError(data.error || 'Failed to delete host');
+        setError(data.error || 'Failed to delete host group');
       }
     } catch (err) {
-      console.error('delete host error', err);
-      setError('Failed to delete host');
+      console.error('delete group error', err);
+      setError('Failed to delete host group');
     }
   };
 
-  const filteredHosts = hosts.filter(h =>
-    h.hostname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.ip?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    h.alias?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredGroups = groups.filter((g) =>
+    g.group_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    g.alias?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    g.keterangan?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  useEffect(() => { fetchHosts(); }, []);
+  useEffect(() => { fetchGroups(); }, []);
 
   return (
-    <PageContainer title="List Hosts" description="Manage monitored hosts">
-      <Breadcrumb title="List Hosts" items={BCrumb} />
+    <PageContainer title="List Host Groups" description="Manage host groups">
+      <Breadcrumb title="List Host Groups" items={BCrumb} />
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Hosts</Typography>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)}>Add Host</Button>
+            <Typography variant="h5">Host Groups</Typography>
+            <Button
+              variant="contained"
+              startIcon={<IconPlus />}
+              onClick={() => setAddDialogOpen(true)}
+            >
+              Add Group
+            </Button>
           </Stack>
 
           <Box mb={3}>
             <TextField
-              placeholder="Search hosts..."
+              placeholder="Search group..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{ startAdornment: (<InputAdornment position="start"><IconSearch size={20} /></InputAdornment>) }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconSearch size={20} />
+                  </InputAdornment>
+                ),
+              }}
               sx={{ minWidth: 300 }}
             />
           </Box>
@@ -128,44 +148,72 @@ const ListHosts = () => {
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
           {loading ? (
-            <Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
           ) : (
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>IP</TableCell>
-                    <TableCell>Hostname</TableCell>
+                    <TableCell>Group Name</TableCell>
                     <TableCell>Alias</TableCell>
-                    <TableCell>Service</TableCell>
+                    <TableCell>Host ID</TableCell>
                     <TableCell>Tags</TableCell>
+                    <TableCell>Keterangan</TableCell>
                     <TableCell>Created</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredHosts.length === 0 ? (
-                    <TableRow><TableCell colSpan={7} align="center">No hosts found</TableCell></TableRow>
+                  {filteredGroups.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} align="center">
+                        No host groups found
+                      </TableCell>
+                    </TableRow>
                   ) : (
-                    filteredHosts.map((h) => (
-                      <TableRow key={h.id}>
-                        <TableCell>{h.ip || '-'}</TableCell>
-                        <TableCell>{h.hostname || '-'}</TableCell>
-                        <TableCell>{h.alias || '-'}</TableCell>
-                        <TableCell>{h.service || '-'}</TableCell>
-                        <TableCell>{h.hosts_tags || '-'}</TableCell>
-                        <TableCell>{h.created_at ? new Date(h.created_at).toLocaleDateString() : '-'}</TableCell>
+                    filteredGroups.map((g) => (
+                      <TableRow key={g.id}>
+                        <TableCell>{g.group_name || '-'}</TableCell>
+                        <TableCell>{g.alias || '-'}</TableCell>
+                        <TableCell>{g.host_id || '-'}</TableCell>
+                        <TableCell>{g.groups_tags || '-'}</TableCell>
+                        <TableCell>{g.keterangan || '-'}</TableCell>
+                        <TableCell>
+                          {g.created_at ? new Date(g.created_at).toLocaleDateString() : '-'}
+                        </TableCell>
                         <TableCell align="center">
-                                          <Stack direction="row" spacing={1} justifyContent="center">
-                                            <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
-                                            <IconButton size="small" color="warning" onClick={() => {
-                                              setEditMode(true);
-                                              setEditingHostId(h.id);
-                                              setNewHost({ ip: h.ip || '', hostname: h.hostname || '', alias: h.alias || '', service: h.service || '', hosts_tags: h.hosts_tags || '' });
-                                              setAddDialogOpen(true);
-                                            }}><IconEdit size={16} /></IconButton>
-                                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
-                                          </Stack>
+                          <Stack direction="row" spacing={1} justifyContent="center">
+                            <IconButton size="small" color="primary">
+                              <IconEye size={16} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="warning"
+                              onClick={() => {
+                                setEditMode(true);
+                                setEditingGroupId(g.id);
+                                setNewGroup({
+                                  group_name: g.group_name || '',
+                                  alias: g.alias || '',
+                                  host_id: g.host_id || '',
+                                  groups_tags: g.groups_tags || '',
+                                  keterangan: g.keterangan || '',
+                                });
+                                setAddDialogOpen(true);
+                              }}
+                            >
+                              <IconEdit size={16} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => setDeleteDialog({ open: true, group: g })}
+                            >
+                              <IconTrash size={16} />
+                            </IconButton>
+                          </Stack>
                         </TableCell>
                       </TableRow>
                     ))
@@ -177,54 +225,161 @@ const ListHosts = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, host: null })}>
+      {/* Delete dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, group: null })}
+      >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Delete host "{deleteDialog.host?.hostname}"?</Typography>
+          <Typography>
+            Delete group "{deleteDialog.group?.group_name}"?
+          </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, host: null })}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={() => handleDelete(deleteDialog.host?.id)}>Delete</Button>
+          <Button onClick={() => setDeleteDialog({ open: false, group: null })}>
+            Cancel
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => handleDelete(deleteDialog.group?.id)}
+          >
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setEditMode(false); setEditingHostId(null); }} fullWidth maxWidth="sm">
-        <DialogTitle>{editMode ? 'Edit Host' : 'Add Host'}</DialogTitle>
+      {/* Add / Edit dialog */}
+      <Dialog
+        open={addDialogOpen}
+        onClose={() => {
+          setAddDialogOpen(false);
+          setEditMode(false);
+          setEditingGroupId(null);
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>{editMode ? 'Edit Group' : 'Add Group'}</DialogTitle>
         <DialogContent>
-          <TextField label="IP" fullWidth margin="dense" value={newHost.ip} onChange={e => setNewHost({...newHost, ip: e.target.value})} />
-          <TextField label="Hostname" fullWidth margin="dense" value={newHost.hostname} onChange={e => setNewHost({...newHost, hostname: e.target.value})} />
-          <TextField label="Alias" fullWidth margin="dense" value={newHost.alias} onChange={e => setNewHost({...newHost, alias: e.target.value})} />
-          <TextField label="Service" fullWidth margin="dense" value={newHost.service} onChange={e => setNewHost({...newHost, service: e.target.value})} />
-          <TextField label="Tags" fullWidth margin="dense" value={newHost.hosts_tags} onChange={e => setNewHost({...newHost, hosts_tags: e.target.value})} />
+          <TextField
+            label="Group Name"
+            fullWidth
+            margin="dense"
+            value={newGroup.group_name}
+            onChange={(e) =>
+              setNewGroup({ ...newGroup, group_name: e.target.value })
+            }
+          />
+          <TextField
+            label="Alias"
+            fullWidth
+            margin="dense"
+            value={newGroup.alias}
+            onChange={(e) =>
+              setNewGroup({ ...newGroup, alias: e.target.value })
+            }
+          />
+          <TextField
+            label="Host ID"
+            fullWidth
+            margin="dense"
+            value={newGroup.host_id}
+            onChange={(e) =>
+              setNewGroup({ ...newGroup, host_id: e.target.value })
+            }
+          />
+          <TextField
+            label="Groups Tags"
+            fullWidth
+            margin="dense"
+            value={newGroup.groups_tags}
+            onChange={(e) =>
+              setNewGroup({ ...newGroup, groups_tags: e.target.value })
+            }
+          />
+          <TextField
+            label="Keterangan"
+            fullWidth
+            margin="dense"
+            multiline
+            minRows={2}
+            value={newGroup.keterangan}
+            onChange={(e) =>
+              setNewGroup({ ...newGroup, keterangan: e.target.value })
+            }
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="primary" onClick={async () => {
-            setSubmitLoading(true);
-            try {
-              let res;
-              if (editMode && editingHostId) {
-                res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${editingHostId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
-              } else {
-                res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              setSubmitLoading(true);
+              try {
+                let res;
+                const payload = {
+                  group_name: newGroup.group_name,
+                  alias: newGroup.alias,
+                  host_id: Number(newGroup.host_id) || 0,
+                  groups_tags: newGroup.groups_tags,
+                  keterangan: newGroup.keterangan,
+                };
+                if (editMode && editingGroupId) {
+                  res = await fetch(
+                    `${BACKEND_URL}${API_PREFIX}/hosts/groups/${editingGroupId}`,
+                    {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                      body: JSON.stringify(payload),
+                    }
+                  );
+                } else {
+                  res = await fetch(
+                    `${BACKEND_URL}${API_PREFIX}/hosts/groups`,
+                    {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                      body: JSON.stringify(payload),
+                    }
+                  );
+                }
+                if (res.status === 401 || res.status === 403)
+                  return handleAuthError({ status: res.status });
+                const data = await res.json();
+                if (res.ok) {
+                  fetchGroups();
+                  setAddDialogOpen(false);
+                  setNewGroup({
+                    group_name: '',
+                    alias: '',
+                    host_id: '',
+                    groups_tags: '',
+                    keterangan: '',
+                  });
+                  setEditMode(false);
+                  setEditingGroupId(null);
+                } else
+                  setError(
+                    data.error ||
+                    (editMode ? 'Failed to update group' : 'Failed to create group')
+                  );
+              } catch (err) {
+                console.error(err);
+                setError(editMode ? 'Failed to update group' : 'Failed to create group');
+              } finally {
+                setSubmitLoading(false);
               }
-              if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
-              const data = await res.json();
-              if (res.ok) {
-                fetchHosts();
-                setAddDialogOpen(false);
-                setNewHost({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
-                setEditMode(false);
-                setEditingHostId(null);
-              } else setError(data.error || (editMode ? 'Failed to update host' : 'Failed to create host'));
-            } catch (err) { console.error(err); setError(editMode ? 'Failed to update host' : 'Failed to create host'); }
-            finally { setSubmitLoading(false); }
-          }}>{submitLoading ? <CircularProgress size={20} /> : (editMode ? 'Save' : 'Create')}</Button>
+            }}
+          >
+            {submitLoading ? <CircularProgress size={20} /> : editMode ? 'Save' : 'Create'}
+          </Button>
         </DialogActions>
       </Dialog>
     </PageContainer>
   );
 };
 
-export default ListHosts;
-
+export default ListHostGroup;
