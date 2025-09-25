@@ -5,7 +5,6 @@ import {
   Typography,
   Button,
   Paper,
-  Chip,
   Stack,
   Box,
   TextField,
@@ -16,6 +15,13 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
 } from '@mui/material';
 import {
   IconPlus,
@@ -23,7 +29,6 @@ import {
   IconEdit,
   IconTrash,
   IconEye,
-  IconUserCircle,
 } from '@tabler/icons';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -39,10 +44,10 @@ const BCrumb = [
     title: 'Admin',
   },
   {
-    title: 'Roles',
+    title: 'Permissions',
   },
   {
-    title: 'List Roles',
+    title: 'List Permissions',
   },
 ];
 
@@ -52,7 +57,7 @@ const PermissionList = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, role: null });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, permission: null });
 
   // Add Role dialog
   const [addOpen, setAddOpen] = useState(false);
@@ -81,8 +86,8 @@ const PermissionList = () => {
         setError(data.error || data.message || 'Gagal mengambil data permissions');
       }
     } catch (err) {
-      console.error('Fetch roles error:', err);
-      setError('Terjadi kesalahan saat mengambil data roles');
+  console.error('Fetch permissions error:', err);
+  setError('Terjadi kesalahan saat mengambil data permissions');
     } finally {
       setLoading(false);
     }
@@ -101,15 +106,15 @@ const PermissionList = () => {
       }
 
       if (res.ok) {
-        setPermissions(prev => prev.filter(p => p.id !== permId));
-        setDeleteDialog({ open: false, role: null });
+  setPermissions(prev => prev.filter(p => p.id !== permId));
+  setDeleteDialog({ open: false, permission: null });
       } else {
         const data = await res.json();
         setError(data.error || data.message || 'Gagal menghapus permission');
       }
     } catch (err) {
-      console.error('Delete role error:', err);
-      setError('Terjadi kesalahan saat menghapus role');
+  console.error('Delete permission error:', err);
+  setError('Terjadi kesalahan saat menghapus permission');
     }
   };
 
@@ -143,8 +148,8 @@ const PermissionList = () => {
         setError(data.error || data.message || 'Gagal menambahkan permission');
       }
     } catch (err) {
-      console.error('Add role error:', err);
-      setError('Terjadi kesalahan saat menambahkan role');
+  console.error('Add permission error:', err);
+  setError('Terjadi kesalahan saat menambahkan permission');
     } finally {
       setAdding(false);
     }
@@ -253,7 +258,7 @@ const PermissionList = () => {
                             <IconButton 
                               size="small" 
                               color="error"
-                              onClick={() => setDeleteDialog({ open: true, role: p })}
+                              onClick={() => setDeleteDialog({ open: true, permission: p })}
                             >
                               <IconTrash size={16} />
                             </IconButton>
@@ -271,25 +276,25 @@ const PermissionList = () => {
 
       {/* Delete Confirmation Dialog */}
   <Dialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false, role: null })}
+  open={deleteDialog.open}
+  onClose={() => setDeleteDialog({ open: false, permission: null })}
       >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-    Are you sure you want to delete permission "{deleteDialog.role?.name}"? 
+  Are you sure you want to delete permission "{deleteDialog.permission?.name}"? 
             This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button 
-            onClick={() => setDeleteDialog({ open: false, role: null })}
+            onClick={() => setDeleteDialog({ open: false, permission: null })}
             color="primary"
           >
             Cancel
           </Button>
           <Button 
-    onClick={() => handleDelete(deleteDialog.role?.id)}
+  onClick={() => handleDelete(deleteDialog.permission?.id)}
             color="error"
             variant="contained"
           >

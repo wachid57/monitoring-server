@@ -301,12 +301,30 @@ const Menuitems = [
     icon: IconUserCircle,
     href: '/settings/profile',
   },
+
+  {
+    navlabel: true,
+    subheader: 'Profiles',
+  },
+  {
+    id: uniqueId(),
+    title: 'Profile Settings',
+    icon: IconUserCircle,
+    href: '/profile/view',
+  },
+
   {
     id: uniqueId(),
     title: 'System Settings',
     icon: IconSettings,
     href: '/settings/system',
   },
+
+    {
+    navlabel: true,
+    subheader: 'Templates',
+  },
+
   {
     id: uniqueId(),
     title: 'Frontend pages',

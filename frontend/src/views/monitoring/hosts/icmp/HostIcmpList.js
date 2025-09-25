@@ -38,8 +38,8 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
-  { title: 'Hosts' },
-  { title: 'List Hosts' },
+  { title: 'Monitoring' },
+  { title: 'ICMP Hosts' },
 ];
 
 const ListHosts = () => {
@@ -106,8 +106,8 @@ const ListHosts = () => {
   useEffect(() => { fetchHosts(); }, []);
 
   return (
-    <PageContainer title="List Hosts" description="Manage monitored hosts">
-      <Breadcrumb title="List Hosts" items={BCrumb} />
+    <PageContainer title="ICMP Hosts" description="ICMP-monitored hosts">
+      <Breadcrumb title="ICMP Hosts" items={BCrumb} />
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>

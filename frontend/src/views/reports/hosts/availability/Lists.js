@@ -38,8 +38,8 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
-  { title: 'Hosts' },
-  { title: 'List Hosts' },
+  { title: 'Reports' },
+  { title: 'Hosts Availability' },
 ];
 
 const ListHosts = () => {
@@ -118,8 +118,8 @@ const ListHosts = () => {
   useEffect(() => { fetchHosts(); }, []);
 
   return (
-    <PageContainer title="List Hosts" description="Manage monitored hosts">
-      <Breadcrumb title="List Hosts" items={BCrumb} />
+    <PageContainer title="Hosts Availability" description="Availability reports for hosts">
+      <Breadcrumb title="Hosts Availability" items={BCrumb} />
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>

@@ -153,18 +153,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
     infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
     infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
-    // Duplicate registrations without leading slash - Fiber treats both consistently but add for safety
-    infrastructureGroup.Get("hosts/groups/bindings", handler.GetHostGroupBindings)
-    infrastructureGroup.Post("hosts/groups/bindings", handler.CreateHostGroupBinding)
-    infrastructureGroup.Get("hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
-    infrastructureGroup.Put("hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
-    infrastructureGroup.Delete("hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
+
     // Host Groups under infrastructure alias
     infrastructureGroup.Get("/hosts/groups", handler.GetHostGroups)
     infrastructureGroup.Post("/hosts/groups", handler.CreateHostGroup)
     infrastructureGroup.Get("/hosts/groups/:id", handler.GetHostGroupByID)
     infrastructureGroup.Put("/hosts/groups/:id", handler.UpdateHostGroup)
     infrastructureGroup.Delete("/hosts/groups/:id", handler.DeleteHostGroup)
+
     // Then parametric /hosts routes
     infrastructureGroup.Post("/hosts", handler.CreateHost)
     infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
@@ -222,6 +218,24 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         serviceGroup.Get("/:id", handler.GetServiceGroupByID)
         serviceGroup.Put("/:id", handler.UpdateServiceGroup)
         serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
+
+    // Service Group Bindings
+    sgb := protected.Group("services/groups/bindings")
+    sgb.Get("/", handler.GetServiceGroupBindings)
+    sgb.Post("/", handler.CreateServiceGroupBinding)
+    sgb.Get("/:id", handler.GetServiceGroupBindingByID)
+    sgb.Put("/:id", handler.UpdateServiceGroupBinding)
+    sgb.Delete("/:id", handler.DeleteServiceGroupBinding)
+
+    // Infrastructure alias for service group bindings (none in sidebar, but keep symmetry)
+    infrastructureGroup.Get("/services/groups/bindings", handler.GetServiceGroupBindings)
+    infrastructureGroup.Post("/services/groups/bindings", handler.CreateServiceGroupBinding)
+    infrastructureGroup.Get("/services/groups/bindings/:id", handler.GetServiceGroupBindingByID)
+    infrastructureGroup.Put("/services/groups/bindings/:id", handler.UpdateServiceGroupBinding)
+    infrastructureGroup.Delete("/services/groups/bindings/:id", handler.DeleteServiceGroupBinding)
+
+    // Admin aliases for permissions already set; add groups alias per menu
+    adminGroup.Get("/groups/list", handler.GetGroups)
 
         // CRUD Contact Groups
         contactGroup := protected.Group("monitoring/contactgroups")
