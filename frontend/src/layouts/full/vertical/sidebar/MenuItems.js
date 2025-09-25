@@ -129,12 +129,6 @@ const Menuitems = [
         icon: IconPoint,
         href: '/infrastructure/hosts/list',
       },
-      {
-        id: uniqueId(),
-        title: 'Add Host',
-        icon: IconPoint,
-        href: '/infrastructure/hosts/add',
-      },
     ],
   },
   {
@@ -148,12 +142,6 @@ const Menuitems = [
         title: 'List Groups',
         icon: IconPoint,
         href: '/infrastructure/hostgroups/list',
-      },
-      {
-        id: uniqueId(),
-        title: 'Add Group',
-        icon: IconPoint,
-        href: '/infrastructure/hostgroups/add',
       },
       {
         id: uniqueId(),
@@ -174,12 +162,6 @@ const Menuitems = [
         title: 'List Services',
         icon: IconPoint,
         href: '/infrastructure/services/list',
-      },
-      {
-        id: uniqueId(),
-        title: 'Add Service',
-        icon: IconPoint,
-        href: '/infrastructure/services/add',
       },
     ],
   },

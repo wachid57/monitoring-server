@@ -82,7 +82,7 @@ export default function HostGroupBindings() {
               <TextField fullWidth placeholder="Search" value={q} onChange={(e)=>setQ(e.target.value)}
                 InputProps={{ startAdornment: (<InputAdornment position="start"><IconSearch size={20} /></InputAdornment>) }} />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setForm(defaultItem); setEditingId(null); setOpen(true); }}>Add Binding</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setForm(defaultItem); setEditingId(null); setOpen(true); }} sx={{ width: 225 }}>Add Binding</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb:2 }}>{error}</Alert>}

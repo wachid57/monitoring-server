@@ -174,32 +174,31 @@ const PermissionBindings = () => {
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h5">Roles & Permissions</Typography>
+            <Box sx={{ minWidth: 300 }}>
+              <TextField
+                placeholder="Search roles..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconSearch size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                fullWidth
+              />
+            </Box>
             <Button
               variant="contained"
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => setAddOpen(true)}
+              sx={{ width: 225 }}
             >
               Add Binding (roleId/permissionId quick)
             </Button>
           </Stack>
-
-          <Box mb={3}>
-            <TextField
-              placeholder="Search roles..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IconSearch size={20} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ minWidth: 300 }}
-            />
-          </Box>
 
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>

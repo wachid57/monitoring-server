@@ -114,7 +114,7 @@ export default function HostGroupBindings() {
                 fullWidth
               />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => { setDialogOpen(true); setEditId(null); }}>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => { setDialogOpen(true); setEditId(null); }} sx={{ width: 225 }}>
               Add Binding
             </Button>
           </Stack>
