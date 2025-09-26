@@ -33,6 +33,7 @@ var migrations = []struct {
     {16, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
     {17, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
     {18, "CreateAvailabilityWebsiteTable", func(db *gorm.DB) error { return migration.CreateAvailabilityWebsiteTable(db) }},
+    {24, "CreateUserProfilesTables", func(db *gorm.DB) error { return migration.CreateUserProfilesTables(db) }},
 
     // Seed data (run after schema)
     {19, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},

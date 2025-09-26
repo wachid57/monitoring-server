@@ -1,34 +1,31 @@
+import { uniqueId } from 'lodash';
 import {
   IconHome,
   IconPoint,
   IconApps,
   IconClipboard,
   IconFileDescription,
-  IconBorderAll,
   IconZoomCode,
   IconRotate,
   IconUserPlus,
   IconLogin,
   IconAlertCircle,
-  IconSettings,
   IconAppWindow,
   IconListTree,
   IconChartHistogram,
-
+  IconBorderAll,
+  IconSettings,
 } from '@tabler/icons-react';
-import { uniqueId } from 'lodash';
 
 const Menuitems = [
   {
     id: uniqueId(),
     title: 'Dashboard',
-    icon: IconHome,
     href: '/dashboards/',
     children: [
       {
         id: uniqueId(),
         title: 'Modern',
-        icon: IconPoint,
         href: '/dashboards/modern',
         chip: 'New',
         chipColor: 'secondary',
@@ -175,31 +172,31 @@ const Menuitems = [
         id: uniqueId(),
         title: 'User Profile',
         icon: IconPoint,
-        href: '/user-profile',
+    href: '/profiles/users/profile',
         children: [
           {
             id: uniqueId(),
             title: 'Profile',
             icon: IconPoint,
-            href: '/user-profile',
+      href: '/profiles/users/profile',
           },
           {
             id: uniqueId(),
             title: 'Followers',
             icon: IconPoint,
-            href: '/apps/followers',
+      href: '/profiles/users/followers',
           },
           {
             id: uniqueId(),
             title: 'Friends',
             icon: IconPoint,
-            href: '/apps/friends',
+      href: '/profiles/users/friends',
           },
           {
             id: uniqueId(),
             title: 'Gallery',
             icon: IconPoint,
-            href: '/apps/gallery',
+      href: '/profiles/users/gallery',
           },
         ],
       },

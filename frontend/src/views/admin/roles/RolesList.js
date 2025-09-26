@@ -167,7 +167,7 @@ const RolesList = () => {
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Box sx={{ minWidth: 300 }}>
+            <Box sx={{ minWidth: 300, flex: 1, mr: 2 }}>
               <TextField
                 placeholder="Search roles..."
                 value={searchTerm}
@@ -182,7 +182,7 @@ const RolesList = () => {
                 fullWidth
               />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} color="primary" onClick={() => setAddOpen(true)} sx={{ width: 225 }}>
+            <Button variant="contained" startIcon={<IconPlus />} color="primary" onClick={() => setAddOpen(true)}>
               Add New Role
             </Button>
           </Stack>

@@ -178,7 +178,7 @@ const ListUsers = () => {
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Box sx={{ minWidth: 300 }}>
+            <Box sx={{ minWidth: 300, flex: 1, mr: 2 }}>
               <TextField
                 placeholder="Search users..."
                 value={searchTerm}
@@ -198,7 +198,6 @@ const ListUsers = () => {
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => { setAddDialogOpen(true); setFormError(''); }}
-              sx={{ width: 225 }}
             >
               Add New User
             </Button>

@@ -1,8 +1,10 @@
 import axios from 'src/utils/axios';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import { getAuthHeaders } from 'src/utils/auth';
 import { createSlice } from '@reduxjs/toolkit';
 import { map } from 'lodash';
 
-const API_URL = '/api/data/postData';
+const BASE = `${BACKEND_URL}${API_PREFIX}`;
 
 const initialState = {
   posts: [],
@@ -45,24 +47,34 @@ export const { getPosts, getFollowers, onToggleFollow, getPhotos } = UserProfile
 
 export const fetchPosts = () => async (dispatch) => {
   try {
-    const response = await axios.get(`${API_URL}`);
-    dispatch(getPosts(response.data));
+  const res = await fetch(`${BASE}/profiles/users/me/posts`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  // Backend returns [{id, data}], normalize to shape UI expects if needed
+  const normalized = data.map((p) => ({ id: p.id, data: p.data }));
+  dispatch(getPosts(normalized));
   } catch (err) {
     throw new Error(err);
   }
 };
 export const likePosts = (postId) => async (dispatch) => {
   try {
-    const response = await axios.post('/api/data/posts/like', { postId });
-    dispatch(getPosts(response.data.posts));
+  await fetch(`${BASE}/profiles/users/posts/like`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ postId }) });
+  // re-fetch posts
+  const res = await fetch(`${BASE}/profiles/users/me/posts`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  const normalized = data.map((p) => ({ id: p.id, data: p.data }));
+  dispatch(getPosts(normalized));
   } catch (err) {
     throw new Error(err);
   }
 };
 export const addComment = (postId, comment) => async (dispatch) => {
   try {
-    const response = await axios.post('/api/data/posts/comments/add', { postId, comment });
-    dispatch(getPosts(response.data.posts));
+  await fetch(`${BASE}/profiles/users/posts/comments/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ postId, comment }) });
+  const res = await fetch(`${BASE}/profiles/users/me/posts`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  const normalized = data.map((p) => ({ id: p.id, data: p.data }));
+  dispatch(getPosts(normalized));
   } catch (err) {
     throw new Error(err);
   }
@@ -70,8 +82,11 @@ export const addComment = (postId, comment) => async (dispatch) => {
 
 export const addReply = (postId, commentId, reply) => async (dispatch) => {
   try {
-    const response = await axios.post('/api/data/posts/replies/add', { postId, commentId, reply });
-    dispatch(getPosts(response.data.posts));
+  await fetch(`${BASE}/profiles/users/posts/replies/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify({ postId, commentId, reply }) });
+  const res = await fetch(`${BASE}/profiles/users/me/posts`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  const normalized = data.map((p) => ({ id: p.id, data: p.data }));
+  dispatch(getPosts(normalized));
   } catch (err) {
     throw new Error(err);
   }
@@ -79,8 +94,9 @@ export const addReply = (postId, commentId, reply) => async (dispatch) => {
 
 export const fetchFollwores = () => async (dispatch) => {
   try {
-    const response = await axios.get(`/api/data/users`);
-    dispatch(getFollowers(response.data));
+  const res = await fetch(`${BASE}/profiles/users/me/followers`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  dispatch(getFollowers(data));
   } catch (err) {
     throw new Error(err);
   }
@@ -88,8 +104,9 @@ export const fetchFollwores = () => async (dispatch) => {
 
 export const fetchPhotos = () => async (dispatch) => {
   try {
-    const response = await axios.get(`/api/data/gallery`);
-    dispatch(getPhotos(response.data));
+  const res = await fetch(`${BASE}/profiles/users/me/photos`, { headers: getAuthHeaders() });
+  const data = await res.json();
+  dispatch(getPhotos(data));
   } catch (err) {
     throw new Error(err);
   }

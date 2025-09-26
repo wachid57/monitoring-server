@@ -34,7 +34,7 @@ export default function HostGroupBindings() {
   const fetchItems = async () => {
     setLoading(true); setError('');
     try {
-  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/groups/bindings`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/groups/bindings`, { headers: getAuthHeaders() });
       if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
       const data = await res.json();
       if (res.ok) setItems(data || []); else setError(data.error || 'Failed to fetch');
@@ -54,7 +54,7 @@ export default function HostGroupBindings() {
     setSubmitting(true); setError('');
     try {
       const payload = { ...form, groupid: form.groupid ? Number(form.groupid) : null, hostid: form.hostid ? Number(form.hostid) : null };
-  const url = editingId ? `${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/groups/bindings/${editingId}` : `${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/groups/bindings`;
+      const url = editingId ? `${BACKEND_URL}${API_PREFIX}/hosts/groups/bindings/${editingId}` : `${BACKEND_URL}${API_PREFIX}/hosts/groups/bindings`;
       const method = editingId ? 'PUT' : 'POST';
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }, body: JSON.stringify(payload) });
       if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
@@ -66,7 +66,7 @@ export default function HostGroupBindings() {
 
   const remove = async (id) => {
     try {
-  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/groups/bindings/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/groups/bindings/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
       if (res.ok) setItems(prev => prev.filter(x => x.id !== id));
     } catch (e) {}
@@ -82,7 +82,7 @@ export default function HostGroupBindings() {
               <TextField fullWidth placeholder="Search" value={q} onChange={(e)=>setQ(e.target.value)}
                 InputProps={{ startAdornment: (<InputAdornment position="start"><IconSearch size={20} /></InputAdornment>) }} />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setForm(defaultItem); setEditingId(null); setOpen(true); }} sx={{ width: 225 }}>Add Binding</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setForm(defaultItem); setEditingId(null); setOpen(true); }}>Add Binding</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb:2 }}>{error}</Alert>}

@@ -29,10 +29,10 @@ const EcomProductList = Loadable(lazy(() => import('../views/apps/eCommerce/Ecom
 const EcomProductCheckout = Loadable(
   lazy(() => import('../views/apps/eCommerce/EcommerceCheckout')),
 );
-const UserProfile = Loadable(lazy(() => import('../views/apps/user-profile/UserProfile')));
-const Followers = Loadable(lazy(() => import('../views/apps/user-profile/Followers')));
-const Friends = Loadable(lazy(() => import('../views/apps/user-profile/Friends')));
-const Gallery = Loadable(lazy(() => import('../views/apps/user-profile/Gallery')));
+const ProfileView = Loadable(lazy(() => import('../views/profiles/users/Profile')));
+const Followers = Loadable(lazy(() => import('../views/profiles/users/Followers')));
+const Friends = Loadable(lazy(() => import('../views/profiles/users/Friends')));
+const Gallery = Loadable(lazy(() => import('../views/profiles/users/Gallery')));
 const InvoiceList = Loadable(lazy(() => import('../views/apps/invoice/List')));
 const InvoiceCreate = Loadable(lazy(() => import('../views/apps/invoice/Create')));
 const InvoiceDetail = Loadable(lazy(() => import('../views/apps/invoice/Detail')));
@@ -113,28 +113,9 @@ const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/
 const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
 const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
 const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
-const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/services/ListServicesGroups')));
-const ServicesGroupsBinding = Loadable(lazy(() => import('../views/infrastruktur/groups/services/ServicesGroupsBinding')));
 // Reports
 const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
-// Monitoring metrics
-const MetricsIndex = Loadable(lazy(() => import('../views/monitoring/metrics/MetricsIndex')));
-const CPUMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/CPUMetricsList')));
-const MemoryMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/MemoryMetricsList')));
-const DiskMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/DiskMetricsList')));
-// Notifications
-const ContactGroups = Loadable(lazy(() => import('../views/notifications/ContactGroups')));
-const NotificationsList = Loadable(lazy(() => import('../views/notifications/NotificationsList')));
-const AcknowledgedList = Loadable(lazy(() => import('../views/notifications/AcknowledgedList')));
-// Reports
-const ManualReports = Loadable(lazy(() => import('../views/reports/manual/ManualReports')));
-const AutomaticReports = Loadable(lazy(() => import('../views/reports/automatic/AutomaticReports')));
-// Admin Groups
-const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGroups')));
-// Settings
-const ProfileSettings = Loadable(lazy(() => import('../views/settings/ProfileSettings')));
-const SystemSettings = Loadable(lazy(() => import('../views/settings/SystemSettings')));
-// Admin Permission pages (moved)
+// Admin Permission pages
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
 
@@ -230,10 +211,19 @@ const Router = [
       { path: '/apps/invoice/create', element: <ProtectedRoute><InvoiceCreate /></ProtectedRoute> },
       { path: '/apps/invoice/detail/:id', element: <ProtectedRoute><InvoiceDetail /></ProtectedRoute> },
       { path: '/apps/invoice/edit/:id', element: <ProtectedRoute><InvoiceEdit /></ProtectedRoute> },
-      { path: '/apps/followers', element: <ProtectedRoute><Followers /></ProtectedRoute> },
-      { path: '/apps/friends', element: <ProtectedRoute><Friends /></ProtectedRoute> },
-      { path: '/apps/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
-      { path: '/user-profile', element: <ProtectedRoute><UserProfile /></ProtectedRoute> },
+  // Profiles Users paths
+  { path: '/profiles/users/profile', element: <ProtectedRoute><ProfileView /></ProtectedRoute> },
+  { path: '/profiles/users/followers', element: <ProtectedRoute><Followers /></ProtectedRoute> },
+  { path: '/profiles/users/friends', element: <ProtectedRoute><Friends /></ProtectedRoute> },
+  { path: '/profiles/users/gallery', element: <ProtectedRoute><Gallery /></ProtectedRoute> },
+  // Legacy paths redirected
+  { path: '/user-profile', element: <Navigate to="/profiles/users/profile" replace /> },
+  { path: '/profiles/user-profile', element: <Navigate to="/profiles/users/profile" replace /> },
+  { path: '/profiles//user-profile', element: <Navigate to="/profiles/users/profile" replace /> },
+  { path: '/apps/user-profile', element: <Navigate to="/profiles/users/profile" replace /> },
+  { path: '/apps/followers', element: <Navigate to="/profiles/users/followers" replace /> },
+  { path: '/apps/friends', element: <Navigate to="/profiles/users/friends" replace /> },
+  { path: '/apps/gallery', element: <Navigate to="/profiles/users/gallery" replace /> },
       
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
@@ -247,11 +237,6 @@ const Router = [
   { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
   { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
   { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
-  // Metrics
-  { path: '/monitoring/metrics', element: <ProtectedRoute><MetricsIndex /></ProtectedRoute> },
-  { path: '/monitoring/metrics/cpu', element: <ProtectedRoute><CPUMetricsList /></ProtectedRoute> },
-  { path: '/monitoring/metrics/memory', element: <ProtectedRoute><MemoryMetricsList /></ProtectedRoute> },
-  { path: '/monitoring/metrics/disk', element: <ProtectedRoute><DiskMetricsList /></ProtectedRoute> },
   
   // Infrastructure routes for hosts (alternate path used by sidebar)
   { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
@@ -261,28 +246,9 @@ const Router = [
   { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
   { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
   { path: '/infrastructure/hostgroups/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
-  { path: '/infrastructure/servicegroups/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/servicegroups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
-  // Host groups alias paths in menu (if needed)
-  { path: '/infrastructure/groups/hosts/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/groups/hosts/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
-  // Services groups alias paths in menu
-  { path: '/infrastructure/groups/services/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/groups/services/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
   
   // Reports
   { path: '/report/hosts/availability', element: <ProtectedRoute><HostsAvailabilityReport /></ProtectedRoute> },
-  { path: '/reports/manual', element: <ProtectedRoute><ManualReports /></ProtectedRoute> },
-  { path: '/reports/automatic', element: <ProtectedRoute><AutomaticReports /></ProtectedRoute> },
-  // Notifications
-  { path: '/notifications/contactgroups', element: <ProtectedRoute><ContactGroups /></ProtectedRoute> },
-  { path: '/notifications/list', element: <ProtectedRoute><NotificationsList /></ProtectedRoute> },
-  { path: '/notifications/acknowledged', element: <ProtectedRoute><AcknowledgedList /></ProtectedRoute> },
-  // Admin Groups
-  { path: '/admin/groups/list', element: <ProtectedRoute><AdminGroupsList /></ProtectedRoute> },
-  // Settings
-  { path: '/settings/profile', element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
-  { path: '/settings/system', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 

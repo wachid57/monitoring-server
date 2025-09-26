@@ -38,89 +38,92 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
-  { title: 'Service Groups' },
-  { title: 'List Service Groups' },
+  { title: 'Hosts' },
+  { title: 'List Hosts' },
 ];
 
-const ServicesGroupsLists = () => {
-  const [groups, setGroups] = useState([]);
+const ListHosts = () => {
+  const [hosts, setHosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, group: null });
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, host: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newGroup, setNewGroup] = useState({ name: '', desc: '' });
+  const [newHost, setNewHost] = useState({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
   const [editMode, setEditMode] = useState(false);
-  const [editingGroupId, setEditingGroupId] = useState(null);
+  const [editingHostId, setEditingHostId] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  const fetchGroups = async () => {
+  const fetchHosts = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + '/services/groups', { headers: getAuthHeaders() });
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { headers: getAuthHeaders() });
       if (res.status === 401 || res.status === 403) {
         handleAuthError({ status: res.status });
         return;
       }
       const data = await res.json();
       if (res.ok) {
-        setGroups(data || []);
+        setHosts(data || []);
       } else {
-        setError(data.error || 'Failed to fetch service groups');
+        setError(data.error || 'Failed to fetch hosts');
       }
     } catch (err) {
-      console.error('fetch service groups error', err);
-      setError('Failed to fetch service groups');
+      console.error('fetch hosts error', err);
+      setError('Failed to fetch hosts');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (groupId) => {
+  const handleDelete = async (hostId) => {
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/services/groups/${groupId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${hostId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
       if (res.ok) {
-        setGroups(prev => prev.filter(g => g.id !== groupId));
-        setDeleteDialog({ open: false, group: null });
+        setHosts(prev => prev.filter(h => h.id !== hostId));
+        setDeleteDialog({ open: false, host: null });
       } else {
         const data = await res.json();
-        setError(data.error || 'Failed to delete service group');
+        setError(data.error || 'Failed to delete host');
       }
     } catch (err) {
-      console.error('delete service group error', err);
-      setError('Failed to delete service group');
+      console.error('delete host error', err);
+      setError('Failed to delete host');
     }
   };
 
-  const filteredGroups = groups.filter(g =>
-    g.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    g.desc?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHosts = hosts.filter(h =>
+    h.hostname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    h.ip?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    h.alias?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  useEffect(() => { fetchGroups(); }, []);
+  useEffect(() => { fetchHosts(); }, []);
 
   return (
-    <PageContainer title="Service Groups" description="Manage service groups">
-  <Breadcrumb title="Service Groups" items={BCrumb} />
+    <PageContainer title="List Hosts" description="Manage monitored hosts">
+      <Breadcrumb title="List Hosts" items={BCrumb} />
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Box sx={{ minWidth: 300 }}>
-              <TextField
-                placeholder="Search service groups..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{ startAdornment: (<InputAdornment position="start"><IconSearch size={20} /></InputAdornment>) }}
-                fullWidth
-              />
-            </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 225 }}>Add Group</Button>
+            <Typography variant="h5">Hosts</Typography>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)}>Add Host</Button>
           </Stack>
+
+          <Box mb={3}>
+            <TextField
+              placeholder="Search hosts..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{ startAdornment: (<InputAdornment position="start"><IconSearch size={20} /></InputAdornment>) }}
+              sx={{ minWidth: 300 }}
+            />
+          </Box>
 
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
@@ -131,31 +134,37 @@ const ServicesGroupsLists = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Description</TableCell>
-                        <TableCell>Created</TableCell>
+                    <TableCell>IP</TableCell>
+                    <TableCell>Hostname</TableCell>
+                    <TableCell>Alias</TableCell>
+                    <TableCell>Service</TableCell>
+                    <TableCell>Tags</TableCell>
+                    <TableCell>Created</TableCell>
                     <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredGroups.length === 0 ? (
+                  {filteredHosts.length === 0 ? (
                     <TableRow><TableCell colSpan={7} align="center">No hosts found</TableCell></TableRow>
                   ) : (
-                    filteredGroups.map((g) => (
-                      <TableRow key={g.id}>
-                        <TableCell>{g.name || '-'}</TableCell>
-                        <TableCell>{g.desc || '-'}</TableCell>
-                        <TableCell>{g.created_at ? new Date(g.created_at).toLocaleDateString() : '-'}</TableCell>
+                    filteredHosts.map((h) => (
+                      <TableRow key={h.id}>
+                        <TableCell>{h.ip || '-'}</TableCell>
+                        <TableCell>{h.hostname || '-'}</TableCell>
+                        <TableCell>{h.alias || '-'}</TableCell>
+                        <TableCell>{h.service || '-'}</TableCell>
+                        <TableCell>{h.hosts_tags || '-'}</TableCell>
+                        <TableCell>{h.created_at ? new Date(h.created_at).toLocaleDateString() : '-'}</TableCell>
                         <TableCell align="center">
                                           <Stack direction="row" spacing={1} justifyContent="center">
                                             <IconButton size="small" color="primary"><IconEye size={16} /></IconButton>
                                             <IconButton size="small" color="warning" onClick={() => {
                                               setEditMode(true);
-                                              setEditingGroupId(g.id);
-                                              setNewGroup({ name: g.name || '', desc: g.desc || '' });
+                                              setEditingHostId(h.id);
+                                              setNewHost({ ip: h.ip || '', hostname: h.hostname || '', alias: h.alias || '', service: h.service || '', hosts_tags: h.hosts_tags || '' });
                                               setAddDialogOpen(true);
                                             }}><IconEdit size={16} /></IconButton>
-                                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, group: g })}><IconTrash size={16} /></IconButton>
+                                            <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, host: h })}><IconTrash size={16} /></IconButton>
                                           </Stack>
                         </TableCell>
                       </TableRow>
@@ -168,22 +177,25 @@ const ServicesGroupsLists = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, group: null })}>
+      <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, host: null })}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          <Typography>Delete service group "{deleteDialog.group?.name}"?</Typography>
+          <Typography>Delete host "{deleteDialog.host?.hostname}"?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, group: null })}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={() => handleDelete(deleteDialog.group?.id)}>Delete</Button>
+          <Button onClick={() => setDeleteDialog({ open: false, host: null })}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={() => handleDelete(deleteDialog.host?.id)}>Delete</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setEditMode(false); setEditingGroupId(null); }} fullWidth maxWidth="sm">
-        <DialogTitle>{editMode ? 'Edit Service Group' : 'Add Service Group'}</DialogTitle>
+      <Dialog open={addDialogOpen} onClose={() => { setAddDialogOpen(false); setEditMode(false); setEditingHostId(null); }} fullWidth maxWidth="sm">
+        <DialogTitle>{editMode ? 'Edit Host' : 'Add Host'}</DialogTitle>
         <DialogContent>
-          <TextField label="Name" fullWidth margin="dense" value={newGroup.name} onChange={e => setNewGroup({...newGroup, name: e.target.value})} />
-          <TextField label="Description" fullWidth margin="dense" value={newGroup.desc} onChange={e => setNewGroup({...newGroup, desc: e.target.value})} />
+          <TextField label="IP" fullWidth margin="dense" value={newHost.ip} onChange={e => setNewHost({...newHost, ip: e.target.value})} />
+          <TextField label="Hostname" fullWidth margin="dense" value={newHost.hostname} onChange={e => setNewHost({...newHost, hostname: e.target.value})} />
+          <TextField label="Alias" fullWidth margin="dense" value={newHost.alias} onChange={e => setNewHost({...newHost, alias: e.target.value})} />
+          <TextField label="Service" fullWidth margin="dense" value={newHost.service} onChange={e => setNewHost({...newHost, service: e.target.value})} />
+          <TextField label="Tags" fullWidth margin="dense" value={newHost.hosts_tags} onChange={e => setNewHost({...newHost, hosts_tags: e.target.value})} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
@@ -191,21 +203,21 @@ const ServicesGroupsLists = () => {
             setSubmitLoading(true);
             try {
               let res;
-              if (editMode && editingGroupId) {
-                res = await fetch(BACKEND_URL + API_PREFIX + `/services/groups/${editingGroupId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newGroup) });
+              if (editMode && editingHostId) {
+                res = await fetch(BACKEND_URL + API_PREFIX + `/monitoring/hosts/${editingHostId}`, { method: 'PUT', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
               } else {
-                res = await fetch(BACKEND_URL + API_PREFIX + '/services/groups', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newGroup) });
+                res = await fetch(BACKEND_URL + API_PREFIX + '/monitoring/hosts', { method: 'POST', headers: {'Content-Type': 'application/json', ...getAuthHeaders()}, body: JSON.stringify(newHost) });
               }
               if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
               const data = await res.json();
               if (res.ok) {
-                fetchGroups();
+                fetchHosts();
                 setAddDialogOpen(false);
-                setNewGroup({ name: '', desc: '' });
+                setNewHost({ ip: '', hostname: '', alias: '', service: '', hosts_tags: '' });
                 setEditMode(false);
-                setEditingGroupId(null);
-              } else setError(data.error || (editMode ? 'Failed to update service group' : 'Failed to create service group'));
-            } catch (err) { console.error(err); setError(editMode ? 'Failed to update service group' : 'Failed to create service group'); }
+                setEditingHostId(null);
+              } else setError(data.error || (editMode ? 'Failed to update host' : 'Failed to create host'));
+            } catch (err) { console.error(err); setError(editMode ? 'Failed to update host' : 'Failed to create host'); }
             finally { setSubmitLoading(false); }
           }}>{submitLoading ? <CircularProgress size={20} /> : (editMode ? 'Save' : 'Create')}</Button>
         </DialogActions>
@@ -214,5 +226,5 @@ const ServicesGroupsLists = () => {
   );
 };
 
-export default ServicesGroupsLists;
+export default ListHosts;
 

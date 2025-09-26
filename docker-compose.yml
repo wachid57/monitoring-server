@@ -27,6 +27,9 @@ services:
       context: ./frontend
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+        VITE_API_PREFIX: ${VITE_API_PREFIX}
+        VITE_SITE_TITLE: ${VITE_SITE_TITLE}
+        VITE_SITE_DESCRIPTION: ${VITE_SITE_DESCRIPTION}
     ports:
       - "7081:8080"
     env_file:

@@ -38,8 +38,8 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
-  { title: 'Monitoring' },
-  { title: 'Website Hosts' },
+  { title: 'Hosts' },
+  { title: 'List Hosts' },
 ];
 
 const ListHosts = () => {
@@ -106,8 +106,8 @@ const ListHosts = () => {
   useEffect(() => { fetchHosts(); }, []);
 
   return (
-    <PageContainer title="Website Hosts" description="Website-monitored hosts">
-      <Breadcrumb title="Website Hosts" items={BCrumb} />
+    <PageContainer title="List Hosts" description="Manage monitored hosts">
+      <Breadcrumb title="List Hosts" items={BCrumb} />
       <Card>
         <CardContent>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
@@ -120,7 +120,7 @@ const ListHosts = () => {
                 fullWidth
               />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 225 }}>Add Host</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 300 }}>Add Host</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}

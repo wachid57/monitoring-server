@@ -122,7 +122,7 @@ const apps = [
     title: 'Note App',
   },
   {
-    link: '/apps/user-profile',
+    link: '/profiles/users/profile',
     img: app6,
     title: 'User Profile App',
   },

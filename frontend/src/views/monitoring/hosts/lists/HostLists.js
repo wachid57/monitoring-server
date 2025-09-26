@@ -133,7 +133,7 @@ const HostLists = () => {
                 fullWidth
               />
             </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 225 }}>Add Host</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddDialogOpen(true)} sx={{ width: 300 }}>Add Host</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}

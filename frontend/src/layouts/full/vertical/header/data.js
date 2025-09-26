@@ -66,8 +66,8 @@ const notifications = [
 // Profile dropdown
 //
 const profile = [
-  {
-    href: '/user-profile',
+    {
+      href: '/profiles/users/profile',
     title: 'My Profile',
     subtitle: 'Account Settings',
     icon: icon1,
@@ -161,7 +161,7 @@ const pageLinks = [
     title: 'Notes App',
   },
   {
-    href: '/user-profile',
+  href: '/profiles/users/profile',
     title: 'User Application',
   },
   {

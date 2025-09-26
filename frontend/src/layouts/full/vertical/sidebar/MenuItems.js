@@ -66,7 +66,7 @@ const Menuitems = [
   {
     id: uniqueId(),
     title: 'Overview',
-    icon: IconChartArea,
+  href: '/profiles/users/profile',
     href: '/dashboards/modern',
   },
 
@@ -90,31 +90,31 @@ const Menuitems = [
     id: uniqueId(),
     title: 'System Metrics',
     icon: IconChartHistogram,
-    href: '/monitoring/metrics',
+  href: '/profiles/users/profile',
     children: [
       {
         id: uniqueId(),
         title: 'CPU Metrics',
         icon: IconPoint,
-        href: '/monitoring/metrics/cpu',
+    href: '/profiles/users/profile',
       },
       {
         id: uniqueId(),
         title: 'Memory Metrics',
         icon: IconPoint,
-        href: '/monitoring/metrics/memory',
+    href: '/profiles/users/followers',
       },
       {
         id: uniqueId(),
         title: 'Disk Metrics',
         icon: IconPoint,
-        href: '/monitoring/metrics/disk',
+    href: '/profiles/users/friends',
       },
     ],
   },
 
   {
-    navlabel: true,
+    href: '/profiles/users/gallery',
     subheader: 'Infrastructure',
   },
   {
@@ -129,6 +129,12 @@ const Menuitems = [
         icon: IconPoint,
         href: '/infrastructure/hosts/list',
       },
+      {
+        id: uniqueId(),
+        title: 'Add Host',
+        icon: IconPoint,
+        href: '/infrastructure/hosts/add',
+      },
     ],
   },
   {
@@ -141,13 +147,19 @@ const Menuitems = [
         id: uniqueId(),
         title: 'List Groups',
         icon: IconPoint,
-        href: '/infrastructure/groups/hosts/list',
+        href: '/infrastructure/hostgroups/list',
+      },
+      {
+        id: uniqueId(),
+        title: 'Add Group',
+        icon: IconPoint,
+        href: '/infrastructure/hostgroups/add',
       },
       {
         id: uniqueId(),
         title: 'Bindings',
         icon: IconPoint,
-        href: '/infrastructure/groups/hosts/bindings',
+        href: '/infrastructure/hostgroups/bindings',
       },
     ],
   },
@@ -159,15 +171,15 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'Group Lists',
+        title: 'List Services',
         icon: IconPoint,
-        href: '/infrastructure/groups/services/list',
+        href: '/infrastructure/services/list',
       },
-            {
+      {
         id: uniqueId(),
-        title: 'Bindings',
+        title: 'Add Service',
         icon: IconPoint,
-        href: '/infrastructure/groups/services/bindings',
+        href: '/infrastructure/services/add',
       },
     ],
   },
@@ -301,30 +313,12 @@ const Menuitems = [
     icon: IconUserCircle,
     href: '/settings/profile',
   },
-
-  {
-    navlabel: true,
-    subheader: 'Profiles',
-  },
-  {
-    id: uniqueId(),
-    title: 'Profile Settings',
-    icon: IconUserCircle,
-    href: '/profile/view',
-  },
-
   {
     id: uniqueId(),
     title: 'System Settings',
     icon: IconSettings,
     href: '/settings/system',
   },
-
-    {
-    navlabel: true,
-    subheader: 'Templates',
-  },
-
   {
     id: uniqueId(),
     title: 'Frontend pages',
@@ -462,31 +456,31 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Users',
     icon: IconUserCircle,
-    href: '/user-profile',
+  href: '/profiles/users/profile',
     children: [
       {
         id: uniqueId(),
         title: 'Profile',
         icon: IconPoint,
-        href: '/user-profile',
+    href: '/profiles/users/profile',
       },
       {
         id: uniqueId(),
         title: 'Followers',
         icon: IconPoint,
-        href: '/apps/followers',
+    href: '/profiles/users/followers',
       },
       {
         id: uniqueId(),
         title: 'Friends',
         icon: IconPoint,
-        href: '/apps/friends',
+    href: '/profiles/users/friends',
       },
       {
         id: uniqueId(),
         title: 'Gallery',
         icon: IconPoint,
-        href: '/apps/gallery',
+    href: '/profiles/users/gallery',
       },
     ],
   },

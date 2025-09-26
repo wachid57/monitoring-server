@@ -10,6 +10,7 @@ require (
 	github.com/redis/go-redis/v9 v9.14.0
 	github.com/swaggo/swag v1.16.4
 	golang.org/x/crypto v0.23.0
+	gorm.io/datatypes v1.2.7
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.0
 )

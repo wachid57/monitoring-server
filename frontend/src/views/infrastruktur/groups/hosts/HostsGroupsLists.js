@@ -138,7 +138,6 @@ const ListHostGroup = () => {
               variant="contained"
               startIcon={<IconPlus />}
               onClick={() => setAddDialogOpen(true)}
-              sx={{ width: 225 }}
             >
               Add Group
             </Button>

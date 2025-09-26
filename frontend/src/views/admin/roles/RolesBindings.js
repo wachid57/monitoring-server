@@ -178,8 +178,8 @@ const RolesBindings = () => {
 
       <Card>
         <CardContent>
-  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-    <Box sx={{ minWidth: 300 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+            <Box sx={{ minWidth: 300, flex: 1, mr: 2 }}>
               <TextField
                 placeholder="Search..."
         value={searchTerm}
@@ -194,7 +194,7 @@ const RolesBindings = () => {
                 fullWidth
               />
             </Box>
-  <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddOpen(true)} sx={{ width: 225 }}>Add Binding</Button>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={() => setAddOpen(true)}>Add Binding</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

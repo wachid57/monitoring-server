@@ -1,0 +1,1 @@
+import{g as s,h as e}from"./Typography-DW8TAfFy.js";function a(t){return e("MuiListItemIcon",t)}const n=s("MuiListItemIcon",["root","alignItemsFlexStart"]);function l(t){return e("MuiListItemText",t)}const o=s("MuiListItemText",["root","multiline","dense","inset","primary","secondary"]);export{a,n as b,l as g,o as l};

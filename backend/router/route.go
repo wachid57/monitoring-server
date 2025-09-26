@@ -111,22 +111,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         rolesGroup.Post("/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
         rolesGroup.Delete("/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
 
-    // Host Group Bindings (static, must be registered before /hosts/groups/:id)
-    hgb := protected.Group("hosts/groups/bindings")
-    hgb.Get("/", handler.GetHostGroupBindings)
-    hgb.Post("/", handler.CreateHostGroupBinding)
-    hgb.Get("/:id", handler.GetHostGroupBindingByID)
-    hgb.Put("/:id", handler.UpdateHostGroupBinding)
-    hgb.Delete("/:id", handler.DeleteHostGroupBinding)
-
-    // Also register without trailing slash to handle clients requesting exact path
-    protected.Get("hosts/groups/bindings", handler.GetHostGroupBindings)
-    protected.Post("hosts/groups/bindings", handler.CreateHostGroupBinding)
-    protected.Get("hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
-    protected.Put("hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
-    protected.Delete("hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
-
-    // CRUD Host Group (register after bindings but before parametric /hosts/:id to avoid shadowing)
+    // CRUD Host Group (register before parametric /hosts/:id to avoid shadowing)
     hostGroups := protected.Group("hosts/groups")
         hostGroups.Get("/", handler.GetHostGroups)
         hostGroups.Post("/", handler.CreateHostGroup)
@@ -143,24 +128,30 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     hostsGroup.Put("/:id", handler.UpdateHost)
     hostsGroup.Delete("/:id", handler.DeleteHost)
 
+        // Host Group Bindings
+        hgb := protected.Group("hosts/groups/bindings")
+        hgb.Get("/", handler.GetHostGroupBindings)
+        hgb.Post("/", handler.CreateHostGroupBinding)
+        hgb.Get("/:id", handler.GetHostGroupBindingByID)
+        hgb.Put("/:id", handler.UpdateHostGroupBinding)
+        hgb.Delete("/:id", handler.DeleteHostGroupBinding)
+
     // Infrastructure API aliases for hosts (frontend may use /infrastructure/hosts/...)
     infrastructureGroup := protected.Group("infrastructure")
     // Register static subpaths first to prevent '/hosts/:id' from capturing them
     infrastructureGroup.Get("/hosts/list", handler.GetHosts)
-    // Host Group Bindings under infrastructure alias (register before /hosts/groups/:id)
-    infrastructureGroup.Get("/hosts/groups/bindings", handler.GetHostGroupBindings)
-    infrastructureGroup.Post("/hosts/groups/bindings", handler.CreateHostGroupBinding)
-    infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
-    infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
-    infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
-
     // Host Groups under infrastructure alias
     infrastructureGroup.Get("/hosts/groups", handler.GetHostGroups)
     infrastructureGroup.Post("/hosts/groups", handler.CreateHostGroup)
     infrastructureGroup.Get("/hosts/groups/:id", handler.GetHostGroupByID)
     infrastructureGroup.Put("/hosts/groups/:id", handler.UpdateHostGroup)
     infrastructureGroup.Delete("/hosts/groups/:id", handler.DeleteHostGroup)
-
+    // Host Group Bindings under infrastructure alias
+    infrastructureGroup.Get("/hosts/groups/bindings", handler.GetHostGroupBindings)
+    infrastructureGroup.Post("/hosts/groups/bindings", handler.CreateHostGroupBinding)
+    infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
+    infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
+    infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
     // Then parametric /hosts routes
     infrastructureGroup.Post("/hosts", handler.CreateHost)
     infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
@@ -219,24 +210,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         serviceGroup.Put("/:id", handler.UpdateServiceGroup)
         serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
 
-    // Service Group Bindings
-    sgb := protected.Group("services/groups/bindings")
-    sgb.Get("/", handler.GetServiceGroupBindings)
-    sgb.Post("/", handler.CreateServiceGroupBinding)
-    sgb.Get("/:id", handler.GetServiceGroupBindingByID)
-    sgb.Put("/:id", handler.UpdateServiceGroupBinding)
-    sgb.Delete("/:id", handler.DeleteServiceGroupBinding)
-
-    // Infrastructure alias for service group bindings (none in sidebar, but keep symmetry)
-    infrastructureGroup.Get("/services/groups/bindings", handler.GetServiceGroupBindings)
-    infrastructureGroup.Post("/services/groups/bindings", handler.CreateServiceGroupBinding)
-    infrastructureGroup.Get("/services/groups/bindings/:id", handler.GetServiceGroupBindingByID)
-    infrastructureGroup.Put("/services/groups/bindings/:id", handler.UpdateServiceGroupBinding)
-    infrastructureGroup.Delete("/services/groups/bindings/:id", handler.DeleteServiceGroupBinding)
-
-    // Admin aliases for permissions already set; add groups alias per menu
-    adminGroup.Get("/groups/list", handler.GetGroups)
-
         // CRUD Contact Groups
         contactGroup := protected.Group("monitoring/contactgroups")
         contactGroup.Get("/", handler.GetContactGroups)
@@ -269,6 +242,24 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         profileSettingGroup.Get("/:id", handler.GetProfileSettingByID)
         profileSettingGroup.Put("/:id", handler.UpdateProfileSetting)
         profileSettingGroup.Delete("/:id", handler.DeleteProfileSetting)
+
+    // Profiles Users API
+    profilesUsers := protected.Group("profiles/users")
+    profilesUsers.Get("/:id/profile", handler.GetUserProfile)
+    profilesUsers.Get("/:id/photos", handler.GetUserPhotos)
+    profilesUsers.Get("/:id/followers", handler.GetUserFollowers)
+    profilesUsers.Get("/:id/friends", handler.GetUserFriends)
+    profilesUsers.Get("/:id/posts", handler.GetUserPosts)
+    // convenience alias for current user
+    profilesUsers.Get("/me/profile", handler.GetUserProfile)
+    profilesUsers.Get("/me/photos", handler.GetUserPhotos)
+    profilesUsers.Get("/me/followers", handler.GetUserFollowers)
+    profilesUsers.Get("/me/friends", handler.GetUserFriends)
+    profilesUsers.Get("/me/posts", handler.GetUserPosts)
+    // interactions
+    profilesUsers.Post("/posts/like", handler.LikePost)
+    profilesUsers.Post("/posts/comments/add", handler.AddPostComment)
+    profilesUsers.Post("/posts/replies/add", handler.AddPostReply)
 
         // CRUD Report Manual
         reportManualGroup := protected.Group("reports/manual")
