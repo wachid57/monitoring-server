@@ -45,6 +45,7 @@ func InitDB() error {
 		&model.Host{},
 		&model.HostGroup{},
 		&model.HostGroupBinding{},
+		&model.ServiceGroupBinding{},
 		&model.CPUMetric{},
 		&model.MemoryMetric{},
 		&model.DiskMetric{},

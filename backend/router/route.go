@@ -210,6 +210,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         serviceGroup.Put("/:id", handler.UpdateServiceGroup)
         serviceGroup.Delete("/:id", handler.DeleteServiceGroup)
 
+    // Service Group Bindings
+    serviceGroupBindings := protected.Group("services/groups/bindings")
+    serviceGroupBindings.Get("/", handler.GetServiceGroupBindings)
+    serviceGroupBindings.Post("/", handler.CreateServiceGroupBinding)
+    serviceGroupBindings.Get("/:id", handler.GetServiceGroupBindingByID)
+    serviceGroupBindings.Put("/:id", handler.UpdateServiceGroupBinding)
+    serviceGroupBindings.Delete("/:id", handler.DeleteServiceGroupBinding)
+
         // CRUD Contact Groups
         contactGroup := protected.Group("monitoring/contactgroups")
         contactGroup.Get("/", handler.GetContactGroups)
