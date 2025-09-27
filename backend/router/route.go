@@ -328,6 +328,9 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     icmpChecker.Put("/:id", handler.UpdateICMPCheck)
     icmpChecker.Delete("/:id", handler.DeleteICMPCheck)
 
+    // Host availability aggregation
+    protected.Get("/monitoring/hosts/availability/", handler.GetHostsAvailability)
+
     }
 
     // Docs endpoints under /docs/v1.0

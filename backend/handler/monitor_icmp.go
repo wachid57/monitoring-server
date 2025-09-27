@@ -7,7 +7,13 @@ import (
 	"monitoring-server/model"
 )
 
-// ListICMPChecks returns all ICMP checks
+// ListICMPChecks godoc
+// @Summary List ICMP monitoring checks
+// @Tags Monitoring-Checks
+// @Produce json
+// @Success 200 {array} model.ICMPCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/icmp/ [get]
 func ListICMPChecks(c *fiber.Ctx) error {
 	var checks []model.ICMPCheck
 	if err := database.DB.Find(&checks).Error; err != nil {
@@ -16,7 +22,15 @@ func ListICMPChecks(c *fiber.Ctx) error {
 	return c.JSON(checks)
 }
 
-// CreateICMPCheck creates a new ICMP check
+// CreateICMPCheck godoc
+// @Summary Create ICMP monitoring check
+// @Tags Monitoring-Checks
+// @Accept json
+// @Produce json
+// @Param data body model.ICMPCheck true "ICMP Check"
+// @Success 201 {object} model.ICMPCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/icmp/ [post]
 func CreateICMPCheck(c *fiber.Ctx) error {
 	var payload model.ICMPCheck
 	if err := c.BodyParser(&payload); err != nil {
@@ -35,7 +49,14 @@ func CreateICMPCheck(c *fiber.Ctx) error {
 	return c.Status(201).JSON(payload)
 }
 
-// GetICMPCheck retrieves a check by ID
+// GetICMPCheck godoc
+// @Summary Get ICMP monitoring check by ID
+// @Tags Monitoring-Checks
+// @Produce json
+// @Param id path int true "ID"
+// @Success 200 {object} model.ICMPCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/icmp/{id} [get]
 func GetICMPCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var check model.ICMPCheck
@@ -45,7 +66,16 @@ func GetICMPCheck(c *fiber.Ctx) error {
 	return c.JSON(check)
 }
 
-// UpdateICMPCheck updates a check by ID
+// UpdateICMPCheck godoc
+// @Summary Update ICMP monitoring check
+// @Tags Monitoring-Checks
+// @Accept json
+// @Produce json
+// @Param id path int true "ID"
+// @Param data body model.ICMPCheck true "ICMP Check"
+// @Success 200 {object} model.ICMPCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/icmp/{id} [put]
 func UpdateICMPCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var existing model.ICMPCheck
@@ -71,7 +101,13 @@ func UpdateICMPCheck(c *fiber.Ctx) error {
 	return c.JSON(existing)
 }
 
-// DeleteICMPCheck deletes a check by ID
+// DeleteICMPCheck godoc
+// @Summary Delete ICMP monitoring check
+// @Tags Monitoring-Checks
+// @Param id path int true "ID"
+// @Success 204
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/icmp/{id} [delete]
 func DeleteICMPCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var existing model.ICMPCheck

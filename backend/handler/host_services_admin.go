@@ -33,13 +33,25 @@ func PingRefreshHostServices(c *fiber.Ctx) error {
 	var services []model.HostService
 	database.DB.Where("host_id=?", host.ID).Find(&services)
 	now := uint64(time.Now().Unix())
+
 	for i := range services {
 		lat := rand.Intn(180) + 20 // 20..199 ms
+		// randomize status a bit for demo
+		sts := "OK"
+		r := rand.Float64()
+		switch {
+		case r > 0.98: sts = "CRIT"
+		case r > 0.94: sts = "WARN"
+		case r > 0.99: sts = "H.DOWN" // rare
+		}
+		prev := services[i].Status
 		services[i].LastLatencyMs = lat
-		services[i].Status = "OK"
-		services[i].UptimePct = 100.0
+		services[i].Status = sts
 		services[i].LastCheckAt = &now
 		database.DB.Save(&services[i])
+		if prev != sts { // record event
+			database.DB.Create(&model.ServiceStatusEvent{HostID: services[i].HostID, ServiceType: services[i].ServiceType, ServiceID: services[i].ServiceID, Status: sts, OccurredAt: time.Now().UTC()})
+		}
 	}
 	return c.JSON(fiber.Map{"host_id": host.ID, "services_updated": len(services)})
 }
