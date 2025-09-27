@@ -4,7 +4,7 @@ import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress,
-  Snackbar
+  Snackbar, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -35,6 +35,8 @@ export default function HostDetails() {
   const [icmpChecks, setIcmp] = useState([]);
   const [httpChecks, setHttp] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [rawServices, setRawServices] = useState([]);
+  const [opBusy, setOpBusy] = useState(false);
   // Dialog states
   const [editingIcmp, setEditingIcmp] = useState(null);
   const [editingHttp, setEditingHttp] = useState(null);
@@ -43,16 +45,36 @@ export default function HostDetails() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [creatingType, setCreatingType] = useState(null); // 'icmp' | 'http'
+  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false);
+  const [autoInterval, setAutoInterval] = useState(30); // seconds
+
+  const doPingRefresh = useCallback(async()=>{
+    if(!host) return; setOpBusy(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${host.ID||host.id}/services/ping-refresh`, {method:'POST', headers: getAuthHeaders()});
+      if(res.status===401||res.status===403){handleAuthError({status:res.status}); return;}
+      if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Refresh failed'); }
+      await load();
+    } catch(e){ setError(e.message);} finally { setOpBusy(false);} 
+  }, [host, load]);
+
+  useEffect(()=>{
+    if(!autoRefreshEnabled) return; 
+    const ms = autoInterval * 1000;
+    const idTimer = setInterval(()=>{ doPingRefresh(); }, ms);
+    return ()=> clearInterval(idTimer);
+  }, [autoRefreshEnabled, autoInterval, doPingRefresh]);
 
   const load = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     setError('');
     try {
-  const agg = await fetchJSON(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${id}/services`);
+      const agg = await fetchJSON(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${id}/services`);
       setHost(agg.host);
       setIcmp(agg.icmp_checks || []);
       setHttp(agg.http_checks || []);
+      setRawServices(agg.services || []);
     } catch (e) {
       console.error(e);
       setError(e.message);
@@ -77,15 +99,33 @@ export default function HostDetails() {
   const formatChecked = (interval) => interval ? `every ${interval}s` : '-';
   // Combined services list
   const services = useMemo(()=>{
+    if(rawServices.length>0) {
+      return rawServices.map(s=>({
+        id: s.ID || s.id,
+        raw: s,
+        type: s.service_type || s.ServiceType,
+        status: s.status || s.Status || 'UNKNOWN',
+        name: s.name || s.Name,
+        summary: s.summary || s.Summary,
+        interval: null,
+        created: s.CreatedAt || s.created_at,
+        // Map back to source for edit/delete paths (need type & service_id)
+        serviceId: s.service_id || s.ServiceID,
+        latency: s.last_latency_ms || s.LastLatencyMs,
+        uptime: s.uptime_pct || s.UptimePct,
+      }));
+    }
+    // fallback old path
     const mapIcmp = icmpChecks.map(ch=>({
       id: ch.ID || ch.id,
       raw: ch,
       type: 'icmp',
-      status: 'OK', // placeholder until real status available
+      status: 'OK',
       name: ch.friendly_name || ch.FriendlyName || (ch.hostname || ch.Hostname) || 'ICMP',
       summary: (ch.hostname || ch.Hostname || '-') + ' / interval ' + (ch.interval_sec || ch.IntervalSec || '-') + 's',
       interval: ch.interval_sec || ch.IntervalSec,
       created: ch.CreatedAt || ch.created_at,
+      serviceId: ch.ID || ch.id,
     }));
     const mapHttp = httpChecks.map(ch=>({
       id: ch.ID || ch.id,
@@ -96,9 +136,10 @@ export default function HostDetails() {
       summary: (ch.url || ch.URL || '-') + ' exp ' + (ch.expected_status || ch.ExpectedStatus || 200),
       interval: ch.interval_sec || ch.IntervalSec,
       created: ch.CreatedAt || ch.created_at,
+      serviceId: ch.ID || ch.id,
     }));
     return [...mapIcmp, ...mapHttp];
-  }, [icmpChecks, httpChecks]);
+  }, [rawServices, icmpChecks, httpChecks]);
 
   return (
     <>
@@ -111,23 +152,7 @@ export default function HostDetails() {
         <Alert severity="warning">Host not found</Alert>
       ) : (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Card>
-              <CardContent>
-                <Typography variant="h5" fontWeight={600} gutterBottom>Host Info</Typography>
-                <Stack spacing={0.6}>
-                  <Typography variant="body2"><strong>ID:</strong> {host.ID || host.id}</Typography>
-                  <Typography variant="body2"><strong>IP:</strong> {host.IP || host.ip || '-'}</Typography>
-                  <Typography variant="body2"><strong>Hostname:</strong> {host.Hostname || host.hostname || '-'}</Typography>
-                  <Typography variant="body2"><strong>Alias:</strong> {host.Alias || host.alias || '-'}</Typography>
-                  <Typography variant="body2"><strong>Service:</strong> {host.Service || host.service || '-'}</Typography>
-                  <Typography variant="body2"><strong>Tags:</strong> {host.HostsTags || host.hosts_tags || '-'}</Typography>
-                  <Typography variant="body2"><strong>Created:</strong> {host.CreatedAt ? new Date(host.CreatedAt).toLocaleString() : (host.created_at ? new Date(host.created_at).toLocaleString() : '-')}</Typography>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12}>
             <Card>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
@@ -138,6 +163,20 @@ export default function HostDetails() {
                   </Stack>
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
+                <Stack direction="row" spacing={1} mb={2} alignItems="center" flexWrap="wrap">
+                  <Button size="small" disabled={opBusy} onClick={async()=>{ if(!host) return; setOpBusy(true); try { const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${host.ID||host.id}/services/rebuild`, {method:'POST', headers: getAuthHeaders()}); if(res.status===401||res.status===403){handleAuthError({status:res.status}); return;} if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Rebuild failed'); } setSuccessMsg('Rebuilt services'); await load(); } catch(e){ setError(e.message);} finally { setOpBusy(false);} }}>Rebuild</Button>
+                  <Button size="small" disabled={opBusy} onClick={doPingRefresh}>Refresh</Button>
+                  <FormControlLabel control={<Switch size="small" checked={autoRefreshEnabled} onChange={e=>setAutoRefreshEnabled(e.target.checked)} />} label="Auto" />
+                  <FormControl size="small" sx={{ minWidth:100 }} disabled={!autoRefreshEnabled}>
+                    <InputLabel id="auto-int-label">Interval</InputLabel>
+                    <Select labelId="auto-int-label" label="Interval" value={autoInterval} onChange={e=>setAutoInterval(Number(e.target.value))}>
+                      <MenuItem value={10}>10s</MenuItem>
+                      <MenuItem value={30}>30s</MenuItem>
+                      <MenuItem value={60}>60s</MenuItem>
+                      <MenuItem value={120}>120s</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
                 <TableContainer component={Paper}>
                   <Table size="small">
                     <TableHead>
@@ -169,12 +208,40 @@ export default function HostDetails() {
                           <TableCell>{formatAge(svc.created)}</TableCell>
                           <TableCell>{formatChecked(svc.interval)}</TableCell>
                           <TableCell sx={{ minWidth:140 }}>
-                            <LinearProgress variant="determinate" value={Math.min(100, (svc.interval ? (60 / svc.interval)*10 : 50))} />
+                            <LinearProgress variant="determinate" value={(()=>{ const l=svc.latency; if(l==null) return 50; return Math.max(5, Math.min(100, (200 - l)/2)); })()} />
                           </TableCell>
                           <TableCell align="center">
                             <Stack direction="row" spacing={1} justifyContent="center">
-                              <Typography onClick={() => (svc.type==='icmp'? setEditingIcmp(svc.raw): setEditingHttp(svc.raw))} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
-                              <Typography onClick={() => setDeleting({ type: svc.type, item: svc.raw })} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
+                              <Typography onClick={() => {
+                                if(rawServices.length>0){
+                                  // need fetch original by type maybe skip for now; cannot open edit without raw source -> fallback: ignore
+                                  const svcId = svc.serviceId;
+                                  if(svc.type==='icmp') {
+                                    // find in icmpChecks if loaded else fetch
+                                    const found = icmpChecks.find(i=> (i.ID||i.id)===svcId);
+                                    if(found) setEditingIcmp(found);
+                                  } else if(svc.type==='http') {
+                                    const found = httpChecks.find(h=> (h.ID||h.id)===svcId);
+                                    if(found) setEditingHttp(found);
+                                  }
+                                } else {
+                                  (svc.type==='icmp'? setEditingIcmp(svc.raw): setEditingHttp(svc.raw));
+                                }
+                              }} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
+                              <Typography onClick={() => {
+                                if(rawServices.length>0){
+                                  const svcId = svc.serviceId;
+                                  if(svc.type==='icmp') {
+                                    const found = icmpChecks.find(i=> (i.ID||i.id)===svcId);
+                                    if(found) setDeleting({ type:'icmp', item: found });
+                                  } else if(svc.type==='http') {
+                                    const found = httpChecks.find(h=> (h.ID||h.id)===svcId);
+                                    if(found) setDeleting({ type:'http', item: found });
+                                  }
+                                } else {
+                                  setDeleting({ type: svc.type, item: svc.raw });
+                                }
+                              }} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
                             </Stack>
                           </TableCell>
                         </TableRow>

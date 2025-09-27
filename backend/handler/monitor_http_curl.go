@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"monitoring-server/database"
 	"monitoring-server/model"
@@ -22,12 +23,12 @@ func CreateHTTPCurlCheck(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
 	if payload.URL == "" { return c.Status(400).JSON(fiber.Map{"error":"url required"}) }
-	// HostID optional: if provided it links this check to an existing host record
 	if payload.IntervalSec == 0 { payload.IntervalSec = 60 }
 	if payload.ExpectedStatus == 0 { payload.ExpectedStatus = 200 }
 	if err := database.DB.Create(&payload).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
+	_ = upsertHostService(payload.HostID, "http", payload.ID, payload.FriendlyName, fmt.Sprintf("%s exp %d", payload.URL, payload.ExpectedStatus))
 	return c.Status(201).JSON(payload)
 }
 
@@ -65,12 +66,17 @@ func UpdateHTTPCurlCheck(c *fiber.Ctx) error {
 	if err := database.DB.Save(&existing).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
+	_ = upsertHostService(existing.HostID, "http", existing.ID, existing.FriendlyName, fmt.Sprintf("%s exp %d", existing.URL, existing.ExpectedStatus))
 	return c.JSON(existing)
 }
 
 // DeleteHTTPCurlCheck deletes a check
 func DeleteHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
+	var existing model.HTTPCurlCheck
+	if err := database.DB.First(&existing, id).Error; err == nil {
+		_ = deleteHostService(existing.HostID, "http", existing.ID)
+	}
 	if err := database.DB.Delete(&model.HTTPCurlCheck{}, id).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}

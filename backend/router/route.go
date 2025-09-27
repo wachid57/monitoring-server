@@ -167,6 +167,8 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
         // Aggregated services for a host (ICMP + HTTP checks)
         infrastructureGroup.Get("/hosts/:id/services", handler.GetHostServices)
+        infrastructureGroup.Post("/hosts/:id/services/rebuild", handler.RebuildHostServices)
+        infrastructureGroup.Post("/hosts/:id/services/ping-refresh", handler.PingRefreshHostServices)
     infrastructureGroup.Put("/hosts/:id", handler.UpdateHost)
     infrastructureGroup.Delete("/hosts/:id", handler.DeleteHost)
 

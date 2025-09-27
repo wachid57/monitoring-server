@@ -55,6 +55,7 @@ func InitDB() error {
 		&model.UserSetting{},
 		&model.ICMPCheck{},
 		&model.HTTPCurlCheck{},
+		&model.HostService{},
 	); err != nil {
 		return err
 	}

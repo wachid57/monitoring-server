@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"monitoring-server/database"
 	"monitoring-server/model"
@@ -28,6 +29,8 @@ func CreateICMPCheck(c *fiber.Ctx) error {
 	if err := database.DB.Create(&payload).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
+	// upsert host service row
+	_ = upsertHostService(payload.HostID, "icmp", payload.ID, payload.FriendlyName, fmt.Sprintf("%s / interval %ds", payload.Hostname, payload.IntervalSec))
 	return c.Status(201).JSON(payload)
 }
 
@@ -63,12 +66,17 @@ func UpdateICMPCheck(c *fiber.Ctx) error {
 	if err := database.DB.Save(&existing).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
+	_ = upsertHostService(existing.HostID, "icmp", existing.ID, existing.FriendlyName, fmt.Sprintf("%s / interval %ds", existing.Hostname, existing.IntervalSec))
 	return c.JSON(existing)
 }
 
 // DeleteICMPCheck deletes a check by ID
 func DeleteICMPCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
+	var existing model.ICMPCheck
+	if err := database.DB.First(&existing, id).Error; err == nil {
+		_ = deleteHostService(existing.HostID, "icmp", existing.ID)
+	}
 	if err := database.DB.Delete(&model.ICMPCheck{}, id).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
