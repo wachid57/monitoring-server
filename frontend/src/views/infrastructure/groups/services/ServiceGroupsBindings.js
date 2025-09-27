@@ -18,11 +18,11 @@ export default function ServiceGroupsBindings(){
   const fetchAll = async ()=>{ setLoading(true); setError(''); try { const [bg,gr,svc] = await Promise.all([
     fetch(`${BACKEND_URL}${API_PREFIX}/services/groups/bindings`,{headers:getAuthHeaders()}),
     fetch(`${BACKEND_URL}${API_PREFIX}/services/groups`,{headers:getAuthHeaders()}),
-    fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/1/services`,{headers:getAuthHeaders()}) // placeholder maybe host-specific; adapt later
+  fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/services/host-services`,{headers:getAuthHeaders()})
   ]);
   if(bg.status===401||gr.status===403) { handleAuthError({status:bg.status}); return; }
   const bdata = await bg.json(); const gdata = await gr.json(); const svdata = await svc.json();
-  if(bg.ok) setBindings(bdata||[]); if(gr.ok) setGroups(gdata||[]); if(svdata && svdata.services) setServices(svdata.services);
+  if(bg.ok) setBindings(bdata||[]); if(gr.ok) setGroups(gdata||[]); if(svdata && svdata.services) setServices(svdata.services); else if(Array.isArray(svdata)) setServices(svdata);
   } catch(e){ console.error(e); setError('Failed fetch data'); } finally { setLoading(false);} };
   useEffect(()=>{ fetchAll(); }, []);
 

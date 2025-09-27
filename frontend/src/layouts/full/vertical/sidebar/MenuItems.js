@@ -165,19 +165,19 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Service Groups',
     icon: IconLayout,
-    href: '/infrastructure/services',
+    href: '/infrastructure/groups/services',
     children: [
       {
         id: uniqueId(),
         title: 'Lists',
         icon: IconPoint,
-        href: '/infrastructure/services/groups/lists',
+        href: '/infrastructure/groups/services/list',
       },
-            {
+      {
         id: uniqueId(),
         title: 'Bindings',
         icon: IconPoint,
-        href: '/infrastructure/services/groups/bindings',
+        href: '/infrastructure/groups/services/bindings',
       },
     ],
   },

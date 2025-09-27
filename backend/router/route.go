@@ -174,6 +174,8 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
 
     // Infrastructure alias for service groups list (read-only for UI listing)
     infrastructureGroup.Get("/services/groups/lists", handler.GetServiceGroups)
+    // All host services across hosts (for service group bindings selection)
+    infrastructureGroup.Get("/services/host-services", handler.ListAllHostServices)
     // (Removed '/infrastruktur' alias routes per request)
 
     // (removed capitalized Infrastruktur alias and duplicate hostGroups block)
