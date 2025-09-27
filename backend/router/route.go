@@ -288,11 +288,21 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         reportAutomaticGroup.Put("/:id", handler.UpdateReportAutomatic)
         reportAutomaticGroup.Delete("/:id", handler.DeleteReportAutomatic)
 
+    // Account profile detail endpoints
+    accountProfile := protected.Group("account/setting/profiles/user-profile")
+    accountProfile.Get("/", handler.GetOwnUserDetail)
+    accountProfile.Post("/", handler.UpsertOwnUserDetail)
+
     // System Settings (key-value store)
     systemSettings := protected.Group("system/settings")
     systemSettings.Get("/", handler.GetSystemSettings)
     systemSettings.Post("/", handler.UpsertSystemSetting) // upsert by key in body
     systemSettings.Delete("/:key", handler.DeleteSystemSetting)
+
+    // Account profile (user detail) routes
+    accountProfile := protected.Group("account/setting/profiles/user-profile")
+    accountProfile.Get("/", handler.GetOwnUserDetail)
+    accountProfile.Post("/", handler.UpsertOwnUserDetail)
 
     }
 

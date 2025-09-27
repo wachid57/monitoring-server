@@ -25,6 +25,8 @@ import {
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
 
+import { getAuthHeaders } from 'src/utils/auth';
+
 const ProfileBanner = () => {
   const ProfileImage = styled(Box)(() => ({
     backgroundImage: 'linear-gradient(#50b2fc,#f44c66)',
@@ -37,12 +39,26 @@ const ProfileBanner = () => {
     margin: '0 auto',
   }));
   const [isLoading, setLoading] = React.useState(true);
+  const [profile, setProfile] = React.useState({ name: '', title: '' });
+  const [error, setError] = React.useState(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', { headers: getAuthHeaders(), credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to load profile');
+        const data = await res.json();
+        if (!cancelled) {
+          setProfile({ name: data.name || data.username || '', title: data.title || '' });
+        }
+      } catch (e) {
+        if (!cancelled) setError(e.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -137,12 +153,24 @@ const ProfileBanner = () => {
                   />
                 </ProfileImage>
                 <Box mt={1}>
-                  <Typography fontWeight={600} variant="h5">
-                    Mathew Anderson
-                  </Typography>
-                  <Typography color="textSecondary" variant="h6" fontWeight={400}>
-                    Designer
-                  </Typography>
+                  {isLoading ? (
+                    <>
+                      <Skeleton variant="text" width={140} />
+                      <Skeleton variant="text" width={100} />
+                    </>
+                  ) : (
+                    <>
+                      <Typography fontWeight={600} variant="h5">
+                        {profile.name || 'Unnamed User'}
+                      </Typography>
+                      <Typography color="textSecondary" variant="h6" fontWeight={400}>
+                        {profile.title || '—'}
+                      </Typography>
+                      {error && (
+                        <Typography color="error" variant="caption">{error}</Typography>
+                      )}
+                    </>
+                  )}
                 </Box>
               </Box>
             </Box>

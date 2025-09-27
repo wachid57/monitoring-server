@@ -51,6 +51,7 @@ func InitDB() error {
 		&model.MemoryMetric{},
 		&model.DiskMetric{},
 		&model.SystemSetting{},
+		&model.UserDetail{},
 	); err != nil {
 		return err
 	}
