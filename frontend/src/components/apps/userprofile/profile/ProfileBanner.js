@@ -1,30 +1,11 @@
 import React, { useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Avatar,
-  Stack,
-  CardMedia,
-  styled,
-  Fab,
-  Skeleton,
-} from '@mui/material';
+import { Box, Typography, Button, Avatar, Stack, CardMedia, styled, Fab, Skeleton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import profilecover from 'src/assets/images/backgrounds/profilebg.jpg';
 import userimg from 'src/assets/images/profile/user-1.jpg';
-import {
-  IconBrandDribbble,
-  IconBrandFacebook,
-  IconBrandTwitter,
-  IconBrandYoutube,
-  IconFileDescription,
-  IconUserCheck,
-  IconUserCircle,
-} from '@tabler/icons';
+import { IconBrandDribbble, IconBrandFacebook, IconBrandTwitter, IconBrandYoutube, IconFileDescription, IconUserCheck, IconUserCircle } from '@tabler/icons';
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
-
 import { getAuthHeaders } from 'src/utils/auth';
 
 const ProfileBanner = () => {
@@ -40,25 +21,27 @@ const ProfileBanner = () => {
   }));
   const [isLoading, setLoading] = React.useState(true);
   const [profile, setProfile] = React.useState({ name: '', title: '' });
-  const [error, setError] = React.useState(null);
+  const [error, setError] = React.useState('');
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    let active = true;
+    const load = async () => {
+      setLoading(true);
       try {
         const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', { headers: getAuthHeaders(), credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load profile');
         const data = await res.json();
-        if (!cancelled) {
-          setProfile({ name: data.name || data.username || '', title: data.title || '' });
+        if (active) {
+          setProfile({ name: data.name || data.username || 'Unknown User', title: data.title || '' });
         }
       } catch (e) {
-        if (!cancelled) setError(e.message);
+        if (active) setError(e.message);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (active) setLoading(false);
       }
-    })();
-    return () => { cancelled = true; };
+    };
+    load();
+    return () => { active = false; };
   }, []);
 
   return (
