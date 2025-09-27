@@ -3,6 +3,7 @@ import { Stack, Typography, IconButton, Dialog, DialogTitle, DialogContent, Dial
 import ChildCard from 'src/components/shared/ChildCard';
 import { IconBriefcase, IconDeviceDesktop, IconMail, IconMapPin, IconPencil } from '@tabler/icons';
 import { getAuthHeaders } from 'src/utils/auth';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
 const emptyDetail = { introduction: '', institution: '', contact_email: '', website: '', location: '', title: '' };
 
@@ -16,7 +17,7 @@ const IntroCard = () => {
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', { headers: getAuthHeaders(), credentials: 'include' });
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders(), credentials: 'include' });
       if (!res.ok) throw new Error('Load failed');
       const data = await res.json();
       setDetail({
@@ -39,7 +40,7 @@ const IntroCard = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', {
+      const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, {
         method: 'POST',
         headers: getAuthHeaders(),
         credentials: 'include',

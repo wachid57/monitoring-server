@@ -7,6 +7,7 @@ import { IconBrandDribbble, IconBrandFacebook, IconBrandTwitter, IconBrandYoutub
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
 import { getAuthHeaders } from 'src/utils/auth';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
 const ProfileBanner = () => {
   const ProfileImage = styled(Box)(() => ({
@@ -28,7 +29,7 @@ const ProfileBanner = () => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', { headers: getAuthHeaders(), credentials: 'include' });
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders(), credentials: 'include' });
         if (!res.ok) throw new Error('Failed to load profile');
         const data = await res.json();
         if (active) {
