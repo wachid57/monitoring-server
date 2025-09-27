@@ -134,7 +134,7 @@ const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGr
 // Settings
 const ProfileSettings = Loadable(lazy(() => import('../views/settings/ProfileSettings')));
 const SystemSettings = Loadable(lazy(() => import('../views/settings/SystemSettings')));
-const ProfileAccountSettings = Loadable(lazy(() => import('../views/account/setting/profiles/Profiles')));
+const AccountUserProfileSettings = Loadable(lazy(() => import('../views/account/setting/profiles/UserProfile')));
 // Admin Permission pages (moved)
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
@@ -238,56 +238,61 @@ const Router = [
       
       // Admin Routes
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
-  { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
-  { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
-    // Permission management
-    { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
-    { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
-  { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
-  { path: '/monitoring/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
-  { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
-  { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
-  { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
-  // Metrics
-  { path: '/monitoring/metrics', element: <ProtectedRoute><MetricsIndex /></ProtectedRoute> },
-  { path: '/monitoring/metrics/cpu', element: <ProtectedRoute><CPUMetricsList /></ProtectedRoute> },
-  { path: '/monitoring/metrics/memory', element: <ProtectedRoute><MemoryMetricsList /></ProtectedRoute> },
-  { path: '/monitoring/metrics/disk', element: <ProtectedRoute><DiskMetricsList /></ProtectedRoute> },
+      { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
+      { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
+
+      // Permission management
+      { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
+      { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
+      { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+      { path: '/monitoring/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
+      { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
+      { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
+      { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
+
+      // Metrics
+      { path: '/monitoring/metrics', element: <ProtectedRoute><MetricsIndex /></ProtectedRoute> },
+      { path: '/monitoring/metrics/cpu', element: <ProtectedRoute><CPUMetricsList /></ProtectedRoute> },
+      { path: '/monitoring/metrics/memory', element: <ProtectedRoute><MemoryMetricsList /></ProtectedRoute> },
+      { path: '/monitoring/metrics/disk', element: <ProtectedRoute><DiskMetricsList /></ProtectedRoute> },
   
-  // Infrastructure routes for hosts (alternate path used by sidebar)
-  { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
-  { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
-  { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
-  { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
-  { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
-  { path: '/infrastructure/hostgroups/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
-  { path: '/infrastructure/servicegroups/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/servicegroups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
-  { path: '/infrastructure/services/groups/lists', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/services/groups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
-  // Host groups alias paths in menu (if needed)
-  { path: '/infrastructure/groups/hosts/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/groups/hosts/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
-  // Services groups alias paths in menu
-  { path: '/infrastructure/groups/services/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
-  { path: '/infrastructure/groups/services/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
+      // Infrastructure routes for hosts (alternate path used by sidebar)
+      { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
+      { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
+      { path: '/infrastructure/hostgroups/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
+      { path: '/infrastructure/servicegroups/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/servicegroups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
+
+      // Host groups alias paths in menu (if needed)
+      { path: '/infrastructure/groups/hosts/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/groups/hosts/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
+
+      // Services groups alias paths in menu
+      { path: '/infrastructure/groups/services/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/groups/services/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
   
-  // Reports
-  { path: '/report/hosts/availability', element: <ProtectedRoute><HostsAvailabilityReport /></ProtectedRoute> },
-  { path: '/reports/manual', element: <ProtectedRoute><ManualReports /></ProtectedRoute> },
-  { path: '/reports/automatic', element: <ProtectedRoute><AutomaticReports /></ProtectedRoute> },
-  // Notifications
-  { path: '/notifications/contactgroups', element: <ProtectedRoute><ContactGroups /></ProtectedRoute> },
-  { path: '/notifications/list', element: <ProtectedRoute><NotificationsList /></ProtectedRoute> },
-  { path: '/notifications/acknowledged', element: <ProtectedRoute><AcknowledgedList /></ProtectedRoute> },
-  // Admin Groups
-  { path: '/admin/groups/list', element: <ProtectedRoute><AdminGroupsList /></ProtectedRoute> },
-  // Settings
-  { path: '/settings/profile', element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
-  { path: '/settings/system', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
-  { path: '/system/settings', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
-      { path: '/account/setting/profiles', element: <ProtectedRoute><ProfileAccountSettings /></ProtectedRoute> },
+      // Reports
+      { path: '/report/hosts/availability', element: <ProtectedRoute><HostsAvailabilityReport /></ProtectedRoute> },
+      { path: '/reports/manual', element: <ProtectedRoute><ManualReports /></ProtectedRoute> },
+      { path: '/reports/automatic', element: <ProtectedRoute><AutomaticReports /></ProtectedRoute> },
+
+      // Notifications
+      { path: '/notifications/contactgroups', element: <ProtectedRoute><ContactGroups /></ProtectedRoute> },
+      { path: '/notifications/list', element: <ProtectedRoute><NotificationsList /></ProtectedRoute> },
+      { path: '/notifications/acknowledged', element: <ProtectedRoute><AcknowledgedList /></ProtectedRoute> },
+  
+      // Admin Groups
+      { path: '/admin/groups/list', element: <ProtectedRoute><AdminGroupsList /></ProtectedRoute> },
+  
+      // Settings
+      { path: '/settings/profile', element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
+      { path: '/settings/system', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
+      { path: '/system/settings', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
+      { path: '/account/setting/profiles/user-profile', element: <ProtectedRoute><AccountUserProfileSettings /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 

@@ -311,7 +311,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Settings',
     icon: IconUserCircle,
-    href: '/account/setting/profiles',
+    href: '/account/setting/profiles/user-profile',
   },
 
 
