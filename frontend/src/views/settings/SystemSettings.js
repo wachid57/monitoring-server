@@ -3,6 +3,8 @@ import { Card, CardContent, Box, TextField, Button, Snackbar, Alert, CircularPro
 import { IconPlus, IconTrash } from '@tabler/icons';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
   { to: '/', title: 'Home' },
@@ -20,7 +22,8 @@ export default function SystemSettings() {
   const loadSettings = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1.0/system/settings');
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings`, { headers: getAuthHeaders() });
+      if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
       if (!res.ok) throw new Error('Failed load');
       const data = await res.json();
       setRows(data.sort((a,b)=>a.key.localeCompare(b.key)));
@@ -38,11 +41,13 @@ export default function SystemSettings() {
   };
 
   const saveRow = async (row) => {
-    await fetch('/api/v1.0/system/settings', {
+    const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ key: row.key, name: row.name, value: row.value, description: row.description })
     });
+    if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); throw new Error('auth'); }
+    if (!res.ok) throw new Error('save failed');
   };
 
   const saveAll = async () => {
@@ -60,7 +65,8 @@ export default function SystemSettings() {
   const removeRow = async (key) => {
     if (!window.confirm('Delete setting '+key+' ?')) return;
     try {
-      await fetch('/api/v1.0/system/settings/'+key, { method: 'DELETE' });
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings/`+key, { method: 'DELETE', headers: getAuthHeaders() });
+      if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
       setRows(r => r.filter(x=>x.key!==key));
       setSnack({ open:true, message:'Deleted '+key, severity:'success' });
     } catch (e) { setSnack({ open:true, message:'Delete failed', severity:'error' }); }
