@@ -105,13 +105,12 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 // const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
-const HostLists = Loadable(lazy(() => import('../views/infrastructure/hosts/lists/HostLists')));
-// Adjusted path: actual file located under views/monitoring/hosts/add/AddHost.js
+const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
 const AddHost = Loadable(lazy(() => import('../views/monitoring/hosts/add/AddHost')));
-const HostDetails = Loadable(lazy(() => import('../views/infrastructure/hosts/details/HostsDetails')));
-const HostsWebsiteList = Loadable(lazy(() => import('../views/infrastructure/hosts/website/HostsWebsiteList')));
-const HostIcmpList = Loadable(lazy(() => import('../views/infrastructure/hosts/icmp/HostIcmpList')));
-const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastructure/groups/hosts/HostsGroupsLists')));
+const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
+const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
+const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
+const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
 const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
 const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
 const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroups')));

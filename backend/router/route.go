@@ -293,12 +293,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     accountProfile.Get("/", handler.GetOwnUserDetail)
     accountProfile.Post("/", handler.UpsertOwnUserDetail)
 
-    // User personal settings (key-value per user)
-    userSettings := protected.Group("account/setting/profiles/user-settings")
-    userSettings.Get("/", handler.ListUserSettings)
-    userSettings.Post("/", handler.UpsertUserSetting)
-    userSettings.Delete("/:key", handler.DeleteUserSetting)
-
     // System Settings (key-value store)
     systemSettings := protected.Group("system/settings")
     systemSettings.Get("/", handler.GetSystemSettings)

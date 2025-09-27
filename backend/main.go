@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"monitoring-server/database"
 	"monitoring-server/handler"
+	"monitoring-server/database/seed"
 	redisSession "monitoring-server/session"
 	"monitoring-server/cors"
 	"monitoring-server/router"
@@ -51,9 +52,9 @@ func main() {
 	}
 	log.Println("Default data initialization completed.")
 
-	// Seed global system settings (idempotent)
-	if err := handler.SeedSystemSettings(); err != nil {
-		log.Printf("Failed seeding system settings: %v", err)
+	// Seed all settings (system + user) idempotently
+	if err := seed.SeedAll(); err != nil {
+		log.Printf("Failed running seeders: %v", err)
 	}
 
 	app.Get("/", func(c *fiber.Ctx) error {

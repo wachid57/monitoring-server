@@ -4,16 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"monitoring-server/database"
 	"monitoring-server/model"
+	"monitoring-server/database/seed"
 )
-
-type userSettingPayload struct {
-	Key         string `json:"key"`
-	Value       string `json:"value"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Enabled     bool   `json:"enabled"`
-	// Native ignored from client for safety
-}
 
 // ListUserSettings returns all settings for the authenticated user
 func ListUserSettings(c *fiber.Ctx) error {
@@ -25,14 +17,18 @@ func ListUserSettings(c *fiber.Ctx) error {
 	if err := database.DB.Where("username = ?", username.(string)).First(&user).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{"error":"user not found"})
 	}
-
-	// ensure default native settings for this user exist
-	if err := EnsureUserDefaultSettings(user.ID); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
 	var settings []model.UserSetting
 	if err := database.DB.Where("user_id = ?", user.ID).Find(&settings).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+	if len(settings) == 0 {
+		// Lazy init defaults for this user
+		if err := seed.SeedDefaultsForUser(user.ID); err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed seeding defaults"})
+		}
+		if err := database.DB.Where("user_id = ?", user.ID).Find(&settings).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
 	}
 	return c.JSON(settings)
 }
@@ -48,7 +44,7 @@ func UpsertUserSetting(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"error":"user not found"})
 	}
 
-	var payload userSettingPayload
+	var payload model.UserSetting
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -61,25 +57,16 @@ func UpsertUserSetting(c *fiber.Ctx) error {
 		existing.Value = payload.Value
 		if payload.Description != "" { existing.Description = payload.Description }
 		if payload.Name != "" { existing.Name = payload.Name }
-		existing.Enabled = payload.Enabled
 		if err := database.DB.Save(&existing).Error; err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 		}
 		return c.JSON(existing)
 	}
-	newSetting := model.UserSetting{
-		UserID: user.ID,
-		Key: payload.Key,
-		Value: payload.Value,
-		Name: payload.Name,
-		Description: payload.Description,
-		Enabled: payload.Enabled,
-		Native: false,
-	}
-	if err := database.DB.Create(&newSetting).Error; err != nil {
+	payload.UserID = user.ID
+	if err := database.DB.Create(&payload).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
-	return c.Status(201).JSON(newSetting)
+	return c.Status(201).JSON(payload)
 }
 
 // DeleteUserSetting deletes a setting by key for the authenticated user

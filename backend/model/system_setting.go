@@ -10,6 +10,4 @@ type SystemSetting struct {
     Value       string `gorm:"type:text" json:"value"`
     Name        string `gorm:"size:256" json:"name"`
     Description string `gorm:"type:text" json:"description"`
-    Enabled     bool   `gorm:"default:true" json:"enabled"`
-    Native      bool   `gorm:"default:true" json:"native"` // native = seeded / built-in (not user removable)
 }

@@ -72,20 +72,30 @@ const Menuitems = [
 
   {
     navlabel: true,
-    subheader: 'Monitoring Services',
+    subheader: 'Monitoring',
   },
-  {
-    id: uniqueId(),
-    title: 'ICMP Monitoring',
-    icon: IconChartLine,
+  {   
+   id: uniqueId(),
+    title: 'Availability',
+    icon: IconChartHistogram,
+    href: '/monitoring/metrics',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'ICMP',
+        icon: IconPoint,
   href: '/monitoring/hosts/icmp',
+      },
+      {
+        id: uniqueId(),
+        title: 'Website',
+        icon: IconPoint,
+  href: '/monitoring/hosts/website',
+      },
+    ],
   },
-  {
-    id: uniqueId(),
-    title: 'Website Monitoring',
-    icon: IconChartDots,
-  href: '/monitoring/website/lists',
-  },
+
+
   {
     id: uniqueId(),
     title: 'System Metrics',
