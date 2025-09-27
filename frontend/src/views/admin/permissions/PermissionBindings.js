@@ -23,6 +23,7 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
+  Autocomplete,
 } from '@mui/material';
 import {
   IconPlus,
@@ -35,6 +36,7 @@ import {
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import { useNotify } from 'src/components/notifications/NotificationProvider';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
@@ -56,16 +58,20 @@ const BCrumb = [
 const PermissionBindings = () => {
   // Role-permission state (simple: list roles and counts)
   const [roles, setRoles] = useState([]);
+  const notify = useNotify();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, role: null });
+  const [editDialog, setEditDialog] = useState({ open:false, role:null });
 
-  // Add Role dialog
+  // Add Binding dialog (user + multi roles or role + multi permissions?). Based on request: select user (single) and roles (multi) to assign.
   const [addOpen, setAddOpen] = useState(false);
-  const [newRoleName, setNewRoleName] = useState('');
-  const [newRoleDesc, setNewRoleDesc] = useState('');
   const [adding, setAdding] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [allRoles, setAllRoles] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
 
   const fetchRoles = async () => {
     setLoading(true);
@@ -84,7 +90,8 @@ const PermissionBindings = () => {
       const data = await res.json();
       if (res.ok) {
         // API returns roles with Permissions preloaded
-        setRoles(Array.isArray(data) ? data : (data.roles || []));
+  const list = Array.isArray(data) ? data : (data.roles || []);
+  setRoles(list);
       } else {
         setError(data.error || data.message || 'Gagal mengambil data roles/permissions');
       }
@@ -110,52 +117,59 @@ const PermissionBindings = () => {
 
       if (res.ok) {
         // Refresh role permissions
-        fetchRoles();
+    fetchRoles();
+    notify.notify('Permission removed', { severity:'success'});
       } else {
         const data = await res.json();
         setError(data.error || data.message || 'Gagal menghapus permission dari role');
+    notify.notify('Gagal menghapus permission', { severity:'error'});
       }
     } catch (err) {
       console.error('Remove permission error:', err);
       setError('Terjadi kesalahan saat menghapus permission');
+  notify.notify('Error hapus permission', { severity:'error'});
     }
   };
 
-  const handleAddBinding = async () => {
-    if (!newRoleName || !newRoleDesc) {
-      setError('RoleId and PermissionId required');
-      return;
-    }
-    setAdding(true);
-    setError('');
+  const loadUsersAndRoles = async () => {
     try {
-      // For simplicity this example keeps add dialog placeholder; real UI should select role and permission
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/roles/${newRoleName}/permissions/${newRoleDesc}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
-      });
+      const [uRes, rRes] = await Promise.all([
+        fetch(BACKEND_URL + API_PREFIX + '/users', { headers: getAuthHeaders() }),
+        fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() })
+      ]);
+      if (uRes.status===401||uRes.status===403) return handleAuthError({status:uRes.status});
+      if (rRes.status===401||rRes.status===403) return handleAuthError({status:rRes.status});
+      const uData = await uRes.json();
+      const rData = await rRes.json();
+      setUsers(Array.isArray(uData)?uData:(uData.users||[]));
+      setAllRoles(Array.isArray(rData)?rData:(rData.roles||[]));
+    } catch(e){ console.error(e); }
+  };
 
-      if (res.status === 401 || res.status === 403) {
-        handleAuthError({ status: res.status });
-        return;
-      }
+  useEffect(()=>{ if(addOpen) loadUsersAndRoles(); }, [addOpen]);
 
-      const data = await res.json();
-      if (res.ok) {
-        setAddOpen(false);
-        setNewRoleName('');
-        setNewRoleDesc('');
-        // Refresh list
-        fetchRoles();
-      } else {
-        setError(data.error || data.message || 'Gagal menambahkan binding');
+  const handleAddBinding = async () => {
+    if(!selectedUser || selectedRoles.length===0){ setError('User dan minimal satu Role diperlukan'); return; }
+    setAdding(true); setError('');
+    try {
+      // Loop each selected role assigning the role to the user (/users/roles/users endpoint?)
+      // Existing API for binding roles to users appears to be POST /api/v1.0/users/roles/users with body
+      // but current backend file not reviewed here; fallback: mimic existing AssignRoleToUserAPI expectations.
+      // We'll attempt a single bulk call if API supports; otherwise loop (TODO if needed).
+      for(const role of selectedRoles){
+        const resp = await fetch(BACKEND_URL + API_PREFIX + '/users/roles/users', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ user_id: selectedUser.id, role_id: role.id })
+        });
+        if(resp.status===401||resp.status===403){ handleAuthError({status:resp.status}); break; }
       }
-    } catch (err) {
-      console.error('Add binding error:', err);
-      setError('Terjadi kesalahan saat menambahkan binding');
-    } finally {
-      setAdding(false);
-    }
+      setAddOpen(false);
+      setSelectedUser(null);
+      setSelectedRoles([]);
+      fetchRoles();
+      notify.notify('Binding ditambahkan', { severity:'success'});
+    } catch(e){ console.error(e); setError('Gagal menambahkan binding'); } finally { setAdding(false);} 
   };
 
   const filteredRoles = roles.filter(role =>
@@ -218,7 +232,7 @@ const PermissionBindings = () => {
                     <TableCell>Role</TableCell>
                     <TableCell>Description</TableCell>
                     <TableCell>Permissions</TableCell>
-                    <TableCell align="center">Actions</TableCell>
+                        <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -246,8 +260,11 @@ const PermissionBindings = () => {
                         </TableCell>
                         <TableCell align="center">
                           <Stack direction="row" spacing={1} justifyContent="center">
-                            <IconButton size="small" color="primary">
-                              <IconEye size={16} />
+                            <IconButton size="small" color="primary" onClick={()=> setEditDialog({ open:true, role })}>
+                              <IconEdit size={16} />
+                            </IconButton>
+                            <IconButton size="small" color="error" disabled={role.native} onClick={()=> setDeleteDialog({ open:true, role })}>
+                              <IconTrash size={16} />
                             </IconButton>
                           </Stack>
                         </TableCell>
@@ -290,13 +307,57 @@ const PermissionBindings = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Add Role Dialog */}
+      {/* Edit Role Placeholder Dialog (future: permission adjustments) */}
+      <Dialog open={editDialog.open} onClose={()=> setEditDialog({ open:false, role:null })} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Role Permissions</DialogTitle>
+        <DialogContent>
+          {editDialog.role && (
+            <Stack spacing={2} mt={1}>
+              <Typography variant="subtitle2">Role: {editDialog.role.name}</Typography>
+              <Typography variant="caption" color="text.secondary">Tambah atau hapus permission di bawah:</Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {(editDialog.role.Permissions||editDialog.role.permissions||[]).map(p=> (
+                  <Chip key={p.id} label={p.name} size="small" onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} />
+                ))}
+              </Stack>
+              <Autocomplete
+                options={(roles.find(r=>r.id===editDialog.role.id)?.Permissions)||[]}
+                getOptionLabel={(o)=> o.name }
+                disabled
+                renderInput={(params)=><TextField {...params} label="Existing Permissions" />}
+              />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={()=> setEditDialog({ open:false, role:null })}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Binding Dialog with Autocomplete */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Binding (Quick)</DialogTitle>
+  <DialogTitle>Add Binding</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField label="Role ID" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} fullWidth />
-            <TextField label="Permission ID" value={newRoleDesc} onChange={(e) => setNewRoleDesc(e.target.value)} fullWidth />
+            <Autocomplete
+              options={users}
+              getOptionLabel={(o)=> o.name || o.username || `User ${o.id}`}
+              value={selectedUser}
+              onChange={(_,v)=> setSelectedUser(v)}
+              renderInput={(params)=><TextField {...params} label="User" placeholder="Cari user" />}
+              fullWidth
+              clearOnEscape
+            />
+            <Autocomplete
+              multiple
+              options={allRoles}
+              getOptionLabel={(o)=> o.name || `Role ${o.id}`}
+              value={selectedRoles}
+              onChange={(_,v)=> setSelectedRoles(v)}
+              renderInput={(params)=><TextField {...params} label="Roles" placeholder="Cari dan pilih roles" />}
+              fullWidth
+              filterSelectedOptions
+            />
           </Stack>
         </DialogContent>
         <DialogActions>

@@ -17,4 +17,4 @@ type ICMPCheck struct {
 }
 
 // TableName override for clearer plural form
-func (ICMPCheck) TableName() string { return "icmp_checks" }
+func (ICMPCheck) TableName() string { return "check_icmp" }
