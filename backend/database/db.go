@@ -50,6 +50,7 @@ func InitDB() error {
 		&model.CPUMetric{},
 		&model.MemoryMetric{},
 		&model.DiskMetric{},
+		&model.SystemSetting{},
 	); err != nil {
 		return err
 	}

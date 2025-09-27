@@ -119,7 +119,7 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'Hosts Management',
+    title: 'Hosts',
     icon: IconApps,
     href: '/infrastructure/hosts',
     children: [
@@ -139,7 +139,7 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'List Groups',
+        title: 'Lists',
         icon: IconPoint,
         href: '/infrastructure/groups/hosts/list',
       },
@@ -159,7 +159,7 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'Group Lists',
+        title: 'Lists',
         icon: IconPoint,
         href: '/infrastructure/services/groups/lists',
       },
@@ -256,20 +256,7 @@ const Menuitems = [
       },
     ],
   },
-  {
-    id: uniqueId(),
-    title: 'Groups Management',
-    icon: IconPackage,
-    href: '/admin/groups/',
-    children: [
-      {
-        id: uniqueId(),
-        title: 'List Groups',
-        icon: IconPoint,
-        href: '/admin/groups/list',
-      },
-    ],
-  },
+
   {
     id: uniqueId(),
     title: 'Permissions',
@@ -290,28 +277,41 @@ const Menuitems = [
       },
     ],
   },
-
+  {
+    id: uniqueId(),
+    title: 'Groups',
+    icon: IconPackage,
+    href: '/admin/groups/',
+    children: [
+      {
+        id: uniqueId(),
+        title: 'List Groups',
+        icon: IconPoint,
+        href: '/admin/groups/list',
+      },
+    ],
+  },
   {
     navlabel: true,
-    subheader: 'Settings',
+    subheader: 'System',
   },
 
   {
     id: uniqueId(),
     title: 'System Settings',
     icon: IconSettings,
-    href: '/settings/system',
+    href: '/system/settings',
   },
 
   {
     navlabel: true,
-    subheader: 'Profiles',
+    subheader: 'Account',
   },
   {
     id: uniqueId(),
-    title: 'Profile Settings',
+    title: 'Settings',
     icon: IconUserCircle,
-    href: '/profile/view',
+    href: '/account/setting/profiles',
   },
 
 

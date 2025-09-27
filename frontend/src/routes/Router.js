@@ -134,6 +134,7 @@ const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGr
 // Settings
 const ProfileSettings = Loadable(lazy(() => import('../views/settings/ProfileSettings')));
 const SystemSettings = Loadable(lazy(() => import('../views/settings/SystemSettings')));
+const ProfileAccountSettings = Loadable(lazy(() => import('../views/account/setting/profiles/Profiles')));
 // Admin Permission pages (moved)
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
@@ -285,6 +286,8 @@ const Router = [
   // Settings
   { path: '/settings/profile', element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
   { path: '/settings/system', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
+  { path: '/system/settings', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
+      { path: '/account/setting/profiles', element: <ProtectedRoute><ProfileAccountSettings /></ProtectedRoute> },
       
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
