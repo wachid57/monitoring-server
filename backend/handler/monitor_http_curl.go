@@ -23,6 +23,7 @@ func CreateHTTPCurlCheck(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
 	if payload.URL == "" { return c.Status(400).JSON(fiber.Map{"error":"url required"}) }
+	if payload.HostID == 0 { return c.Status(400).JSON(fiber.Map{"error":"host_id required"}) }
 	if payload.IntervalSec == 0 { payload.IntervalSec = 60 }
 	if payload.ExpectedStatus == 0 { payload.ExpectedStatus = 200 }
 	if err := database.DB.Create(&payload).Error; err != nil {

@@ -25,6 +25,7 @@ func CreateICMPCheck(c *fiber.Ctx) error {
 	if payload.Hostname == "" {
 		return c.Status(400).JSON(fiber.Map{"error": "hostname required"})
 	}
+	if payload.HostID == 0 { return c.Status(400).JSON(fiber.Map{"error":"host_id required"}) }
 	if payload.IntervalSec == 0 { payload.IntervalSec = 60 }
 	if err := database.DB.Create(&payload).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})

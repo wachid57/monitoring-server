@@ -1,8 +1,8 @@
 package migration
 
 import (
-	"monitoring-server/model"
 	"gorm.io/gorm"
+	"monitoring-server/model"
 )
 
 // AssignAdminToWpmAdmin assigns Administrator role to wpm-admin
@@ -26,9 +26,14 @@ func AssignAdminToWpmAdmin(db *gorm.DB) error {
 		}
 	}
 
-	// ensure many-to-many user_roles exists via GORM association
-	if err := db.Model(&user).Association("Roles").Append(&adminRole); err != nil {
-		return err
+	// ensure many-to-many user_roles exists if not already bound
+	var currentRoles []model.Role
+	if err := db.Model(&user).Association("Roles").Find(&currentRoles); err == nil {
+		already := false
+		for _, r := range currentRoles { if r.ID == adminRole.ID { already = true; break } }
+		if !already {
+			if err := db.Model(&user).Association("Roles").Append(&adminRole); err != nil { return err }
+		}
 	}
 
 	return nil

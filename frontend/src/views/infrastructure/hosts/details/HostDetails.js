@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, IconButton, Menu, MenuItem } from '@mui/material';
 import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
@@ -32,10 +32,8 @@ async function fetchJSON(url) {
 export default function HostDetails() {
   const { id } = useParams();
   const [host, setHost] = useState(null);
-  const [icmpChecks, setIcmp] = useState([]);
-  const [httpChecks, setHttp] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [rawServices, setRawServices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [opBusy, setOpBusy] = useState(false);
   // Dialog states
   const [editingIcmp, setEditingIcmp] = useState(null);
@@ -45,8 +43,27 @@ export default function HostDetails() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [creatingType, setCreatingType] = useState(null); // 'icmp' | 'http'
+  const [menuAnchor, setMenuAnchor] = useState(null); // anchor element for row menu
+  const [menuSvc, setMenuSvc] = useState(null); // selected service row
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false);
   const [autoInterval, setAutoInterval] = useState(30); // seconds
+  // load function must be declared before doPingRefresh (dependency order)
+  const load = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    setError('');
+    try {
+      const agg = await fetchJSON(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${id}/services`);
+      setHost(agg.host);
+      setRawServices(agg.services || []);
+      // legacy arrays no longer returned; clear them
+    } catch (e) {
+      console.error(e);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   const doPingRefresh = useCallback(async()=>{
     if(!host) return; setOpBusy(true);
@@ -65,24 +82,6 @@ export default function HostDetails() {
     return ()=> clearInterval(idTimer);
   }, [autoRefreshEnabled, autoInterval, doPingRefresh]);
 
-  const load = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    setError('');
-    try {
-      const agg = await fetchJSON(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${id}/services`);
-      setHost(agg.host);
-      setIcmp(agg.icmp_checks || []);
-      setHttp(agg.http_checks || []);
-      setRawServices(agg.services || []);
-    } catch (e) {
-      console.error(e);
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
   useEffect(() => { load(); }, [load]);
 
   // Helpers
@@ -99,47 +98,21 @@ export default function HostDetails() {
   const formatChecked = (interval) => interval ? `every ${interval}s` : '-';
   // Combined services list
   const services = useMemo(()=>{
-    if(rawServices.length>0) {
-      return rawServices.map(s=>({
-        id: s.ID || s.id,
-        raw: s,
-        type: s.service_type || s.ServiceType,
-        status: s.status || s.Status || 'UNKNOWN',
-        name: s.name || s.Name,
-        summary: s.summary || s.Summary,
-        interval: null,
-        created: s.CreatedAt || s.created_at,
-        // Map back to source for edit/delete paths (need type & service_id)
-        serviceId: s.service_id || s.ServiceID,
-        latency: s.last_latency_ms || s.LastLatencyMs,
-        uptime: s.uptime_pct || s.UptimePct,
-      }));
-    }
-    // fallback old path
-    const mapIcmp = icmpChecks.map(ch=>({
-      id: ch.ID || ch.id,
-      raw: ch,
-      type: 'icmp',
-      status: 'OK',
-      name: ch.friendly_name || ch.FriendlyName || (ch.hostname || ch.Hostname) || 'ICMP',
-      summary: (ch.hostname || ch.Hostname || '-') + ' / interval ' + (ch.interval_sec || ch.IntervalSec || '-') + 's',
-      interval: ch.interval_sec || ch.IntervalSec,
-      created: ch.CreatedAt || ch.created_at,
-      serviceId: ch.ID || ch.id,
+    return rawServices.map(s=>({
+      id: s.ID || s.id,
+      raw: s,
+      type: s.service_type || s.ServiceType,
+      status: s.status || s.Status || 'UNKNOWN',
+      name: s.name || s.Name,
+      summary: s.summary || s.Summary,
+      interval: null,
+      created: s.CreatedAt || s.created_at,
+      // Map back to source for edit/delete paths (need type & service_id)
+      serviceId: s.service_id || s.ServiceID,
+      latency: s.last_latency_ms || s.LastLatencyMs,
+      uptime: s.uptime_pct || s.UptimePct,
     }));
-    const mapHttp = httpChecks.map(ch=>({
-      id: ch.ID || ch.id,
-      raw: ch,
-      type: 'http',
-      status: 'OK',
-      name: ch.friendly_name || ch.FriendlyName || (ch.url || ch.URL) || 'HTTP',
-      summary: (ch.url || ch.URL || '-') + ' exp ' + (ch.expected_status || ch.ExpectedStatus || 200),
-      interval: ch.interval_sec || ch.IntervalSec,
-      created: ch.CreatedAt || ch.created_at,
-      serviceId: ch.ID || ch.id,
-    }));
-    return [...mapIcmp, ...mapHttp];
-  }, [rawServices, icmpChecks, httpChecks]);
+  }, [rawServices]);
 
   return (
     <>
@@ -187,7 +160,7 @@ export default function HostDetails() {
                         <TableCell>Age</TableCell>
                         <TableCell>Checked</TableCell>
                         <TableCell>Perf-o-meter</TableCell>
-                        <TableCell align="center">Actions</TableCell>
+                        <TableCell align="center"></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -210,39 +183,10 @@ export default function HostDetails() {
                           <TableCell sx={{ minWidth:140 }}>
                             <LinearProgress variant="determinate" value={(()=>{ const l=svc.latency; if(l==null) return 50; return Math.max(5, Math.min(100, (200 - l)/2)); })()} />
                           </TableCell>
-                          <TableCell align="center">
-                            <Stack direction="row" spacing={1} justifyContent="center">
-                              <Typography onClick={() => {
-                                if(rawServices.length>0){
-                                  // need fetch original by type maybe skip for now; cannot open edit without raw source -> fallback: ignore
-                                  const svcId = svc.serviceId;
-                                  if(svc.type==='icmp') {
-                                    // find in icmpChecks if loaded else fetch
-                                    const found = icmpChecks.find(i=> (i.ID||i.id)===svcId);
-                                    if(found) setEditingIcmp(found);
-                                  } else if(svc.type==='http') {
-                                    const found = httpChecks.find(h=> (h.ID||h.id)===svcId);
-                                    if(found) setEditingHttp(found);
-                                  }
-                                } else {
-                                  (svc.type==='icmp'? setEditingIcmp(svc.raw): setEditingHttp(svc.raw));
-                                }
-                              }} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
-                              <Typography onClick={() => {
-                                if(rawServices.length>0){
-                                  const svcId = svc.serviceId;
-                                  if(svc.type==='icmp') {
-                                    const found = icmpChecks.find(i=> (i.ID||i.id)===svcId);
-                                    if(found) setDeleting({ type:'icmp', item: found });
-                                  } else if(svc.type==='http') {
-                                    const found = httpChecks.find(h=> (h.ID||h.id)===svcId);
-                                    if(found) setDeleting({ type:'http', item: found });
-                                  }
-                                } else {
-                                  setDeleting({ type: svc.type, item: svc.raw });
-                                }
-                              }} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
-                            </Stack>
+                          <TableCell align="center" sx={{ width:48 }}>
+                            <IconButton size="small" onClick={(e)=>{ setMenuAnchor(e.currentTarget); setMenuSvc(svc); }}>
+                              <span className="material-icons" style={{fontSize:20}}>more_vert</span>
+                            </IconButton>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -326,8 +270,8 @@ export default function HostDetails() {
         onSave={async (data)=>{
           setSaving(true);
           try {
-            // attach host id
-            data.HostID = host.ID || host.id;
+            // attach host id (use json field name expected by backend)
+            data.host_id = host.ID || host.id;
             const endpoint = creatingType==='icmp'
               ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp`
               : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl`;
@@ -348,6 +292,27 @@ export default function HostDetails() {
         message={successMsg}
         anchorOrigin={{ vertical:'bottom', horizontal:'right' }}
       />
+      <Menu
+        anchorEl={menuAnchor}
+        open={!!menuAnchor}
+        onClose={()=>{ setMenuAnchor(null); setMenuSvc(null); }}
+        anchorOrigin={{vertical:'bottom', horizontal:'right'}}
+        transformOrigin={{vertical:'top', horizontal:'right'}}
+      >
+        <MenuItem onClick={()=>{
+          if(menuSvc){
+            if(menuSvc.type==='icmp') setEditingIcmp(menuSvc.raw);
+            else if(menuSvc.type==='http') setEditingHttp(menuSvc.raw);
+          }
+          setMenuAnchor(null); setMenuSvc(null);
+        }}>Edit</MenuItem>
+        <MenuItem onClick={()=>{
+          if(menuSvc){
+            setDeleting({ type: menuSvc.type, item: menuSvc.raw });
+          }
+          setMenuAnchor(null); setMenuSvc(null);
+        }} sx={{ color:'error.main' }}>Delete</MenuItem>
+      </Menu>
     </>
   );
 }
