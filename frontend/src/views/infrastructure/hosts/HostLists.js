@@ -114,8 +114,7 @@ const HostLists = () => {
   useEffect(() => { fetchHosts(); }, []);
 
   const goToDetails = (id) => {
-    // project often uses window navigation, keep consistent
-    window.location.href = `/infrastructure/hosts/${id}`;
+    window.location.href = `/infrastructure/hosts/details/${id}`;
   };
 
   return (

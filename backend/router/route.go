@@ -140,6 +140,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     hostsGroup.Post("/", handler.CreateHost)
     // Place param routes after all static subpaths under /hosts to avoid capturing them
     hostsGroup.Get("/:id", handler.GetHostByID)
+    hostsGroup.Get("/:id/services", handler.GetHostServices)
     hostsGroup.Put("/:id", handler.UpdateHost)
     hostsGroup.Delete("/:id", handler.DeleteHost)
 
@@ -164,6 +165,8 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     // Then parametric /hosts routes
     infrastructureGroup.Post("/hosts", handler.CreateHost)
     infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
+        // Aggregated services for a host (ICMP + HTTP checks)
+        infrastructureGroup.Get("/hosts/:id/services", handler.GetHostServices)
     infrastructureGroup.Put("/hosts/:id", handler.UpdateHost)
     infrastructureGroup.Delete("/hosts/:id", handler.DeleteHost)
 
