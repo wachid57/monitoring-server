@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress,
   Snackbar
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
@@ -63,6 +63,43 @@ export default function HostDetails() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Helpers
+  const formatAge = (created) => {
+    if(!created) return '-';
+    const dt = new Date(created);
+    const diff = Date.now() - dt.getTime();
+    const mins = Math.floor(diff/60000);
+    if(mins < 60) return mins + 'm';
+    const hrs = Math.floor(mins/60);
+    if(hrs < 24) return hrs + 'h';
+    const days = Math.floor(hrs/24); return days + 'd';
+  };
+  const formatChecked = (interval) => interval ? `every ${interval}s` : '-';
+  // Combined services list
+  const services = useMemo(()=>{
+    const mapIcmp = icmpChecks.map(ch=>({
+      id: ch.ID || ch.id,
+      raw: ch,
+      type: 'icmp',
+      status: 'OK', // placeholder until real status available
+      name: ch.friendly_name || ch.FriendlyName || (ch.hostname || ch.Hostname) || 'ICMP',
+      summary: (ch.hostname || ch.Hostname || '-') + ' / interval ' + (ch.interval_sec || ch.IntervalSec || '-') + 's',
+      interval: ch.interval_sec || ch.IntervalSec,
+      created: ch.CreatedAt || ch.created_at,
+    }));
+    const mapHttp = httpChecks.map(ch=>({
+      id: ch.ID || ch.id,
+      raw: ch,
+      type: 'http',
+      status: 'OK',
+      name: ch.friendly_name || ch.FriendlyName || (ch.url || ch.URL) || 'HTTP',
+      summary: (ch.url || ch.URL || '-') + ' exp ' + (ch.expected_status || ch.ExpectedStatus || 200),
+      interval: ch.interval_sec || ch.IntervalSec,
+      created: ch.CreatedAt || ch.created_at,
+    }));
+    return [...mapIcmp, ...mapHttp];
+  }, [icmpChecks, httpChecks]);
+
   return (
     <>
       <PageContainer title="Host Details" description="Host and attached services">
@@ -91,86 +128,53 @@ export default function HostDetails() {
             </Card>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Card sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>ICMP Checks</Typography>
-                <Divider sx={{ mb: 2 }} />
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Hostname</TableCell>
-                        <TableCell>Interval(s)</TableCell>
-                        <TableCell>Retries</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell align="center">Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {icmpChecks.length === 0 ? (
-                        <TableRow><TableCell colSpan={6} align="center">No ICMP checks</TableCell></TableRow>
-                      ) : icmpChecks.map(ch => (
-                        <TableRow key={ch.ID || ch.id}>
-                          <TableCell>{ch.friendly_name || ch.FriendlyName || '-'}</TableCell>
-                          <TableCell>{ch.hostname || ch.Hostname || '-'}</TableCell>
-                          <TableCell>{ch.interval_sec || ch.IntervalSec || '-'}</TableCell>
-                          <TableCell>{ch.retries || ch.Retries || '-'}</TableCell>
-                          <TableCell><Chip size="small" label={ch.monitor_type || ch.MonitorType || 'icmp'} /></TableCell>
-                          <TableCell align="center">
-                            <Stack direction="row" spacing={1} justifyContent="center">
-                              <Typography onClick={() => setEditingIcmp(ch)} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
-                              <Typography onClick={() => setDeleting({ type:'icmp', item: ch })} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
-                            </Stack>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                <Box mt={2} textAlign="right">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setCreatingType('icmp')}
-                  >
-                    Add ICMP Check
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
             <Card>
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>HTTP Curl Checks</Typography>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Typography variant="h6" fontWeight={600}>Services</Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button size="small" variant="outlined" onClick={()=>setCreatingType('icmp')}>Add ICMP</Button>
+                    <Button size="small" variant="contained" onClick={()=>setCreatingType('http')}>Add HTTP</Button>
+                  </Stack>
+                </Stack>
                 <Divider sx={{ mb: 2 }} />
                 <TableContainer component={Paper}>
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>URL</TableCell>
-                        <TableCell>Interval(s)</TableCell>
-                        <TableCell>Retries</TableCell>
-                        <TableCell>Expect</TableCell>
-                        <TableCell>Type</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Service Name</TableCell>
+                        <TableCell>Summary</TableCell>
+                        <TableCell>Age</TableCell>
+                        <TableCell>Checked</TableCell>
+                        <TableCell>Perf-o-meter</TableCell>
                         <TableCell align="center">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {httpChecks.length === 0 ? (
-                        <TableRow><TableCell colSpan={7} align="center">No HTTP checks</TableCell></TableRow>
-                      ) : httpChecks.map(ch => (
-                        <TableRow key={ch.ID || ch.id}>
-                          <TableCell>{ch.friendly_name || ch.FriendlyName || '-'}</TableCell>
-                          <TableCell>{ch.url || ch.URL || '-'}</TableCell>
-                          <TableCell>{ch.interval_sec || ch.IntervalSec || '-'}</TableCell>
-                          <TableCell>{ch.retries || ch.Retries || '-'}</TableCell>
-                          <TableCell>{ch.expected_status || ch.ExpectedStatus || '-'}</TableCell>
-                          <TableCell><Chip size="small" label={ch.monitor_type || ch.MonitorType || 'http'} /></TableCell>
+                      {services.length === 0 ? (
+                        <TableRow><TableCell colSpan={7} align="center">No services</TableCell></TableRow>
+                      ) : services.map(svc => (
+                        <TableRow key={`${svc.type}-${svc.id}`}>
+                          <TableCell>
+                            <Chip size="small" color={svc.status==='OK' ? 'success':'default'} label={svc.status} />
+                          </TableCell>
+                          <TableCell>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Chip size="small" label={svc.type.toUpperCase()} />
+                              <Typography variant="body2" sx={{ fontWeight:500 }}>{svc.name}</Typography>
+                            </Stack>
+                          </TableCell>
+                          <TableCell><Typography variant="body2" noWrap maxWidth={220}>{svc.summary}</Typography></TableCell>
+                          <TableCell>{formatAge(svc.created)}</TableCell>
+                          <TableCell>{formatChecked(svc.interval)}</TableCell>
+                          <TableCell sx={{ minWidth:140 }}>
+                            <LinearProgress variant="determinate" value={Math.min(100, (svc.interval ? (60 / svc.interval)*10 : 50))} />
+                          </TableCell>
                           <TableCell align="center">
                             <Stack direction="row" spacing={1} justifyContent="center">
-                              <Typography onClick={() => setEditingHttp(ch)} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
-                              <Typography onClick={() => setDeleting({ type:'http', item: ch })} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
+                              <Typography onClick={() => (svc.type==='icmp'? setEditingIcmp(svc.raw): setEditingHttp(svc.raw))} sx={{ cursor:'pointer', fontSize:12, color:'primary.main' }}>Edit</Typography>
+                              <Typography onClick={() => setDeleting({ type: svc.type, item: svc.raw })} sx={{ cursor:'pointer', fontSize:12, color:'error.main' }}>Delete</Typography>
                             </Stack>
                           </TableCell>
                         </TableRow>
@@ -178,15 +182,6 @@ export default function HostDetails() {
                     </TableBody>
                   </Table>
                 </TableContainer>
-                <Box mt={2} textAlign="right">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setCreatingType('http')}
-                  >
-                    Add HTTP Check
-                  </Button>
-                </Box>
               </CardContent>
             </Card>
           </Grid>
