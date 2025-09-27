@@ -161,13 +161,13 @@ const Menuitems = [
         id: uniqueId(),
         title: 'Group Lists',
         icon: IconPoint,
-        href: '/infrastructure/groups/services/list',
+        href: '/infrastructure/services/groups/lists',
       },
             {
         id: uniqueId(),
         title: 'Bindings',
         icon: IconPoint,
-        href: '/infrastructure/groups/services/bindings',
+        href: '/infrastructure/services/groups/bindings',
       },
     ],
   },
@@ -295,11 +295,12 @@ const Menuitems = [
     navlabel: true,
     subheader: 'Settings',
   },
+
   {
     id: uniqueId(),
-    title: 'Profile Settings',
-    icon: IconUserCircle,
-    href: '/settings/profile',
+    title: 'System Settings',
+    icon: IconSettings,
+    href: '/settings/system',
   },
 
   {
@@ -313,12 +314,6 @@ const Menuitems = [
     href: '/profile/view',
   },
 
-  {
-    id: uniqueId(),
-    title: 'System Settings',
-    icon: IconSettings,
-    href: '/settings/system',
-  },
 
     {
     navlabel: true,
