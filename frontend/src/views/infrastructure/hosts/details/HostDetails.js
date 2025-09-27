@@ -1,16 +1,21 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, IconButton, Menu } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import BuildIcon from '@mui/icons-material/Build';
+import AddIcon from '@mui/icons-material/Add';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress,
-  Snackbar, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel
+  Snackbar, Select, MenuItem, FormControl
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 // Note: MenuItem already included in the grouped import block at top (Snackbar, Select, MenuItem, ...) so removed duplicate import.
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import { useNotify } from 'src/components/notifications/NotificationProvider';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const BCrumb = [
@@ -43,12 +48,12 @@ export default function HostDetails() {
   const [deleting, setDeleting] = useState(null); // { type: 'icmp'|'http', item }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState(''); // legacy, will be removed after migration to notify
   const [creatingType, setCreatingType] = useState(null); // 'icmp' | 'http'
   const [menuAnchor, setMenuAnchor] = useState(null); // anchor element for row menu
   const [menuSvc, setMenuSvc] = useState(null); // selected service row
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(false);
-  const [autoInterval, setAutoInterval] = useState(30); // seconds
+  const [refreshInterval, setRefreshInterval] = useState(0); // seconds, 0=off
+  const [addAnchor, setAddAnchor] = useState(null);
   // load function must be declared before doPingRefresh (dependency order)
   const load = useCallback(async () => {
     if (!id) return;
@@ -67,6 +72,8 @@ export default function HostDetails() {
     }
   }, [id]);
 
+  const notifyCtx = useNotify();
+
   const doPingRefresh = useCallback(async()=>{
     if(!host) return; setOpBusy(true);
     try {
@@ -74,15 +81,15 @@ export default function HostDetails() {
       if(res.status===401||res.status===403){handleAuthError({status:res.status}); return;}
       if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Refresh failed'); }
       await load();
+      notifyCtx.notify('Services refreshed', { severity:'success'});
     } catch(e){ setError(e.message);} finally { setOpBusy(false);} 
-  }, [host, load]);
+  }, [host, load, notifyCtx]);
 
   useEffect(()=>{
-    if(!autoRefreshEnabled) return; 
-    const ms = autoInterval * 1000;
-    const idTimer = setInterval(()=>{ doPingRefresh(); }, ms);
+    if(!refreshInterval) return;
+    const idTimer = setInterval(()=>{ doPingRefresh(); }, refreshInterval * 1000);
     return ()=> clearInterval(idTimer);
-  }, [autoRefreshEnabled, autoInterval, doPingRefresh]);
+  }, [refreshInterval, doPingRefresh]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -130,28 +137,33 @@ export default function HostDetails() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2} flexWrap="wrap" spacing={1}>
                   <Typography variant="h6" fontWeight={600}>Services</Typography>
-                  <Stack direction="row" spacing={1}>
-                    <Button size="small" variant="outlined" onClick={()=>setCreatingType('icmp')}>Add ICMP</Button>
-                    <Button size="small" variant="contained" onClick={()=>setCreatingType('http')}>Add HTTP</Button>
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <AccessTimeIcon sx={{ fontSize:18, color:'text.secondary' }} />
+                      <FormControl size="small" sx={{ minWidth:100 }}>
+                      <Select value={refreshInterval} onChange={e=>setRefreshInterval(Number(e.target.value))} displayEmpty>
+                        <MenuItem value={0}>Off</MenuItem>
+                        <MenuItem value={5}>5s</MenuItem>
+                        <MenuItem value={10}>10s</MenuItem>
+                        <MenuItem value={15}>15s</MenuItem>
+                        <MenuItem value={30}>30s</MenuItem>
+                        <MenuItem value={45}>45s</MenuItem>
+                        <MenuItem value={60}>60s</MenuItem>
+                      </Select>
+                      </FormControl>
+                    </Stack>
+                    <Button size="small" startIcon={<BuildIcon fontSize="small" />} disabled={opBusy} onClick={async()=>{ if(!host) return; setOpBusy(true); try { const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${host.ID||host.id}/services/rebuild`, {method:'POST', headers: getAuthHeaders()}); if(res.status===401||res.status===403){handleAuthError({status:res.status}); return;} if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Rebuild failed'); } await load(); notifyCtx.notify('Services rebuilt', { severity:'success'}); } catch(e){ setError(e.message); notifyCtx.notify(e.message,{severity:'error'});} finally { setOpBusy(false);} }}>Rebuild</Button>
+                    <Button size="small" startIcon={<RefreshIcon fontSize="small" />} disabled={opBusy} onClick={doPingRefresh}>Refresh</Button>
+                    <Button size="small" variant="contained" startIcon={<AddIcon fontSize="small" />} onClick={(e)=>setAddAnchor(e.currentTarget)}>Add Service</Button>
+                    <Menu anchorEl={addAnchor} open={!!addAnchor} onClose={()=>setAddAnchor(null)}>
+                      <MenuItem onClick={()=>{ setCreatingType('icmp'); setAddAnchor(null); }}>ICMP</MenuItem>
+                      <MenuItem onClick={()=>{ setCreatingType('http'); setAddAnchor(null); }}>HTTP</MenuItem>
+                    </Menu>
                   </Stack>
                 </Stack>
                 <Divider sx={{ mb: 2 }} />
-                <Stack direction="row" spacing={1} mb={2} alignItems="center" flexWrap="wrap">
-                  <Button size="small" disabled={opBusy} onClick={async()=>{ if(!host) return; setOpBusy(true); try { const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${host.ID||host.id}/services/rebuild`, {method:'POST', headers: getAuthHeaders()}); if(res.status===401||res.status===403){handleAuthError({status:res.status}); return;} if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Rebuild failed'); } setSuccessMsg('Rebuilt services'); await load(); } catch(e){ setError(e.message);} finally { setOpBusy(false);} }}>Rebuild</Button>
-                  <Button size="small" disabled={opBusy} onClick={doPingRefresh}>Refresh</Button>
-                  <FormControlLabel control={<Switch size="small" checked={autoRefreshEnabled} onChange={e=>setAutoRefreshEnabled(e.target.checked)} />} label="Auto" />
-                  <FormControl size="small" sx={{ minWidth:100 }} disabled={!autoRefreshEnabled}>
-                    <InputLabel id="auto-int-label">Interval</InputLabel>
-                    <Select labelId="auto-int-label" label="Interval" value={autoInterval} onChange={e=>setAutoInterval(Number(e.target.value))}>
-                      <MenuItem value={10}>10s</MenuItem>
-                      <MenuItem value={30}>30s</MenuItem>
-                      <MenuItem value={60}>60s</MenuItem>
-                      <MenuItem value={120}>120s</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Stack>
                 <TableContainer component={Paper}>
                   <Table size="small">
                     <TableHead>
@@ -219,7 +231,7 @@ export default function HostDetails() {
             });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Update failed'); }
-            setEditingIcmp(null); load(); setSuccessMsg('ICMP check updated');
+            setEditingIcmp(null); load(); notifyCtx.notify('ICMP check updated', { severity:'success'});
           } catch(e){ setError(e.message); } finally { setSaving(false);} }}
       />)}
   {editingHttp && (
@@ -240,7 +252,7 @@ export default function HostDetails() {
             });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Update failed'); }
-            setEditingHttp(null); load(); setSuccessMsg('HTTP check updated');
+            setEditingHttp(null); load(); notifyCtx.notify('HTTP check updated', { severity:'success'});
           } catch(e){ setError(e.message); } finally { setSaving(false);} }}
       />)}
   {deleting && (
@@ -258,7 +270,7 @@ export default function HostDetails() {
             const res = await fetch(base, { method:'DELETE', headers: getAuthHeaders() });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Delete failed'); }
-            setDeleting(null); load(); setSuccessMsg(`${deleting.type.toUpperCase()} check deleted`);
+            setDeleting(null); load(); notifyCtx.notify(`${deleting.type.toUpperCase()} check deleted`, { severity:'success'});
           } catch(e){ setError(e.message);} }}
       />)}
   {creatingType && (
@@ -284,16 +296,10 @@ export default function HostDetails() {
             });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Create failed'); }
-            setCreatingType(null); load(); setSuccessMsg(`${creatingType.toUpperCase()} check created`);
+            setCreatingType(null); load(); notifyCtx.notify(`${creatingType.toUpperCase()} check created`, { severity:'success'});
           } catch(e){ setError(e.message); } finally { setSaving(false);} }}
       />)}
-      <Snackbar
-        open={!!successMsg}
-        autoHideDuration={3000}
-        onClose={()=>setSuccessMsg('')}
-        message={successMsg}
-        anchorOrigin={{ vertical:'bottom', horizontal:'right' }}
-      />
+  {/* Legacy Snackbar removed; notifications handled via NotificationProvider */}
       <Menu
         anchorEl={menuAnchor}
         open={!!menuAnchor}
@@ -301,10 +307,20 @@ export default function HostDetails() {
         anchorOrigin={{vertical:'bottom', horizontal:'right'}}
         transformOrigin={{vertical:'top', horizontal:'right'}}
       >
-        <MenuItem onClick={()=>{
+        <MenuItem onClick={async()=>{
           if(menuSvc){
-            if(menuSvc.type==='icmp') setEditingIcmp(menuSvc.raw);
-            else if(menuSvc.type==='http') setEditingHttp(menuSvc.raw);
+            try {
+              let endpoint = '';
+              if(menuSvc.type==='icmp') endpoint = `${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp/${menuSvc.serviceId}`;
+              else if(menuSvc.type==='http') endpoint = `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl/${menuSvc.serviceId}`;
+              if(endpoint){
+                const res = await fetch(endpoint, { headers: getAuthHeaders() });
+                if(res.status===401||res.status===403){ handleAuthError({status:res.status}); return; }
+                if(!res.ok){ throw new Error('Load failed'); }
+                const data = await res.json();
+                if(menuSvc.type==='icmp') setEditingIcmp(data); else setEditingHttp(data);
+              }
+            } catch(err){ setError(err.message); }
           }
           setMenuAnchor(null); setMenuSvc(null);
         }}>Edit</MenuItem>
@@ -333,9 +349,9 @@ function EditDialog({ type, open, item, onClose, onSave, saving, creating }) {
   }));
   const onChange = (k,v)=> setForm(f=>({...f,[k]:v}));
   const submit = ()=>{
-    const payload = { FriendlyName: form.friendly_name, IntervalSec: Number(form.interval_sec)||60, Retries: Number(form.retries)||0 };
-    if(type==='icmp') { payload.Hostname = form.hostname; }
-    else { payload.URL = form.url; payload.ExpectedStatus = Number(form.expected_status)||200; if(form.keyword) payload.Keyword = form.keyword; }
+    const payload = { friendly_name: form.friendly_name, interval_sec: Number(form.interval_sec)||60, retries: Number(form.retries)||0 };
+    if(type==='icmp') { payload.hostname = form.hostname; }
+    else { payload.url = form.url; payload.expected_status = Number(form.expected_status)||200; if(form.keyword) payload.keyword = form.keyword; }
     onSave(payload);
   };
   return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">

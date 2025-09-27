@@ -318,6 +318,14 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     httpCurlChecker.Put("/:id", handler.UpdateHTTPCurlCheck)
     httpCurlChecker.Delete("/:id", handler.DeleteHTTPCurlCheck)
 
+    // Monitoring ICMP Checker (new alias similar to http-curl)
+    icmpChecker := protected.Group("monitoring/checker/icmp")
+    icmpChecker.Get("/", handler.ListICMPChecks)
+    icmpChecker.Post("/", handler.CreateICMPCheck)
+    icmpChecker.Get("/:id", handler.GetICMPCheck)
+    icmpChecker.Put("/:id", handler.UpdateICMPCheck)
+    icmpChecker.Delete("/:id", handler.DeleteICMPCheck)
+
     }
 
     // Docs endpoints under /docs/v1.0

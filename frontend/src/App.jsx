@@ -4,6 +4,8 @@ import RTL from './layouts/full/shared/customizer/RTL';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { RouterProvider } from 'react-router';
 import router from './routes/Router'
+import { NotificationProvider } from './components/notifications/NotificationProvider';
+import { NotifyingErrorBoundary } from './components/notifications/ErrorBoundary';
 
 function App() {
 
@@ -12,10 +14,14 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <RTL direction={customizer.activeDir}>
-        <CssBaseline />
-        <RouterProvider router={router} />
-      </RTL>
+      <NotificationProvider>
+        <RTL direction={customizer.activeDir}>
+          <CssBaseline />
+          <NotifyingErrorBoundary>
+            <RouterProvider router={router} />
+          </NotifyingErrorBoundary>
+        </RTL>
+      </NotificationProvider>
     </ThemeProvider>
   );
 }
