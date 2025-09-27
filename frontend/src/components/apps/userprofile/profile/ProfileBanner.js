@@ -24,6 +24,8 @@ import {
 } from '@tabler/icons';
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
+import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const ProfileBanner = () => {
   const ProfileImage = styled(Box)(() => ({
@@ -37,13 +39,28 @@ const ProfileBanner = () => {
     margin: '0 auto',
   }));
   const [isLoading, setLoading] = React.useState(true);
+  const [profile, setProfile] = React.useState({ name: '', title: '' });
+
+  const loadProfile = React.useCallback(async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/account/setting/profiles/user-profile`, { headers: getAuthHeaders(), credentials: 'include' });
+      if (!res.ok) throw new Error('Failed load profile');
+      const data = await res.json();
+      // API returns user detail fields plus maybe nested user; attempt to map
+      setProfile({
+        name: data.name || data.username || '',
+        title: data.title || data.institution || ''
+      });
+    } catch (e) {
+      handleAuthError(e);
+    }
+  }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    const timer = setTimeout(() => setLoading(false), 500);
+    loadProfile();
     return () => clearTimeout(timer);
-  }, []);
+  }, [loadProfile]);
 
   return (
     <>
@@ -138,10 +155,10 @@ const ProfileBanner = () => {
                 </ProfileImage>
                 <Box mt={1}>
                   <Typography fontWeight={600} variant="h5">
-                    Mathew Anderson
+                    {profile.name || '-'}
                   </Typography>
                   <Typography color="textSecondary" variant="h6" fontWeight={400}>
-                    Designer
+                    {profile.title || '-'}
                   </Typography>
                 </Box>
               </Box>
