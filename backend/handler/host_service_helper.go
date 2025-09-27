@@ -9,6 +9,7 @@ import (
 // upsertHostService creates or updates a HostService row for given type+serviceID
 func upsertHostService(hostID uint, serviceType string, serviceID uint, name, summary string) error {
 	if hostID == 0 || serviceID == 0 || serviceType == "" { return nil }
+	if name == "" { name = summary }
 	var existing model.HostService
 	if err := database.DB.Where("host_id=? AND service_type=? AND service_id=?", hostID, serviceType, serviceID).First(&existing).Error; err == nil {
 		existing.Name = name

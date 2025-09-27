@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, IconButton, Menu } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
@@ -7,6 +8,7 @@ import {
   Snackbar, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
+// Note: MenuItem already included in the grouped import block at top (Snackbar, Select, MenuItem, ...) so removed duplicate import.
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
@@ -185,7 +187,7 @@ export default function HostDetails() {
                           </TableCell>
                           <TableCell align="center" sx={{ width:48 }}>
                             <IconButton size="small" onClick={(e)=>{ setMenuAnchor(e.currentTarget); setMenuSvc(svc); }}>
-                              <span className="material-icons" style={{fontSize:20}}>more_vert</span>
+                              <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </TableCell>
                         </TableRow>

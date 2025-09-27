@@ -15,3 +15,6 @@ type ICMPCheck struct {
 	ResendDownCount   int    `json:"resend_down_count"`
 	MonitorType       string `json:"monitor_type" gorm:"size:32"`
 }
+
+// TableName override for clearer plural form
+func (ICMPCheck) TableName() string { return "icmp_checks" }

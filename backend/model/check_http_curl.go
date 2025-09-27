@@ -18,3 +18,5 @@ type HTTPCurlCheck struct {
 	ExpectedStatus   int    `json:"expected_status" gorm:"default:200"`
 	Keyword          string `json:"keyword" gorm:"size:255"`
 }
+
+func (HTTPCurlCheck) TableName() string { return "http_curl_checks" }
