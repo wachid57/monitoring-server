@@ -105,9 +105,9 @@ const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')))
 // const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
-const HostLists = Loadable(lazy(() => import('../views/monitoring/hosts/lists/HostLists')));
+const HostLists = Loadable(lazy(() => import('../views/infrastructure/hosts/HostLists')));
 const AddHost = Loadable(lazy(() => import('../views/monitoring/hosts/add/AddHost')));
-const HostDetails = Loadable(lazy(() => import('../views/monitoring/hosts/details/HostsDetails')));
+const HostDetails = Loadable(lazy(() => import('../views/infrastructure/hosts/details/HostDetails')));
 const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
 const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
 const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));

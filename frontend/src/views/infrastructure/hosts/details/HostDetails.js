@@ -3,7 +3,8 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } 
 import { useParams } from 'react-router';
 import {
   Card, CardContent, Typography, CircularProgress, Alert, Box, Grid, Stack, Divider,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip,
+  Snackbar
 } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
@@ -40,6 +41,8 @@ export default function HostDetails() {
   const [deleting, setDeleting] = useState(null); // { type: 'icmp'|'http', item }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [creatingType, setCreatingType] = useState(null); // 'icmp' | 'http'
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -125,6 +128,15 @@ export default function HostDetails() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <Box mt={2} textAlign="right">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setCreatingType('icmp')}
+                  >
+                    Add ICMP Check
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
             <Card>
@@ -166,6 +178,15 @@ export default function HostDetails() {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <Box mt={2} textAlign="right">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setCreatingType('http')}
+                  >
+                    Add HTTP Check
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           </Grid>
@@ -190,7 +211,7 @@ export default function HostDetails() {
             });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Update failed'); }
-            setEditingIcmp(null); load();
+            setEditingIcmp(null); load(); setSuccessMsg('ICMP check updated');
           } catch(e){ setError(e.message); } finally { setSaving(false);} }}
       />)}
   {editingHttp && (
@@ -211,7 +232,7 @@ export default function HostDetails() {
             });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Update failed'); }
-            setEditingHttp(null); load();
+            setEditingHttp(null); load(); setSuccessMsg('HTTP check updated');
           } catch(e){ setError(e.message); } finally { setSaving(false);} }}
       />)}
   {deleting && (
@@ -229,16 +250,49 @@ export default function HostDetails() {
             const res = await fetch(base, { method:'DELETE', headers: getAuthHeaders() });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
             if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Delete failed'); }
-            setDeleting(null); load();
+            setDeleting(null); load(); setSuccessMsg(`${deleting.type.toUpperCase()} check deleted`);
           } catch(e){ setError(e.message);} }}
       />)}
-  </>
+  {creatingType && (
+      <EditDialog
+        type={creatingType}
+        open={!!creatingType}
+        item={{}}
+        creating
+        saving={saving}
+        onClose={()=>setCreatingType(null)}
+        onSave={async (data)=>{
+          setSaving(true);
+          try {
+            // attach host id
+            data.HostID = host.ID || host.id;
+            const endpoint = creatingType==='icmp'
+              ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp`
+              : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl`;
+            const res = await fetch(endpoint, {
+              method:'POST',
+              headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
+              body: JSON.stringify(data)
+            });
+            if(res.status===401||res.status===403) return handleAuthError({status:res.status});
+            if(!res.ok){ const dj= await res.json(); throw new Error(dj.error||'Create failed'); }
+            setCreatingType(null); load(); setSuccessMsg(`${creatingType.toUpperCase()} check created`);
+          } catch(e){ setError(e.message); } finally { setSaving(false);} }}
+      />)}
+      <Snackbar
+        open={!!successMsg}
+        autoHideDuration={3000}
+        onClose={()=>setSuccessMsg('')}
+        message={successMsg}
+        anchorOrigin={{ vertical:'bottom', horizontal:'right' }}
+      />
+    </>
   );
 }
 
 // Reusable Edit Dialog Component
 
-function EditDialog({ type, open, item, onClose, onSave, saving }) {
+function EditDialog({ type, open, item, onClose, onSave, saving, creating }) {
   const [form, setForm] = useState(()=>({
     friendly_name: item.friendly_name || item.FriendlyName || '',
     hostname: item.hostname || item.Hostname || '',
@@ -256,7 +310,7 @@ function EditDialog({ type, open, item, onClose, onSave, saving }) {
     onSave(payload);
   };
   return (<Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-    <DialogTitle>Edit {type.toUpperCase()} Check</DialogTitle>
+    <DialogTitle>{creating ? 'Create' : 'Edit'} {type.toUpperCase()} Check</DialogTitle>
     <DialogContent dividers>
       <Stack spacing={2} mt={1}>
         <TextField label="Friendly Name" value={form.friendly_name} onChange={e=>onChange('friendly_name', e.target.value)} fullWidth />
@@ -270,7 +324,7 @@ function EditDialog({ type, open, item, onClose, onSave, saving }) {
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose}>Cancel</Button>
-      <Button variant="contained" disabled={saving} onClick={submit}>{saving? 'Saving...' : 'Save'}</Button>
+      <Button variant="contained" disabled={saving} onClick={submit}>{saving? (creating ? 'Saving...' : 'Saving...') : (creating ? 'Create' : 'Save')}</Button>
     </DialogActions>
   </Dialog>);
 }
