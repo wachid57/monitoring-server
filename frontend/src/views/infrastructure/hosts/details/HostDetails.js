@@ -224,7 +224,7 @@ export default function HostDetails() {
           setSaving(true);
           try {
             const idc = editingIcmp.ID || editingIcmp.id;
-            const res = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp/${idc}`, {
+            const res = await fetch(`${BACKEND_URL}${API_PREFIX}/services/availability/icmp/${idc}`, {
               method:'PUT',
               headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
               body: JSON.stringify(data)
@@ -265,7 +265,7 @@ export default function HostDetails() {
           try {
             const idd = deleting.item.ID || deleting.item.id;
             const base = deleting.type==='icmp'
-              ? `${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp/${idd}`
+              ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp/${idd}`
               : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl/${idd}`;
             const res = await fetch(base, { method:'DELETE', headers: getAuthHeaders() });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
@@ -287,7 +287,7 @@ export default function HostDetails() {
             // attach host id (use json field name expected by backend)
             data.host_id = host.ID || host.id;
             const endpoint = creatingType==='icmp'
-              ? `${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp`
+              ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp`
               : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl`;
             const res = await fetch(endpoint, {
               method:'POST',
