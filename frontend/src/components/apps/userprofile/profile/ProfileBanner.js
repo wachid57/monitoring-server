@@ -1,13 +1,29 @@
 import React, { useEffect } from 'react';
-import { Box, Typography, Button, Avatar, Stack, CardMedia, styled, Fab, Skeleton } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Avatar,
+  Stack,
+  CardMedia,
+  styled,
+  Fab,
+  Skeleton,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import profilecover from 'src/assets/images/backgrounds/profilebg.jpg';
 import userimg from 'src/assets/images/profile/user-1.jpg';
-import { IconBrandDribbble, IconBrandFacebook, IconBrandTwitter, IconBrandYoutube, IconFileDescription, IconUserCheck, IconUserCircle } from '@tabler/icons';
+import {
+  IconBrandDribbble,
+  IconBrandFacebook,
+  IconBrandTwitter,
+  IconBrandYoutube,
+  IconFileDescription,
+  IconUserCheck,
+  IconUserCircle,
+} from '@tabler/icons';
 import ProfileTab from './ProfileTab';
 import BlankCard from '../../../shared/BlankCard';
-import { getAuthHeaders } from 'src/utils/auth';
-import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
 const ProfileBanner = () => {
   const ProfileImage = styled(Box)(() => ({
@@ -21,28 +37,12 @@ const ProfileBanner = () => {
     margin: '0 auto',
   }));
   const [isLoading, setLoading] = React.useState(true);
-  const [profile, setProfile] = React.useState({ name: '', title: '' });
-  const [error, setError] = React.useState('');
 
   useEffect(() => {
-    let active = true;
-    const load = async () => {
-      setLoading(true);
-      try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders() });
-        if (!res.ok) throw new Error('Failed to load profile');
-        const data = await res.json();
-        if (active) {
-          setProfile({ name: data.name || data.username || 'Unknown User', title: data.title || '' });
-        }
-      } catch (e) {
-        if (active) setError(e.message);
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    load();
-    return () => { active = false; };
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -137,24 +137,12 @@ const ProfileBanner = () => {
                   />
                 </ProfileImage>
                 <Box mt={1}>
-                  {isLoading ? (
-                    <>
-                      <Skeleton variant="text" width={140} />
-                      <Skeleton variant="text" width={100} />
-                    </>
-                  ) : (
-                    <>
-                      <Typography fontWeight={600} variant="h5">
-                        {profile.name || 'Unnamed User'}
-                      </Typography>
-                      <Typography color="textSecondary" variant="h6" fontWeight={400}>
-                        {profile.title || '—'}
-                      </Typography>
-                      {error && (
-                        <Typography color="error" variant="caption">{error}</Typography>
-                      )}
-                    </>
-                  )}
+                  <Typography fontWeight={600} variant="h5">
+                    Mathew Anderson
+                  </Typography>
+                  <Typography color="textSecondary" variant="h6" fontWeight={400}>
+                    Designer
+                  </Typography>
                 </Box>
               </Box>
             </Box>

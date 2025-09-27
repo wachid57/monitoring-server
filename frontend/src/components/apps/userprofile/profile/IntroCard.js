@@ -3,9 +3,8 @@ import { Stack, Typography, IconButton, Dialog, DialogTitle, DialogContent, Dial
 import ChildCard from 'src/components/shared/ChildCard';
 import { IconBriefcase, IconDeviceDesktop, IconMail, IconMapPin, IconPencil } from '@tabler/icons';
 import { getAuthHeaders } from 'src/utils/auth';
-import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 
-const emptyDetail = { introduction: '', institution: '', contact_email: '', website: '', location: '', title: '' };
+const emptyDetail = { introduction: '', institution: '', contact_email: '', website: '', location: '' };
 
 const IntroCard = () => {
   const [detail, setDetail] = React.useState(emptyDetail);
@@ -17,7 +16,7 @@ const IntroCard = () => {
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders() });
+      const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', { headers: getAuthHeaders(), credentials: 'include' });
       if (!res.ok) throw new Error('Load failed');
       const data = await res.json();
       setDetail({
@@ -26,7 +25,6 @@ const IntroCard = () => {
         contact_email: data.contact_email || '',
         website: data.website || '',
         location: data.location || '',
-        title: data.title || '',
       });
     } catch (e) {
       setSnack({ open: true, message: e.message, severity: 'error' });
@@ -40,16 +38,16 @@ const IntroCard = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, {
+      const res = await fetch('/api/v1.0/account/setting/profiles/user-profile', {
         method: 'POST',
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           introduction: detail.introduction,
           institution: detail.institution,
           contact_email: detail.contact_email,
           website: detail.website,
           location: detail.location,
-          title: detail.title,
         })
       });
       if (!res.ok) throw new Error('Save failed');
@@ -100,7 +98,6 @@ const IntroCard = () => {
         <DialogContent dividers>
           <Stack spacing={2} mt={1}>
             <TextField label="Introduction" multiline minRows={3} value={detail.introduction} onChange={(e) => setDetail({ ...detail, introduction: e.target.value })} />
-            <TextField label="Title / Role" value={detail.title} onChange={(e) => setDetail({ ...detail, title: e.target.value })} />
             <TextField label="Institution" value={detail.institution} onChange={(e) => setDetail({ ...detail, institution: e.target.value })} />
             <TextField label="Contact Email" type="email" value={detail.contact_email} onChange={(e) => setDetail({ ...detail, contact_email: e.target.value })} />
             <TextField label="Website" value={detail.website} onChange={(e) => setDetail({ ...detail, website: e.target.value })} />

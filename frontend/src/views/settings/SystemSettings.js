@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, CardContent, Stack, Box, TextField, Button, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { Card, CardContent, Box, TextField, Button, Snackbar, Alert, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody, IconButton } from '@mui/material';
+import { IconPlus, IconTrash } from '@tabler/icons';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 
@@ -13,22 +14,16 @@ export default function SystemSettings() {
   const [loading, setLoading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [snack, setSnack] = React.useState({ open: false, message: '', severity: 'success' });
-  const [form, setForm] = React.useState({ site_name: '', base_url: '', smtp_server: '' });
+  const [rows, setRows] = React.useState([]);
+  const [newRow, setNewRow] = React.useState({ key: '', name: '', value: '', description: '' });
 
   const loadSettings = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/v1.0/system/settings', { credentials: 'include' });
+      const res = await fetch('/api/v1.0/system/settings');
       if (!res.ok) throw new Error('Failed load');
       const data = await res.json();
-      // data is array of {key,value}
-      const map = {};
-      data.forEach((d) => { map[d.key] = d.value; });
-      setForm({
-        site_name: map.site_name || '',
-        base_url: map.base_url || '',
-        smtp_server: map.smtp_server || '',
-      });
+      setRows(data.sort((a,b)=>a.key.localeCompare(b.key)));
     } catch (e) {
       setSnack({ open: true, message: 'Load failed: ' + e.message, severity: 'error' });
     } finally {
@@ -38,27 +33,37 @@ export default function SystemSettings() {
 
   React.useEffect(() => { loadSettings(); }, [loadSettings]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const updateRowValue = (idx, field, value) => {
+    setRows(r => r.map((row,i)=> i===idx ? { ...row, [field]: value } : row));
+  };
+
+  const saveRow = async (row) => {
+    await fetch('/api/v1.0/system/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: row.key, name: row.name, value: row.value, description: row.description })
+    });
+  };
 
   const saveAll = async () => {
     setSaving(true);
     try {
-      // send each key as upsert
-      for (const [key, value] of Object.entries(form)) {
-        await fetch('/api/v1.0/system/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ key, value }),
-        });
-      }
+      for (const r of rows) { await saveRow(r); }
+      if (newRow.key && newRow.value) { await saveRow(newRow); setNewRow({ key:'', name:'', value:'', description:'' }); }
       setSnack({ open: true, message: 'Settings saved', severity: 'success' });
       loadSettings();
     } catch (e) {
       setSnack({ open: true, message: 'Save failed: ' + e.message, severity: 'error' });
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
+  };
+
+  const removeRow = async (key) => {
+    if (!window.confirm('Delete setting '+key+' ?')) return;
+    try {
+      await fetch('/api/v1.0/system/settings/'+key, { method: 'DELETE' });
+      setRows(r => r.filter(x=>x.key!==key));
+      setSnack({ open:true, message:'Deleted '+key, severity:'success' });
+    } catch (e) { setSnack({ open:true, message:'Delete failed', severity:'error' }); }
   };
 
   return (
@@ -67,14 +72,58 @@ export default function SystemSettings() {
       <Card>
         <CardContent>
           {loading ? <CircularProgress size={28} /> : (
-            <Stack spacing={2} maxWidth={480}>
-              <TextField label="Site Name" name="site_name" value={form.site_name} onChange={handleChange} fullWidth />
-              <TextField label="Base URL" name="base_url" value={form.base_url} onChange={handleChange} fullWidth />
-              <TextField label="SMTP Server" name="smtp_server" value={form.smtp_server} onChange={handleChange} fullWidth />
-              <Box>
-                <Button variant="contained" disabled={saving} onClick={saveAll}>{saving ? 'Saving...' : 'Save Settings'}</Button>
+            <>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell width={200}>Name</TableCell>
+                    <TableCell width={180}>Key</TableCell>
+                    <TableCell>Value</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell width={60} align="center">Del</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {rows.map((r,idx)=>(
+                    <TableRow key={r.key}>
+                      <TableCell>
+                        <TextField size="small" fullWidth value={r.name || ''} onChange={e=>updateRowValue(idx,'name',e.target.value)} />
+                      </TableCell>
+                      <TableCell>{r.key}</TableCell>
+                      <TableCell>
+                        <TextField size="small" fullWidth value={r.value} onChange={e=>updateRowValue(idx,'value',e.target.value)} />
+                      </TableCell>
+                      <TableCell>
+                        <TextField size="small" fullWidth value={r.description || ''} onChange={e=>updateRowValue(idx,'description',e.target.value)} />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" onClick={()=>removeRow(r.key)}><IconTrash size={16} /></IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow>
+                    <TableCell>
+                      <TextField size="small" placeholder="Name" value={newRow.name} onChange={e=>setNewRow({...newRow,name:e.target.value})} />
+                    </TableCell>
+                    <TableCell>
+                      <TextField size="small" placeholder="new_key" value={newRow.key} onChange={e=>setNewRow({...newRow,key:e.target.value})} />
+                    </TableCell>
+                    <TableCell>
+                      <TextField size="small" placeholder="value" value={newRow.value} onChange={e=>setNewRow({...newRow,value:e.target.value})} />
+                    </TableCell>
+                    <TableCell>
+                      <TextField size="small" placeholder="description" value={newRow.description} onChange={e=>setNewRow({...newRow,description:e.target.value})} />
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton size="small" disabled={!newRow.key || !newRow.value} onClick={()=>{ setRows(r=>[...r,newRow]); setNewRow({key:'',name:'',value:'',description:''}) }}><IconPlus size={16} /></IconButton>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+              <Box mt={2}>
+                <Button variant="contained" disabled={saving} onClick={saveAll}>{saving ? 'Saving...' : 'Save All'}</Button>
               </Box>
-            </Stack>
+            </>
           )}
         </CardContent>
       </Card>

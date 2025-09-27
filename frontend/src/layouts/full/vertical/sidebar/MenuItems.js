@@ -313,6 +313,12 @@ const Menuitems = [
     icon: IconUserCircle,
     href: '/account/setting/profiles/user-profile',
   },
+  {
+    id: uniqueId(),
+    title: 'User Settings',
+    icon: IconUserCircle,
+    href: '/account/setting/profiles/user-settings',
+  },
 
 
     {

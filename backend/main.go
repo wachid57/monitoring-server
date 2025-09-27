@@ -51,6 +51,11 @@ func main() {
 	}
 	log.Println("Default data initialization completed.")
 
+	// Seed global system settings (idempotent)
+	if err := handler.SeedSystemSettings(); err != nil {
+		log.Printf("Failed seeding system settings: %v", err)
+	}
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Backend Fiber API running!")
 	})

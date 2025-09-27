@@ -299,7 +299,10 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     systemSettings.Post("/", handler.UpsertSystemSetting) // upsert by key in body
     systemSettings.Delete("/:key", handler.DeleteSystemSetting)
 
-    // (duplicate accountProfile group removed)
+    // Account profile (user detail) routes
+    accountProfile := protected.Group("account/setting/profiles/user-profile")
+    accountProfile.Get("/", handler.GetOwnUserDetail)
+    accountProfile.Post("/", handler.UpsertOwnUserDetail)
 
     }
 
