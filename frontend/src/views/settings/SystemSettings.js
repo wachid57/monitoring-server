@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, Box, TextField, Button, Snackbar, Alert, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody, IconButton } from '@mui/material';
-import { IconPlus, IconTrash } from '@tabler/icons';
+import { Card, CardContent, Box, TextField, Button, Snackbar, Alert, CircularProgress, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Switch, Chip, Tooltip, Stack } from '@mui/material';
+import { IconPlus, IconTrash, IconEdit, IconCheck, IconX, IconLock } from '@tabler/icons';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
@@ -17,7 +17,8 @@ export default function SystemSettings() {
   const [saving, setSaving] = React.useState(false);
   const [snack, setSnack] = React.useState({ open: false, message: '', severity: 'success' });
   const [rows, setRows] = React.useState([]);
-  const [newRow, setNewRow] = React.useState({ key: '', name: '', value: '', description: '' });
+  const [editing, setEditing] = React.useState({}); // key -> original snapshot
+  const [newRow, setNewRow] = React.useState({ key: '', name: '', value: '', description: '', enabled: true });
 
   const loadSettings = React.useCallback(async () => {
     setLoading(true);
@@ -26,7 +27,7 @@ export default function SystemSettings() {
       if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
       if (!res.ok) throw new Error('Failed load');
       const data = await res.json();
-      setRows(data.sort((a,b)=>a.key.localeCompare(b.key)));
+  setRows(data.sort((a,b)=>a.key.localeCompare(b.key)));
     } catch (e) {
       setSnack({ open: true, message: 'Load failed: ' + e.message, severity: 'error' });
     } finally {
@@ -40,35 +41,56 @@ export default function SystemSettings() {
     setRows(r => r.map((row,i)=> i===idx ? { ...row, [field]: value } : row));
   };
 
+  const beginEdit = (r) => {
+    setEditing(e => ({ ...e, [r.key]: { ...r } }));
+  };
+  const cancelEdit = (r) => {
+    // revert row to snapshot
+    setRows(rs => rs.map(x => x.key === r.key ? editing[r.key] : x));
+    setEditing(e => { const cp = { ...e }; delete cp[r.key]; return cp; });
+  };
+  const isEditing = (key) => !!editing[key];
+
   const saveRow = async (row) => {
     const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-      body: JSON.stringify({ key: row.key, name: row.name, value: row.value, description: row.description })
+      body: JSON.stringify({ key: row.key, name: row.name, value: row.value, description: row.description, enabled: row.enabled })
     });
     if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); throw new Error('auth'); }
     if (!res.ok) throw new Error('save failed');
   };
 
-  const saveAll = async () => {
-    setSaving(true);
+  const commitEdit = async (r) => {
     try {
-      for (const r of rows) { await saveRow(r); }
-      if (newRow.key && newRow.value) { await saveRow(newRow); setNewRow({ key:'', name:'', value:'', description:'' }); }
-      setSnack({ open: true, message: 'Settings saved', severity: 'success' });
-      loadSettings();
+      await saveRow(r);
+      setSnack({ open:true, message:`Saved ${r.key}`, severity:'success' });
+      setEditing(e => { const cp = { ...e }; delete cp[r.key]; return cp; });
     } catch (e) {
-      setSnack({ open: true, message: 'Save failed: ' + e.message, severity: 'error' });
-    } finally { setSaving(false); }
+      setSnack({ open:true, message:'Save failed: '+e.message, severity:'error' });
+    }
   };
 
-  const removeRow = async (key) => {
-    if (!window.confirm('Delete setting '+key+' ?')) return;
+  const addNew = async () => {
+    if (!newRow.key || !newRow.value) return;
     try {
-      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings/`+key, { method: 'DELETE', headers: getAuthHeaders() });
+      await saveRow(newRow);
+      setSnack({ open:true, message:`Created ${newRow.key}`, severity:'success' });
+      setNewRow({ key:'', name:'', value:'', description:'', enabled:true });
+      loadSettings();
+    } catch (e) {
+      setSnack({ open:true, message:'Create failed: '+e.message, severity:'error' });
+    }
+  };
+
+  const removeRow = async (row) => {
+    if (row.native) return;
+    if (!window.confirm('Delete setting '+row.key+' ?')) return;
+    try {
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/system/settings/`+row.key, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.status === 401 || res.status === 403) { handleAuthError({ status: res.status }); return; }
-      setRows(r => r.filter(x=>x.key!==key));
-      setSnack({ open:true, message:'Deleted '+key, severity:'success' });
+      setRows(r => r.filter(x=>x.key!==row.key));
+      setSnack({ open:true, message:'Deleted '+row.key, severity:'success' });
     } catch (e) { setSnack({ open:true, message:'Delete failed', severity:'error' }); }
   };
 
@@ -83,30 +105,62 @@ export default function SystemSettings() {
                 <TableHead>
                   <TableRow>
                     <TableCell width={200}>Name</TableCell>
-                    <TableCell width={180}>Key</TableCell>
+                    <TableCell width={160}>Key</TableCell>
+                    <TableCell width={120}>Enabled</TableCell>
                     <TableCell>Value</TableCell>
                     <TableCell>Description</TableCell>
-                    <TableCell width={60} align="center">Del</TableCell>
+                    <TableCell width={140} align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((r,idx)=>(
-                    <TableRow key={r.key}>
-                      <TableCell>
-                        <TextField size="small" fullWidth value={r.name || ''} onChange={e=>updateRowValue(idx,'name',e.target.value)} />
-                      </TableCell>
-                      <TableCell>{r.key}</TableCell>
-                      <TableCell>
-                        <TextField size="small" fullWidth value={r.value} onChange={e=>updateRowValue(idx,'value',e.target.value)} />
-                      </TableCell>
-                      <TableCell>
-                        <TextField size="small" fullWidth value={r.description || ''} onChange={e=>updateRowValue(idx,'description',e.target.value)} />
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton size="small" onClick={()=>removeRow(r.key)}><IconTrash size={16} /></IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {rows.map((r,idx)=>{
+                    const editMode = isEditing(r.key);
+                    return (
+                      <TableRow key={r.key} hover>
+                        <TableCell>
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            {r.native && <Tooltip title="Native setting"><span><IconLock size={14} /></span></Tooltip>}
+                            {editMode ? (
+                              <TextField size="small" fullWidth value={r.name || ''} onChange={e=>updateRowValue(idx,'name',e.target.value)} />
+                            ) : (
+                              <span>{r.name || <em style={{opacity:0.6}}>—</em>}</span>
+                            )}
+                          </Stack>
+                        </TableCell>
+                        <TableCell>{r.key}</TableCell>
+                        <TableCell>
+                          <Switch size="small" checked={!!r.enabled} disabled={!editMode} onChange={e=>updateRowValue(idx,'enabled',e.target.checked)} />
+                        </TableCell>
+                        <TableCell>
+                          {editMode ? (
+                            <TextField size="small" fullWidth value={r.value} onChange={e=>updateRowValue(idx,'value',e.target.value)} />
+                          ) : (
+                            <span style={{fontFamily:'monospace'}}>{r.value}</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editMode ? (
+                            <TextField size="small" fullWidth value={r.description || ''} onChange={e=>updateRowValue(idx,'description',e.target.value)} />
+                          ) : (
+                            <span>{r.description}</span>
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          {editMode ? (
+                            <Stack direction="row" spacing={1} justifyContent="center">
+                              <IconButton size="small" color="success" onClick={()=>commitEdit(r)}><IconCheck size={16} /></IconButton>
+                              <IconButton size="small" color="error" onClick={()=>cancelEdit(r)}><IconX size={16} /></IconButton>
+                            </Stack>
+                          ) : (
+                            <Stack direction="row" spacing={1} justifyContent="center">
+                              <IconButton size="small" onClick={()=>beginEdit(r)}><IconEdit size={16} /></IconButton>
+                              {!r.native && <IconButton size="small" onClick={()=>removeRow(r)}><IconTrash size={16} /></IconButton>}
+                            </Stack>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                   <TableRow>
                     <TableCell>
                       <TextField size="small" placeholder="Name" value={newRow.name} onChange={e=>setNewRow({...newRow,name:e.target.value})} />
@@ -115,20 +169,20 @@ export default function SystemSettings() {
                       <TextField size="small" placeholder="new_key" value={newRow.key} onChange={e=>setNewRow({...newRow,key:e.target.value})} />
                     </TableCell>
                     <TableCell>
+                      <Switch size="small" checked={newRow.enabled} onChange={e=>setNewRow(n=>({...n,enabled:e.target.checked}))} />
+                    </TableCell>
+                    <TableCell>
                       <TextField size="small" placeholder="value" value={newRow.value} onChange={e=>setNewRow({...newRow,value:e.target.value})} />
                     </TableCell>
                     <TableCell>
                       <TextField size="small" placeholder="description" value={newRow.description} onChange={e=>setNewRow({...newRow,description:e.target.value})} />
                     </TableCell>
                     <TableCell align="center">
-                      <IconButton size="small" disabled={!newRow.key || !newRow.value} onClick={()=>{ setRows(r=>[...r,newRow]); setNewRow({key:'',name:'',value:'',description:''}) }}><IconPlus size={16} /></IconButton>
+                      <IconButton size="small" disabled={!newRow.key || !newRow.value} onClick={addNew}><IconPlus size={16} /></IconButton>
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
-              <Box mt={2}>
-                <Button variant="contained" disabled={saving} onClick={saveAll}>{saving ? 'Saving...' : 'Save All'}</Button>
-              </Box>
             </>
           )}
         </CardContent>

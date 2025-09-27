@@ -29,11 +29,15 @@ func UpsertSystemSetting(c *fiber.Ctx) error {
         existing.Value = payload.Value
         if payload.Name != "" { existing.Name = payload.Name }
         if payload.Description != "" { existing.Description = payload.Description }
+        // Enabled can be toggled irrespective of native (but you might restrict if needed)
+        existing.Enabled = payload.Enabled
         if err := database.DB.Save(&existing).Error; err != nil {
             return c.Status(500).JSON(fiber.Map{"error": err.Error()})
         }
         return c.JSON(existing)
     }
+    // New custom (non-native) entry
+    payload.Native = false
     if err := database.DB.Create(&payload).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": err.Error()})
     }
@@ -46,7 +50,14 @@ func DeleteSystemSetting(c *fiber.Ctx) error {
     if key == "" {
         return c.Status(400).JSON(fiber.Map{"error": "key param required"})
     }
-    if err := database.DB.Where("key = ?", key).Delete(&model.SystemSetting{}).Error; err != nil {
+    var setting model.SystemSetting
+    if err := database.DB.Where("key = ?", key).First(&setting).Error; err != nil {
+        return c.Status(404).JSON(fiber.Map{"error":"not found"})
+    }
+    if setting.Native {
+        return c.Status(400).JSON(fiber.Map{"error":"cannot delete native setting"})
+    }
+    if err := database.DB.Delete(&setting).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": err.Error()})
     }
     return c.SendStatus(204)

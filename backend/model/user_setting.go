@@ -11,6 +11,8 @@ type UserSetting struct {
 	Value  string `gorm:"type:text" json:"value"`
 	Name   string `gorm:"size:256" json:"name"`
 	Description string `gorm:"type:text" json:"description"`
+	Native bool `gorm:"default:false" json:"native"`
+	Enabled bool `gorm:"default:true" json:"enabled"`
 }
 
 func (UserSetting) TableName() string { return "user_settings" }

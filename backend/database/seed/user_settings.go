@@ -9,13 +9,13 @@ import (
 // seedDefaultsForUser inserts default settings for one user if missing.
 func seedDefaultsForUser(userID uint) error {
     defaults := []model.UserSetting{
-        {Key: "ui_theme", Name: "UI Theme", Value: "auto", Description: "Preferred theme (light|dark|auto)"},
-        {Key: "language", Name: "Language", Value: "en", Description: "Preferred language code"},
-        {Key: "time_format", Name: "Time Format", Value: "24h", Description: "Display time format (12h|24h)"},
-        {Key: "date_format", Name: "Date Format", Value: "YYYY-MM-DD", Description: "Display date format"},
-        {Key: "dashboard_layout", Name: "Dashboard Layout", Value: "default", Description: "Chosen dashboard layout variant"},
-        {Key: "notify_email", Name: "Notify by Email", Value: "true", Description: "Receive alert e-mails"},
-        {Key: "notify_webhook", Name: "Notify by Webhook", Value: "false", Description: "Enable personal webhook notifications"},
+        {Key: "ui_theme", Name: "UI Theme", Value: "auto", Description: "Preferred theme (light|dark|auto)", Native: true, Enabled: true},
+        {Key: "language", Name: "Language", Value: "en", Description: "Preferred language code", Native: true, Enabled: true},
+        {Key: "time_format", Name: "Time Format", Value: "24h", Description: "Display time format (12h|24h)", Native: true, Enabled: true},
+        {Key: "date_format", Name: "Date Format", Value: "YYYY-MM-DD", Description: "Display date format", Native: true, Enabled: true},
+        {Key: "dashboard_layout", Name: "Dashboard Layout", Value: "default", Description: "Chosen dashboard layout variant", Native: true, Enabled: true},
+        {Key: "notify_email", Name: "Notify by Email", Value: "true", Description: "Receive alert e-mails", Native: true, Enabled: true},
+        {Key: "notify_webhook", Name: "Notify by Webhook", Value: "false", Description: "Enable personal webhook notifications", Native: true, Enabled: true},
     }
     for _, def := range defaults {
         var existing model.UserSetting
