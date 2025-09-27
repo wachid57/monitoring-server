@@ -110,7 +110,7 @@ const AddHost = Loadable(lazy(() => import('../views/monitoring/hosts/add/AddHos
 const HostDetails = Loadable(lazy(() => import('../views/infrastructure/hosts/details/HostDetails')));
 const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
 const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
-const ICMPAvailabilityPage = Loadable(lazy(() => import('../views/monitoring/hosts/ICMPAvailabilityPage')));
+const ICMPAvailabilityPage = Loadable(lazy(() => import('../views/monitoring/availability/ICMPAvailabilityPage')));
 const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
 const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
 const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
@@ -271,11 +271,11 @@ const Router = [
       { path: '/infrastructure/servicegroups/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
 
       // Host groups alias paths in menu (if needed)
-      { path: '/infrastructure/groups/hosts/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/groups/hosts/lists', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
       { path: '/infrastructure/groups/hosts/bindings', element: <ProtectedRoute><HostGroupBindings /></ProtectedRoute> },
 
       // Services groups alias paths in menu
-      { path: '/infrastructure/groups/services/list', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
+      { path: '/infrastructure/groups/services/lists', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
       { path: '/infrastructure/groups/services/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
   
       // Reports

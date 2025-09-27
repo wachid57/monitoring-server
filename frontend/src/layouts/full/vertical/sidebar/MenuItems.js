@@ -143,44 +143,39 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'Host Groups',
+    title: 'Groups',
     icon: IconPackage,
     href: '/infrastructure/hostgroups',
     children: [
       {
         id: uniqueId(),
-        title: 'Lists',
+        title: 'Hosts',
         icon: IconPoint,
-        href: '/infrastructure/groups/hosts/list',
+        href: '/infrastructure/groups/hosts/lists',
       },
       {
         id: uniqueId(),
-        title: 'Bindings',
+        title: 'Hosts Bindings',
         icon: IconPoint,
         href: '/infrastructure/groups/hosts/bindings',
       },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: 'Service Groups',
-    icon: IconLayout,
-    href: '/infrastructure/groups/services',
-    children: [
+
       {
         id: uniqueId(),
-        title: 'Lists',
+        title: 'Services',
         icon: IconPoint,
-        href: '/infrastructure/groups/services/list',
+        href: '/infrastructure/groups/services/lists',
       },
       {
         id: uniqueId(),
-        title: 'Bindings',
+        title: 'Services Bindings',
         icon: IconPoint,
         href: '/infrastructure/groups/services/bindings',
       },
+
     ],
   },
+
 
   {
     navlabel: true,
