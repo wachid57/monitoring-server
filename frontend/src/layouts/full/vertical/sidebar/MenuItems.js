@@ -308,7 +308,7 @@ const Menuitems = [
 
   {
     id: uniqueId(),
-    title: 'System Settings',
+    title: 'Settings',
     icon: IconSettings,
     href: '/system/settings',
   },
@@ -319,13 +319,13 @@ const Menuitems = [
   },
   {
     id: uniqueId(),
-    title: 'Settings',
+    title: 'Profile',
     icon: IconUserCircle,
     href: '/account/setting/profiles/user-profile',
   },
   {
     id: uniqueId(),
-    title: 'User Settings',
+    title: 'Settings',
     icon: IconUserCircle,
     href: '/account/setting/profiles/user-settings',
   },

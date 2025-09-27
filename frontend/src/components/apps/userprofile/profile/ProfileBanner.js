@@ -43,7 +43,7 @@ const ProfileBanner = () => {
 
   const loadProfile = React.useCallback(async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/account/setting/profiles/user-profile`, { headers: getAuthHeaders(), credentials: 'include' });
+      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/account/setting/profiles/user-profile`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Failed load profile');
       const data = await res.json();
       // API returns user detail fields plus maybe nested user; attempt to map
