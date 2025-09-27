@@ -4059,13 +4059,24 @@ const docTemplate = `{
         "model.ServiceGroup": {
             "type": "object",
             "properties": {
-                "desc": {
+                "Desc": {
+                    "description": "Legacy short description field (existing column)",
+                    "type": "string"
+                },
+                "alias": {
+                    "description": "New extended fields",
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "tags": {
                     "type": "string"
                 }
             }

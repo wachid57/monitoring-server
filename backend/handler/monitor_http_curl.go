@@ -6,70 +6,72 @@ import (
 	"monitoring-server/model"
 )
 
-// ListICMPChecks returns all ICMP checks
-func ListICMPChecks(c *fiber.Ctx) error {
-	var checks []model.ICMPCheck
+// ListHTTPCurlChecks returns all HTTP curl checks
+func ListHTTPCurlChecks(c *fiber.Ctx) error {
+	var checks []model.HTTPCurlCheck
 	if err := database.DB.Find(&checks).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(checks)
 }
 
-// CreateICMPCheck creates a new ICMP check
-func CreateICMPCheck(c *fiber.Ctx) error {
-	var payload model.ICMPCheck
+// CreateHTTPCurlCheck creates a new HTTP curl check
+func CreateHTTPCurlCheck(c *fiber.Ctx) error {
+	var payload model.HTTPCurlCheck
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
-	if payload.Hostname == "" {
-		return c.Status(400).JSON(fiber.Map{"error": "hostname required"})
-	}
+	if payload.URL == "" { return c.Status(400).JSON(fiber.Map{"error":"url required"}) }
+	// HostID optional: if provided it links this check to an existing host record
 	if payload.IntervalSec == 0 { payload.IntervalSec = 60 }
+	if payload.ExpectedStatus == 0 { payload.ExpectedStatus = 200 }
 	if err := database.DB.Create(&payload).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.Status(201).JSON(payload)
 }
 
-// GetICMPCheck retrieves a check by ID
-func GetICMPCheck(c *fiber.Ctx) error {
+// GetHTTPCurlCheck retrieves a check by ID
+func GetHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var check model.ICMPCheck
+	var check model.HTTPCurlCheck
 	if err := database.DB.First(&check, id).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "not found"})
 	}
 	return c.JSON(check)
 }
 
-// UpdateICMPCheck updates a check by ID
-func UpdateICMPCheck(c *fiber.Ctx) error {
+// UpdateHTTPCurlCheck updates a check
+func UpdateHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var existing model.ICMPCheck
+	var existing model.HTTPCurlCheck
 	if err := database.DB.First(&existing, id).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{"error": "not found"})
 	}
-	var payload model.ICMPCheck
+	var payload model.HTTPCurlCheck
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
 	}
 	existing.FriendlyName = payload.FriendlyName
 	if payload.HostID != 0 { existing.HostID = payload.HostID }
-	if payload.Hostname != "" { existing.Hostname = payload.Hostname }
+	if payload.URL != "" { existing.URL = payload.URL }
 	if payload.IntervalSec > 0 { existing.IntervalSec = payload.IntervalSec }
 	existing.Retries = payload.Retries
 	existing.RetryIntervalSec = payload.RetryIntervalSec
 	existing.ResendDownCount = payload.ResendDownCount
 	if payload.MonitorType != "" { existing.MonitorType = payload.MonitorType }
+	if payload.ExpectedStatus > 0 { existing.ExpectedStatus = payload.ExpectedStatus }
+	if payload.Keyword != "" { existing.Keyword = payload.Keyword }
 	if err := database.DB.Save(&existing).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(existing)
 }
 
-// DeleteICMPCheck deletes a check by ID
-func DeleteICMPCheck(c *fiber.Ctx) error {
+// DeleteHTTPCurlCheck deletes a check
+func DeleteHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
-	if err := database.DB.Delete(&model.ICMPCheck{}, id).Error; err != nil {
+	if err := database.DB.Delete(&model.HTTPCurlCheck{}, id).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.SendStatus(204)

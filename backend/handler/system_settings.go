@@ -27,6 +27,8 @@ func UpsertSystemSetting(c *fiber.Ctx) error {
     var existing model.SystemSetting
     if err := database.DB.Where("key = ?", payload.Key).First(&existing).Error; err == nil {
         existing.Value = payload.Value
+        if payload.Name != "" { existing.Name = payload.Name }
+        if payload.Description != "" { existing.Description = payload.Description }
         if err := database.DB.Save(&existing).Error; err != nil {
             return c.Status(500).JSON(fiber.Map{"error": err.Error()})
         }

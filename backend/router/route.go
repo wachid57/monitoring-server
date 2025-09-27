@@ -293,16 +293,25 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
     accountProfile.Get("/", handler.GetOwnUserDetail)
     accountProfile.Post("/", handler.UpsertOwnUserDetail)
 
+    // User personal settings (key-value per user)
+    userSettings := protected.Group("account/setting/profiles/user-settings")
+    userSettings.Get("/", handler.ListUserSettings)
+    userSettings.Post("/", handler.UpsertUserSetting)
+    userSettings.Delete("/:key", handler.DeleteUserSetting)
+
     // System Settings (key-value store)
     systemSettings := protected.Group("system/settings")
     systemSettings.Get("/", handler.GetSystemSettings)
     systemSettings.Post("/", handler.UpsertSystemSetting) // upsert by key in body
     systemSettings.Delete("/:key", handler.DeleteSystemSetting)
 
-    // Account profile (user detail) routes
-    accountProfile := protected.Group("account/setting/profiles/user-profile")
-    accountProfile.Get("/", handler.GetOwnUserDetail)
-    accountProfile.Post("/", handler.UpsertOwnUserDetail)
+    // Monitoring HTTP Curl Checker
+    httpCurlChecker := protected.Group("monitoring/checker/http-curl")
+    httpCurlChecker.Get("/", handler.ListHTTPCurlChecks)
+    httpCurlChecker.Post("/", handler.CreateHTTPCurlCheck)
+    httpCurlChecker.Get("/:id", handler.GetHTTPCurlCheck)
+    httpCurlChecker.Put("/:id", handler.UpdateHTTPCurlCheck)
+    httpCurlChecker.Delete("/:id", handler.DeleteHTTPCurlCheck)
 
     }
 

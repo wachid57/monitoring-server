@@ -52,6 +52,9 @@ func InitDB() error {
 		&model.DiskMetric{},
 		&model.SystemSetting{},
 		&model.UserDetail{},
+		&model.UserSetting{},
+		&model.ICMPCheck{},
+		&model.HTTPCurlCheck{},
 	); err != nil {
 		return err
 	}

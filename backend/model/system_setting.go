@@ -6,6 +6,8 @@ import "gorm.io/gorm"
 // Keys should be unique. Values are stored as text (string) but can contain JSON if needed.
 type SystemSetting struct {
     gorm.Model
-    Key   string `gorm:"uniqueIndex;size:128" json:"key"`
-    Value string `gorm:"type:text" json:"value"`
+    Key         string `gorm:"uniqueIndex;size:128" json:"key"`
+    Value       string `gorm:"type:text" json:"value"`
+    Name        string `gorm:"size:256" json:"name"`
+    Description string `gorm:"type:text" json:"description"`
 }
