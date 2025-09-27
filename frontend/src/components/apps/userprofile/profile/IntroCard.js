@@ -17,7 +17,7 @@ const IntroCard = () => {
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders(), credentials: 'include' });
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Load failed');
       const data = await res.json();
       setDetail({
@@ -43,7 +43,6 @@ const IntroCard = () => {
       const res = await fetch(BACKEND_URL + API_PREFIX + `/account/setting/profiles/user-profile`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        credentials: 'include',
         body: JSON.stringify({
           introduction: detail.introduction,
           institution: detail.institution,
