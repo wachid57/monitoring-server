@@ -63,7 +63,7 @@ const ListHostGroup = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/groups`, {
+  const res = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/groups/hosts`, {
         headers: getAuthHeaders(),
       });
       if (res.status === 401 || res.status === 403) {
@@ -87,7 +87,7 @@ const ListHostGroup = () => {
   const handleDelete = async (groupId) => {
     try {
       const res = await fetch(
-        `${BACKEND_URL}${API_PREFIX}/hosts/groups/${groupId}`,
+  `${BACKEND_URL}${API_PREFIX}/infrastructure/groups/hosts/${groupId}`,
         { method: 'DELETE', headers: getAuthHeaders() }
       );
       if (res.status === 401 || res.status === 403)
@@ -317,7 +317,7 @@ const ListHostGroup = () => {
                 };
                 if (editMode && editingGroupId) {
                   res = await fetch(
-                    `${BACKEND_URL}${API_PREFIX}/hosts/groups/${editingGroupId}`,
+                    `${BACKEND_URL}${API_PREFIX}/infrastructure/groups/hosts/${editingGroupId}`,
                     {
                       method: 'PUT',
                       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -326,7 +326,7 @@ const ListHostGroup = () => {
                   );
                 } else {
                   res = await fetch(
-                    `${BACKEND_URL}${API_PREFIX}/hosts/groups`,
+                    `${BACKEND_URL}${API_PREFIX}/infrastructure/groups/hosts`,
                     {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },

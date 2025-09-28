@@ -83,7 +83,8 @@ const Menuitems = [
         id: uniqueId(),
         title: 'ICMP',
         icon: IconPoint,
-  href: '/monitoring/hosts/icmp',
+  // Updated path to new ICMP availability view
+  href: '/monitoring/availability/icmp',
       },
       {
         id: uniqueId(),
