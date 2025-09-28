@@ -25,6 +25,72 @@ definitions:
       username:
         type: string
     type: object
+  handler.AvailabilityItem:
+    properties:
+      crit_pct:
+        type: number
+      downtime_pct:
+        type: number
+      flapping_pct:
+        type: number
+      hard_down_pct:
+        type: number
+      host_id:
+        type: integer
+      host_name:
+        type: string
+      na_pct:
+        type: number
+      ok_pct:
+        type: number
+      service_id:
+        type: integer
+      service_name:
+        type: string
+      service_type:
+        type: string
+      unknown_pct:
+        type: number
+      warn_pct:
+        type: number
+    type: object
+  handler.AvailabilityResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handler.AvailabilityItem'
+        type: array
+      range:
+        properties:
+          from:
+            type: string
+          seconds:
+            type: integer
+          to:
+            type: string
+        type: object
+      summary:
+        $ref: '#/definitions/handler.AvailabilitySummary'
+    type: object
+  handler.AvailabilitySummary:
+    properties:
+      crit_pct:
+        type: number
+      downtime_pct:
+        type: number
+      flapping_pct:
+        type: number
+      hard_down_pct:
+        type: number
+      na_pct:
+        type: number
+      ok_pct:
+        type: number
+      unknown_pct:
+        type: number
+      warn_pct:
+        type: number
+    type: object
   model.Aknowledged:
     properties:
       id:
@@ -89,6 +155,38 @@ definitions:
       updated_at:
         type: string
     type: object
+  model.HTTPCurlCheck:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      expected_status:
+        description: Basic validation expectations
+        type: integer
+      friendly_name:
+        type: string
+      host_id:
+        type: integer
+      id:
+        type: integer
+      interval_sec:
+        type: integer
+      keyword:
+        type: string
+      monitor_type:
+        type: string
+      resend_down_count:
+        type: integer
+      retries:
+        type: integer
+      retry_interval_sec:
+        type: integer
+      updated_at:
+        type: string
+      url:
+        type: string
+    type: object
   model.Host:
     properties:
       alias:
@@ -131,6 +229,58 @@ definitions:
         type: integer
       keterangan:
         type: string
+      updated_at:
+        type: string
+    type: object
+  model.HostGroupBinding:
+    properties:
+      alias:
+        type: string
+      created:
+        type: string
+      deleted:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      groupid:
+        type: integer
+      hostid:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      tags:
+        type: string
+      updated:
+        type: string
+    type: object
+  model.ICMPCheck:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      friendly_name:
+        type: string
+      host_id:
+        type: integer
+      hostname:
+        type: string
+      id:
+        type: integer
+      interval_sec:
+        type: integer
+      monitor_type:
+        type: string
+      resend_down_count:
+        type: integer
+      retries:
+        type: integer
+      retry_interval_sec:
+        type: integer
       updated_at:
         type: string
     type: object
@@ -273,11 +423,67 @@ definitions:
     type: object
   model.ServiceGroup:
     properties:
-      desc:
+      Desc:
+        description: Legacy short description field (existing column)
+        type: string
+      alias:
+        description: New extended fields
+        type: string
+      description:
         type: string
       id:
         type: integer
       name:
+        type: string
+      tags:
+        type: string
+    type: object
+  model.ServiceGroupBinding:
+    properties:
+      alias:
+        type: string
+      created:
+        type: string
+      deleted:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      groupid:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      serviceid:
+        type: integer
+      tags:
+        type: string
+      updated:
+        type: string
+    type: object
+  model.SystemSetting:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      native:
+        type: boolean
+      updated_at:
+        type: string
+      value:
         type: string
     type: object
   model.User:
@@ -307,10 +513,501 @@ definitions:
       username:
         type: string
     type: object
+  model.UserDetail:
+    properties:
+      contact_email:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: integer
+      institution:
+        type: string
+      introduction:
+        type: string
+      location:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      website:
+        type: string
+    type: object
+  model.UserSetting:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      native:
+        type: boolean
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+      value:
+        type: string
+    type: object
 info:
   contact: {}
   title: Monitoring Server Backend API
 paths:
+  /api/v1.0/account/setting/profiles/user-profile/:
+    get:
+      description: Returns base user info merged with extended profile detail for
+        authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get own extended user detail
+      tags:
+      - UserProfile
+    post:
+      consumes:
+      - application/json
+      description: Creates or updates extended profile fields for authenticated user
+      parameters:
+      - description: User Detail
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserDetail'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserDetail'
+      security:
+      - BearerAuth: []
+      summary: Upsert own extended user detail
+      tags:
+      - UserProfile
+  /api/v1.0/account/setting/profiles/user-settings/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.UserSetting'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List user settings (own)
+      tags:
+      - UserSettings
+    post:
+      consumes:
+      - application/json
+      description: Create or update a user-scoped setting by key
+      parameters:
+      - description: User Setting
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserSetting'
+      security:
+      - BearerAuth: []
+      summary: Upsert user setting (own)
+      tags:
+      - UserSettings
+  /api/v1.0/account/setting/profiles/user-settings/{key}:
+    delete:
+      parameters:
+      - description: Setting Key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete user setting (own)
+      tags:
+      - UserSettings
+  /api/v1.0/admin/roles:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Role'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/model.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Role'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new role
+      tags:
+      - Roles
+  /api/v1.0/admin/roles/{id}:
+    delete:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete role by ID
+      tags:
+      - Roles
+    get:
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Role'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get role by ID
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Role data
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/model.Role'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Role'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update role by ID
+      tags:
+      - Roles
+  /api/v1.0/admin/roles/bindings:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.RoleBinding'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all role bindings
+      tags:
+      - RoleBindings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role binding data
+        in: body
+        name: binding
+        required: true
+        schema:
+          $ref: '#/definitions/model.RoleBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new role binding
+      tags:
+      - RoleBindings
+  /api/v1.0/admin/roles/bindings/{id}:
+    delete:
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete role binding by ID
+      tags:
+      - RoleBindings
+    get:
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get role binding by ID
+      tags:
+      - RoleBindings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Role Binding ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Role binding data
+        in: body
+        name: binding
+        required: true
+        schema:
+          $ref: '#/definitions/model.RoleBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoleBinding'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update role binding by ID
+      tags:
+      - RoleBindings
+  /api/v1.0/admin/roles/users:
+    get:
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user-role assignments
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '{user_id, role_id?, role_name?}'
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign role to user
+      tags:
+      - Roles
+  /api/v1.0/dashboard:
+    get:
+      description: Simple protected dashboard endpoint (placeholder)
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Dashboard endpoint (protected)
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Dashboard overview
+      tags:
+      - Dashboard
   /api/v1.0/hosts:
     get:
       produces:
@@ -595,6 +1292,210 @@ paths:
       summary: Update host group by ID
       tags:
       - HostGroups
+  /api/v1.0/hosts/groups/bindings/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.HostGroupBinding'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List host group bindings
+      tags:
+      - HostGroupBindings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: HostGroup Binding
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.HostGroupBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Create host group binding
+      tags:
+      - HostGroupBindings
+  /api/v1.0/hosts/groups/bindings/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete host group binding
+      tags:
+      - HostGroupBindings
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Get host group binding
+      tags:
+      - HostGroupBindings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: HostGroup Binding
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.HostGroupBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HostGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Update host group binding
+      tags:
+      - HostGroupBindings
+  /api/v1.0/infrastructure/hosts/{id}/services:
+    get:
+      description: Returns host record plus unified host_services rows (auto rebuild
+        if empty & source checks exist)
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get aggregated services for host
+      tags:
+      - HostServices
+  /api/v1.0/infrastructure/hosts/{id}/services/ping-refresh:
+    post:
+      description: 'Demo-only endpoint: randomizes status + latency; records status
+        change events'
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Simulate latency & status refresh for host services
+      tags:
+      - HostServices
+  /api/v1.0/infrastructure/hosts/{id}/services/rebuild:
+    post:
+      description: Reconstruct rows in host_services from underlying check tables
+        (ICMP, HTTP) for a host
+      parameters:
+      - description: Host ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Rebuild aggregated host services for a host
+      tags:
+      - HostServices
+  /api/v1.0/infrastructure/services/host-services:
+    get:
+      description: Returns all host_services across all hosts (used for service group
+        bindings selection)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List all host services
+      tags:
+      - HostServices
   /api/v1.0/metrics/cpu/:
     get:
       produces:
@@ -995,6 +1896,206 @@ paths:
       summary: Update Aknowledged
       tags:
       - Aknowledged
+  /api/v1.0/monitoring/checker/http-curl/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.HTTPCurlCheck'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List HTTP curl checks
+      tags:
+      - Monitoring-Checks
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: HTTP Curl Check
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.HTTPCurlCheck'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.HTTPCurlCheck'
+      security:
+      - BearerAuth: []
+      summary: Create HTTP curl check
+      tags:
+      - Monitoring-Checks
+  /api/v1.0/monitoring/checker/http-curl/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete HTTP curl check
+      tags:
+      - Monitoring-Checks
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HTTPCurlCheck'
+      security:
+      - BearerAuth: []
+      summary: Get HTTP curl check
+      tags:
+      - Monitoring-Checks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: HTTP Curl Check
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.HTTPCurlCheck'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.HTTPCurlCheck'
+      security:
+      - BearerAuth: []
+      summary: Update HTTP curl check
+      tags:
+      - Monitoring-Checks
+  /api/v1.0/monitoring/checker/icmp/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ICMPCheck'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List ICMP monitoring checks
+      tags:
+      - Monitoring-Checks
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ICMP Check
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ICMPCheck'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.ICMPCheck'
+      security:
+      - BearerAuth: []
+      summary: Create ICMP monitoring check
+      tags:
+      - Monitoring-Checks
+  /api/v1.0/monitoring/checker/icmp/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete ICMP monitoring check
+      tags:
+      - Monitoring-Checks
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ICMPCheck'
+      security:
+      - BearerAuth: []
+      summary: Get ICMP monitoring check by ID
+      tags:
+      - Monitoring-Checks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ICMP Check
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ICMPCheck'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ICMPCheck'
+      security:
+      - BearerAuth: []
+      summary: Update ICMP monitoring check
+      tags:
+      - Monitoring-Checks
   /api/v1.0/monitoring/contactgroups/:
     get:
       produces:
@@ -1095,6 +2196,34 @@ paths:
       summary: Update Contact Group
       tags:
       - ContactGroup
+  /api/v1.0/monitoring/hosts/availability/:
+    get:
+      description: Aggregated availability percentages per host service in time range
+      parameters:
+      - description: 'RFC3339 start time (default: now-24h)'
+        in: query
+        name: from
+        type: string
+      - description: 'RFC3339 end time (default: now)'
+        in: query
+        name: to
+        type: string
+      - description: Filter by service_type (e.g. icmp)
+        in: query
+        name: service_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.AvailabilityResponse'
+      security:
+      - BearerAuth: []
+      summary: Host services availability
+      tags:
+      - Availability
   /api/v1.0/monitoring/notifications/:
     get:
       produces:
@@ -1195,6 +2324,106 @@ paths:
       summary: Update Notification
       tags:
       - Notification
+  /api/v1.0/permissions/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Permission'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List permissions
+      tags:
+      - Permissions
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Permission
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Permission'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Permission'
+      security:
+      - BearerAuth: []
+      summary: Create permission
+      tags:
+      - Permissions
+  /api/v1.0/permissions/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete permission
+      tags:
+      - Permissions
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Permission'
+      security:
+      - BearerAuth: []
+      summary: Get permission by ID
+      tags:
+      - Permissions
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Permission
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.Permission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Permission'
+      security:
+      - BearerAuth: []
+      summary: Update permission
+      tags:
+      - Permissions
   /api/v1.0/profiles/settings/:
     get:
       produces:
@@ -1795,6 +3024,162 @@ paths:
       summary: Update Service Group
       tags:
       - ServiceGroup
+  /api/v1.0/services/groups/bindings/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ServiceGroupBinding'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List service group bindings
+      tags:
+      - ServiceGroupBindings
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ServiceGroup Binding
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ServiceGroupBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Create service group binding
+      tags:
+      - ServiceGroupBindings
+  /api/v1.0/services/groups/bindings/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete service group binding
+      tags:
+      - ServiceGroupBindings
+    get:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Get service group binding
+      tags:
+      - ServiceGroupBindings
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ServiceGroup Binding
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.ServiceGroupBinding'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ServiceGroupBinding'
+      security:
+      - BearerAuth: []
+      summary: Update service group binding
+      tags:
+      - ServiceGroupBindings
+  /api/v1.0/system/settings/:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.SystemSetting'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: List system settings
+      tags:
+      - SystemSettings
+    post:
+      consumes:
+      - application/json
+      description: Create or update system setting by key (Native entries cannot be
+        newly created by user)
+      parameters:
+      - description: System Setting
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/model.SystemSetting'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SystemSetting'
+      security:
+      - BearerAuth: []
+      summary: Upsert system setting
+      tags:
+      - SystemSettings
+  /api/v1.0/system/settings/{key}:
+    delete:
+      parameters:
+      - description: Setting Key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete system setting
+      tags:
+      - SystemSettings
   /api/v1.0/users:
     get:
       produces:
@@ -2079,337 +3464,6 @@ paths:
       summary: Update group by ID
       tags:
       - Groups
-  /api/v1.0/users/roles:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Role'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Get all roles
-      tags:
-      - Roles
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role data
-        in: body
-        name: role
-        required: true
-        schema:
-          $ref: '#/definitions/model.Role'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Role'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create a new role
-      tags:
-      - Roles
-  /api/v1.0/users/roles/{id}:
-    delete:
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete role by ID
-      tags:
-      - Roles
-    get:
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Role'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get role by ID
-      tags:
-      - Roles
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Role data
-        in: body
-        name: role
-        required: true
-        schema:
-          $ref: '#/definitions/model.Role'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Role'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update role by ID
-      tags:
-      - Roles
-  /api/v1.0/admin/roles/bindings:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.RoleBinding'
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Get all role bindings
-      tags:
-      - RoleBindings
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role binding data
-        in: body
-        name: binding
-        required: true
-        schema:
-          $ref: '#/definitions/model.RoleBinding'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Create a new role binding
-      tags:
-      - RoleBindings
-  /api/v1.0/admin/roles/bindings/{id}:
-    delete:
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "204":
-          description: No Content
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Delete role binding by ID
-      tags:
-      - RoleBindings
-    get:
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Get role binding by ID
-      tags:
-      - RoleBindings
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Role Binding ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Role binding data
-        in: body
-        name: binding
-        required: true
-        schema:
-          $ref: '#/definitions/model.RoleBinding'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.RoleBinding'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Update role binding by ID
-      tags:
-      - RoleBindings
-  /api/v1.0/users/roles/users:
-    get:
-      parameters:
-      - description: User ID
-        in: query
-        name: user_id
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              additionalProperties: true
-              type: object
-            type: array
-      security:
-      - BearerAuth: []
-      summary: Get user-role assignments
-      tags:
-      - Roles
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: '{user_id, role_id?, role_name?}'
-        in: body
-        name: body
-        required: true
-        schema:
-          additionalProperties: true
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Assign role to user
-      tags:
-      - Roles
   /auth/change-password:
     post:
       consumes:

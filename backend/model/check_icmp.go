@@ -1,11 +1,14 @@
 package model
 
-import "gorm.io/gorm"
+import "time"
 
 // ICMPCheck defines configuration for an ICMP monitoring check
 // (File renamed from icmp_check.go to check_icmp.go)
 type ICMPCheck struct {
-	gorm.Model
+	ID               uint       `json:"id" gorm:"primaryKey"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
+	DeletedAt        *time.Time `json:"deleted_at,omitempty" gorm:"index"`
 	HostID            uint   `json:"host_id" gorm:"index"`
 	FriendlyName      string `json:"friendly_name" gorm:"size:255"`
 	Hostname          string `json:"hostname" gorm:"size:255;index"`

@@ -1,10 +1,13 @@
 package model
 
-import "gorm.io/gorm"
+import "time"
 
 // UserDetail stores extended profile information for a user.
 type UserDetail struct {
-    gorm.Model
+    ID           uint       `json:"id" gorm:"primaryKey"`
+    CreatedAt    time.Time  `json:"created_at"`
+    UpdatedAt    time.Time  `json:"updated_at"`
+    DeletedAt    *time.Time `json:"deleted_at,omitempty" gorm:"index"`
     UserID       uint   `gorm:"uniqueIndex" json:"user_id"`
     Introduction string `gorm:"type:text" json:"introduction"`
     Institution  string `json:"institution"`

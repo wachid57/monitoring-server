@@ -1,11 +1,16 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"time"
+)
 
 // HTTPCurlCheck defines configuration for an HTTP(S) monitoring check using simple curl semantics
 // Future: could include header overrides, method, expected status, etc.
 type HTTPCurlCheck struct {
-	gorm.Model
+	ID              uint       `json:"id" gorm:"primaryKey"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
+	DeletedAt       *time.Time `json:"deleted_at,omitempty" gorm:"index"`
 	HostID           uint   `json:"host_id" gorm:"index"`
 	FriendlyName     string `json:"friendly_name" gorm:"size:255"`
 	URL              string `json:"url" gorm:"size:512;index"`
