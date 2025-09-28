@@ -4,6 +4,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
+// Navigation will use plain window.location (no react-router link needed)
 
 const BCrumb = [
   { to: '/', title: 'Home' },
@@ -72,7 +73,15 @@ const HostDetails = ({ match, location }) => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">Monitor Type</Typography>
-                    <Typography>{host.monitor_type || 'HTTP(s)'}</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" alignItems="center">
+                      <Typography>{host.monitor_type || 'HTTP(s)'}</Typography>
+                      {(host.monitor_type === 'icmp' || host.type === 'icmp' || host.has_icmp) && (
+                        <Button size="small" variant="outlined" onClick={() => window.location.href = `/infrastructure/hosts/details/${id}/icmp/details`}>ICMP details</Button>
+                      )}
+                      {(['http','https','website'].includes((host.monitor_type||'').toLowerCase()) || host.has_http) && (
+                        <Button size="small" variant="outlined" onClick={() => window.location.href = `/infrastructure/hosts/details/${id}/website/details`}>Website details</Button>
+                      )}
+                    </Stack>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="subtitle2">URL / IP</Typography>
