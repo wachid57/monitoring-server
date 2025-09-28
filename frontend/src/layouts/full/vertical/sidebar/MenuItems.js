@@ -94,6 +94,12 @@ const Menuitems = [
       },
     ],
   },
+  {
+    id: uniqueId(),
+    title: 'Alert Rules',
+    icon: IconAlertCircle,
+    href: '/monitoring/alerts/rules',
+  },
 
 
   {

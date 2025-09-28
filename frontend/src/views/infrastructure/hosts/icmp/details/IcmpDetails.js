@@ -8,6 +8,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
+import useAlertsStream from 'src/hooks/useAlertsStream';
 
 // Simple utility to derive host id from path (support both monitoring & infrastructure prefixes)
 const extractHostId = () => {
@@ -34,6 +35,9 @@ const BCrumb = [
 
 const IcmpDetails = () => {
   const hostId = extractHostId();
+  // alerts hook (reuse monitoring implementation)
+  const alerts = useAlertsStream({ hostId, serviceType:'icmp', enabled:true, limit:20 });
+  const latestAlert = alerts[0];
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [host, setHost] = useState(null);
@@ -369,7 +373,14 @@ const IcmpDetails = () => {
       <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
         <CardContent>
           <Stack spacing={2}>
-            <Typography variant="h5">ICMP Service - {host?.hostname || host?.ip}</Typography>
+            <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
+              <Typography variant="h5">ICMP Service - {host?.hostname || host?.ip}</Typography>
+              {alerts.length>0 && (
+                <Tooltip title={latestAlert? (latestAlert.reason || 'Alert'): 'Active alerts'}>
+                  <Chip color="error" label={`Alerts: ${alerts.length}`} size="small" />
+                </Tooltip>
+              )}
+            </Stack>
             <Divider />
             <Grid container spacing={2}>
               <Grid item xs={12} sm={3}>
