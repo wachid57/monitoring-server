@@ -62,6 +62,7 @@ const PermissionBindings = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, role: null });
   const [editDialog, setEditDialog] = useState({ open:false, role:null });
   const [permissions, setPermissions] = useState([]);
@@ -180,7 +181,7 @@ const PermissionBindings = () => {
     } catch(e){ console.error(e); setError('Gagal menambah permissions'); notify.notify('Gagal menambah permissions', { severity:'error'});} finally { setAdding(false);} 
   };
 
-  const colorPool = ['primary','secondary','success','warning','info','default'];
+  const colorPool = ['primary','secondary','success','warning','info','default','error'];
 const hashString = (str='') => {
   let h = 0; for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) & 0xffffffff; }
   return Math.abs(h);
@@ -197,10 +198,13 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
     } catch(e){ console.error(e); notify.notify('Error tambah permission',{severity:'error'});}
   };
 
-  const filteredRoles = roles.filter(role =>
-    role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRoles = roles.filter(role => {
+    const textMatch = role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    if(!textMatch) return false;
+    if(roleFilter) return role.id === roleFilter.id;
+    return true;
+  });
 
   return (
     <PageContainer title="Role Permission Bindings" description="Manage role-permission relationships">
@@ -208,28 +212,42 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
       
       <Card>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-            <Box sx={{ minWidth: 300 }}>
-              <TextField
-                placeholder="Search roles..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <IconSearch size={20} />
-                    </InputAdornment>
-                  ),
-                }}
-                fullWidth
-              />
-            </Box>
+          <Stack direction={{ xs:'column', md:'row' }} spacing={2} justifyContent="space-between" alignItems={{ md:'center' }} mb={3}>
+            <Stack direction={{ xs:'column', sm:'row' }} spacing={2} flexGrow={1} alignItems={{ sm:'center' }}>
+              <Box sx={{ minWidth: 260 }}>
+                <TextField
+                  placeholder="Search roles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <IconSearch size={20} />
+                      </InputAdornment>
+                    ),
+                  }}
+                  fullWidth
+                  size="small"
+                />
+              </Box>
+              <Box sx={{ minWidth: 260 }}>
+                <Autocomplete
+                  options={roles}
+                  size="small"
+                  value={roleFilter}
+                  onChange={(_,v)=> setRoleFilter(v)}
+                  getOptionLabel={o=> o?.name || ''}
+                  renderInput={(params)=><TextField {...params} label="Filter Role" placeholder="Select role" />}
+                  clearOnEscape
+                />
+              </Box>
+            </Stack>
             <Button
               variant="contained"
               startIcon={<IconPlus />}
               color="primary"
               onClick={() => setAddOpen(true)}
-              sx={{ width: 225 }}
+              sx={{ width: 225, alignSelf:{ xs:'stretch', md:'auto' } }}
             >
               Add Binding
             </Button>
@@ -274,9 +292,20 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
                         <TableCell>{role.description || '-'}</TableCell>
                         <TableCell>
                           <Stack direction="row" spacing={1} flexWrap="wrap">
-                            {(role.Permissions || role.permissions || []).map((p) => (
-                              <Chip key={p.id} label={p.name} size="small" color={getChipColor(p.name)} onDelete={() => handleRemovePermission(role.id, p.id)} />
-                            ))}
+                            {(role.Permissions || role.permissions || []).map((p, idx) => {
+                              const color = getChipColor(p.name);
+                              const variant = idx % 2 === 0 ? 'filled' : 'outlined';
+                              return (
+                                <Chip
+                                  key={p.id}
+                                  label={p.name}
+                                  size="small"
+                                  color={color}
+                                  variant={variant}
+                                  onDelete={() => handleRemovePermission(role.id, p.id)}
+                                />
+                              );
+                            })}
                           </Stack>
                         </TableCell>
                         <TableCell align="center">
@@ -334,12 +363,20 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
         <DialogContent>
           {editDialog.role && (
             <Stack spacing={2} mt={1}>
-              <Typography variant="subtitle2">Role: {editDialog.role.name}</Typography>
+              <Autocomplete
+                options={roles}
+                value={roles.find(r=> r.id===editDialog.role.id) || editDialog.role}
+                onChange={(_,v)=> { if(v) setEditDialog({ open:true, role:v }); }}
+                getOptionLabel={o=> o?.name || ''}
+                renderInput={(p)=><TextField {...p} label="Role" size="small" />}
+              />
               <Typography variant="caption" color="text.secondary">Tambah atau hapus permission di bawah:</Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap">
-                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p)=> (
-                  <Chip key={p.id} label={p.name} size="small" color={getChipColor(p.name)} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} />
-                ))}
+                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p,i)=> {
+                  const color = getChipColor(p.name);
+                  const variant = i % 2 === 0 ? 'filled' : 'outlined';
+                  return <Chip key={p.id} label={p.name} size="small" color={color} variant={variant} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} />
+                })}
               </Stack>
               <Autocomplete
                 options={permissions.filter(p=> !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)))}
