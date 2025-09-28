@@ -26,10 +26,15 @@ const Search = () => {
   };
 
   const filterRoutes = (rotr, cSearch) => {
-    if (rotr.length > 1)
-      return rotr.filter((t) =>
-        t.title ? t.href.toLocaleLowerCase().includes(cSearch.toLocaleLowerCase()) : '',
-      );
+    if (!cSearch) return rotr; // no search term, return all
+    if (rotr.length > 1) {
+      const lower = cSearch.toLocaleLowerCase();
+      return rotr.filter((t) => {
+        if (!t || !t.title) return false; // skip nav labels and invalid
+        const href = typeof t.href === 'string' ? t.href : '';
+        return href.toLocaleLowerCase().includes(lower) || t.title.toLocaleLowerCase().includes(lower);
+      });
+    }
     return rotr;
   };
   const searchData = filterRoutes(Menuitems, search);
