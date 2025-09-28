@@ -88,7 +88,7 @@ const PermissionBindings = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -146,7 +146,7 @@ const PermissionBindings = () => {
     try {
       const [uRes, rRes] = await Promise.all([
   fetch(BACKEND_URL + API_PREFIX + '/admin/users', { headers: getAuthHeaders() }),
-  fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles', { headers: getAuthHeaders() })
+  fetch(BACKEND_URL + API_PREFIX + '/admin/roles', { headers: getAuthHeaders() })
       ]);
       if (uRes.status===401||uRes.status===403) return handleAuthError({status:uRes.status});
       if (rRes.status===401||rRes.status===403) return handleAuthError({status:rRes.status});

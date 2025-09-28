@@ -254,7 +254,7 @@ const UsersLists = () => {
 							const data = await res.json(); if (!res.ok) { setError(data.error || 'Failed to update user'); setEditSaving(false); return; }
 							const currentRole = (editUser.roles && editUser.roles[0]?.name) || '';
 							if (editForm.role && editForm.role !== currentRole) {
-								const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles/users', { method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role }) });
+								const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles/users', { method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role }) });
 								if(!resp.ok){ notify('Gagal assign role baru', { severity:'error'}); }
 							}
 							setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles: editForm.role ? [{ name: editForm.role }] : [] } : u));

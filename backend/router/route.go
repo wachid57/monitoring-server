@@ -45,15 +45,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             usersGroup.Get("/", handler.GetUsers)
             usersGroup.Post("/", handler.CreateUser)
 
-            // DEPRECATED: user-role assignment endpoints (prefer /admin/roles/*)
-            usersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
-            usersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
-            usersGroup.Get("/roles/bindings", handler.GetRoleBindings)
-            usersGroup.Post("/roles/bindings", handler.CreateRoleBinding)
-            usersGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
-            usersGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
-            usersGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
-
             // User Groups (organizational grouping of users)
             usersGroup.Get("/groups", handler.GetGroups)
             usersGroup.Post("/groups", handler.CreateGroup)
@@ -96,12 +87,17 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             adminGroup.Put("/permissions/:id", handler.UpdatePermission)
             adminGroup.Delete("/permissions/:id", handler.DeletePermission)
 
-            // Roles CRUD (/admin/roles)
+            // Roles CRUD (/admin/roles) plus aliases with trailing slash
             adminGroup.Get("/roles", handler.GetRoles)
+            adminGroup.Get("/roles/", handler.GetRoles)
             adminGroup.Post("/roles", handler.CreateRole)
+            adminGroup.Post("/roles/", handler.CreateRole)
             adminGroup.Get("/roles/:id", handler.GetRoleByID)
+            adminGroup.Get("/roles/:id/", handler.GetRoleByID)
             adminGroup.Put("/roles/:id", handler.UpdateRole)
+            adminGroup.Put("/roles/:id/", handler.UpdateRole)
             adminGroup.Delete("/roles/:id", handler.DeleteRole)
+            adminGroup.Delete("/roles/:id/", handler.DeleteRole)
 
             // Role Bindings (user <-> role mapping) & listing (add slash aliases for robustness)
             adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
@@ -117,7 +113,11 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
 
             // User-role assignments (simple assign/list) alias under admin
             adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
+            adminGroup.Get("/roles/users/", handler.GetUserRoleAssignments)
             adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+            adminGroup.Post("/roles/users/", handler.AssignRoleToUserAPI)
+
+            // Remove direct CRUD under /admin/users/roles to enforce single canonical path (/admin/roles)
 
             // User-group assignments (listing & replace semantics)
             adminGroup.Get("/groups/users", handler.GetUserGroupAssignments)
@@ -178,6 +178,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             infrastructureGroup.Get("/hosts/groups/bindings/:id", handler.GetHostGroupBindingByID)
             infrastructureGroup.Put("/hosts/groups/bindings/:id", handler.UpdateHostGroupBinding)
             infrastructureGroup.Delete("/hosts/groups/bindings/:id", handler.DeleteHostGroupBinding)
+            
         // DEPRECATED (use /infrastructure/groups/hosts): legacy host group paths
         infrastructureGroup.Get("/hosts/groups", handler.GetHostGroups)
         infrastructureGroup.Post("/hosts/groups", handler.CreateHostGroup)
