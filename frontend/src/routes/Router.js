@@ -22,12 +22,13 @@ const RollbaseCASL = Loadable(lazy(() => import('../views/pages/rollbaseCASL/Rol
 /* ============================= ADMIN ============================= */
 // Manajemen user, roles, permissions, admin groups
 const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/GroupsList')));
-const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
+const UsersLists = Loadable(lazy(() => import('../views/admin/users/UsersLists')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
 const UserGroupsList = Loadable(lazy(() => import('../views/admin/users/groups/UserGroupsList')));
+const UserGroupBindings = Loadable(lazy(() => import('../views/admin/users/groups/UserGroupBindings')));
 
 /* ============================ MONITORING ========================= */
 // Monitoring host availability, metrics, ICMP, website, add host
@@ -103,12 +104,13 @@ const Router = [
   // ADMINISTRATION (manajemen user, roles, permissions)
   // Prefix UI: /admin/*
   // ------------------------------------------------------------------
-      { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
+    { path: '/admin/users/list', element: <ProtectedRoute><UsersLists /></ProtectedRoute> },
       { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
       { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
       { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
       { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
   { path: '/admin/users/groups/list', element: <ProtectedRoute><UserGroupsList /></ProtectedRoute> },
+  { path: '/admin/users/groups/bindings', element: <ProtectedRoute><UserGroupBindings /></ProtectedRoute> },
 
   // ------------------------------------------------------------------
   // MONITORING (hosts, availability, metrics, reports, notifications)

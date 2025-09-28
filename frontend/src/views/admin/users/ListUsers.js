@@ -1,117 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  Stack,
-  Box,
-  TextField,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
-import {
-  IconPlus,
-  IconSearch,
-  IconEdit,
-  IconTrash,
-  IconEye,
-  IconUserCircle,
-} from '@tabler/icons';
-// Removed Autocomplete (multi-role) in favor of simple single-select dropdown
-// import Autocomplete from '@mui/material/Autocomplete';
-import PageContainer from 'src/components/container/PageContainer';
-import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
-import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
-import MenuItem from '@mui/material/MenuItem';
-import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
-import { useNotify } from 'src/components/notifications/NotificationProvider';
-
-const BCrumb = [
-  {
-    to: '/',
-    title: 'Home',
-  },
-  {
-    title: 'Admin',
-  },
-  {
-    title: 'Users',
-  },
-  {
-    title: 'List Users',
-  },
-];
-
-const ListUsers = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const notifyCtx = useNotify();
-  const notify = notifyCtx?.notify || (()=>{});
-  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: '' });
-  const [availableRoles, setAvailableRoles] = useState([]);
-  const [formError, setFormError] = useState('');
-  const [submitLoading, setSubmitLoading] = useState(false);
-  // Edit user state
-  const [editOpen, setEditOpen] = useState(false);
-  const [editUser, setEditUser] = useState(null);
-  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', role: '' });
-  const [editSaving, setEditSaving] = useState(false);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError('');
-    
-    try {
-  console.log('Fetching users from:', BACKEND_URL + API_PREFIX + '/admin/users');
-      console.log('Auth headers:', getAuthHeaders());
-      
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users', {
-        method: 'GET',
-        headers: getAuthHeaders()
-      });
-
-      console.log('Response status:', res.status);
-
-      if (res.status === 401 || res.status === 403) {
-        console.log('Auth error, redirecting to login');
-        handleAuthError({ status: res.status });
-        return;
-      }
-
-      const data = await res.json();
-      console.log('Response data:', data);
-
-      if (res.ok) {
-        setUsers(data.users || data || []);
-      } else {
-        setError(data.error || data.message || 'Gagal mengambil data users');
-      }
-    } catch (err) {
-      console.error('Fetch users error:', err);
-      setError('Terjadi kesalahan saat mengambil data users');
-    } finally {
-      setLoading(false);
-    }
-  };
+// Backwards compatibility wrapper: original ListUsers component renamed to UsersLists.
+// Keeping this thin re-export so any stale imports keep working temporarily.
+import UsersLists from './UsersLists';
+export default UsersLists;
 
   const handleDelete = async (userId) => {
     try {
@@ -556,4 +446,4 @@ const ListUsers = () => {
   );
 };
 
-export default ListUsers;
+// (File intentionally minimal)
