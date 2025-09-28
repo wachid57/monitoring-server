@@ -233,9 +233,15 @@ const Menuitems = [
     children: [
       {
         id: uniqueId(),
-        title: 'List Users',
+        title: 'Lists',
         icon: IconPoint,
         href: '/admin/users/list',
+      },
+            {
+        id: uniqueId(),
+        title: 'Groups',
+        icon: IconPoint,
+        href: '/admin/users/groups/list',
       },
     ],
   },
@@ -278,19 +284,7 @@ const Menuitems = [
       },
     ],
   },
-  {
-    id: uniqueId(),
-    title: 'Groups',
-    icon: IconPackage,
-    children: [
-      {
-        id: uniqueId(),
-        title: 'List Groups',
-        icon: IconPoint,
-        href: '/admin/groups/list',
-      },
-    ],
-  },
+
   {
     navlabel: true,
     subheader: 'System',

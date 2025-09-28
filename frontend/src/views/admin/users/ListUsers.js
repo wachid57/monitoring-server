@@ -32,6 +32,7 @@ import {
   IconEye,
   IconUserCircle,
 } from '@tabler/icons';
+import Autocomplete from '@mui/material/Autocomplete';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
@@ -60,7 +61,7 @@ const ListUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: 'User' });
+  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: '' });
   const [availableRoles, setAvailableRoles] = useState([]);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -411,21 +412,14 @@ const ListUsers = () => {
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
-          <TextField
-            select
-            SelectProps={{ native: true }}
-            label="Role"
+          <Autocomplete
+            options={availableRoles}
+            getOptionLabel={(o)=> o.name || ''}
+            value={availableRoles.find(r=> r.name===newUser.role) || null}
+            onChange={(_,v)=> setNewUser({ ...newUser, role: v?.name || '' })}
+            renderInput={(params)=><TextField {...params} label='Role' margin='dense' placeholder='Select role' helperText='Choose a role' />}
             fullWidth
-            margin="dense"
-            value={newUser.role}
-            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-            helperText="Choose a role"
-          >
-            <option value="">Select role</option>
-            {availableRoles.map((r) => (
-              <option key={r.id} value={r.name}>{r.name}</option>
-            ))}
-          </TextField>
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>
@@ -454,7 +448,16 @@ const ListUsers = () => {
                   // refresh users
                   fetchUsers();
                   setAddDialogOpen(false);
-                  setNewUser({ username: '', email: '', name: '', password: '', role: 'User' });
+                  setNewUser({ username: '', email: '', name: '', password: '', role: '' });
+                  // optimistic assign role if name exists
+                  if(newUser.role){
+                    const createdId = (data.id)|| (data.user?.id);
+                    if(createdId){
+                      await fetch(BACKEND_URL + API_PREFIX + '/users/roles/users', {
+                        method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: createdId, role_name: newUser.role })
+                      });
+                    }
+                  }
                 } else {
                   // Backend may create user but fail role binding; show explicit message
                   setFormError(data.error || data.message || 'Failed to create user (role assignment may have failed)');
@@ -481,20 +484,15 @@ const ListUsers = () => {
             <TextField label="Username" value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} fullWidth />
             <TextField label="Email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} fullWidth />
             <TextField label="Full name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} fullWidth />
-            <TextField
-              select
-              SelectProps={{ native: true }}
-              label="Role"
+            <Autocomplete
+              options={availableRoles}
+              getOptionLabel={(o)=> o.name || ''}
+              value={availableRoles.find(r=> r.name===editForm.role) || null}
+              onChange={(_,v)=> setEditForm({ ...editForm, role: v?.name || '' })}
+              renderInput={(params)=><TextField {...params} label='Role' placeholder='Select role' helperText='Choose a role' />}
               fullWidth
-              value={editForm.role}
-              onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
-              helperText="Choose a role"
-            >
-              <option value="">Select role</option>
-              {availableRoles.map((r) => (
-                <option key={r.id} value={r.name}>{r.name}</option>
-              ))}
-            </TextField>
+              disabled={editUser?.native}
+            />
           </Stack>
           {editUser?.native && (
             <Alert severity="info" sx={{ mt: 2 }}>
@@ -533,6 +531,7 @@ const ListUsers = () => {
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                     body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role })
                   });
+                  setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles:[{ name: editForm.role }] } : u));
                 }
                 setEditOpen(false);
                 setEditUser(null);
