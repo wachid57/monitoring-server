@@ -17,10 +17,13 @@ func GetUserGroupAssignments(c *fiber.Ctx) error {
     userID := c.QueryInt("user_id", 0)
     username := c.Query("username")
 
-    sql := `SELECT u.id AS user_id, u.username, g.id AS group_id, g.name AS group_name, b.id AS binding_id, b.note, b.source, b.created_at
+    sql := `SELECT u.id AS user_id, u.username, g.id AS group_id, g.name AS group_name,
+                   b.id AS binding_id, b.note, b.source, b.created_at, b.assigned_by,
+                   au.username AS assigned_by_username
             FROM users u
             JOIN user_group_bindings b ON u.id = b.user_id
-            JOIN groups g ON g.id = b.group_id`
+            JOIN groups g ON g.id = b.group_id
+            LEFT JOIN users au ON au.id = b.assigned_by`
 
     var args []interface{}
     conditions := ""
@@ -46,7 +49,9 @@ func GetUserGroupAssignments(c *fiber.Ctx) error {
         var bindingID uint
         var note, source string
         var createdAt time.Time
-        _ = rows.Scan(&userID, &uname, &groupID, &groupName, &bindingID, &note, &source, &createdAt)
+        var assignedBy uint
+        var assignedByUsername *string
+        _ = rows.Scan(&userID, &uname, &groupID, &groupName, &bindingID, &note, &source, &createdAt, &assignedBy, &assignedByUsername)
         results = append(results, fiber.Map{
             "user_id":    userID,
             "username":   uname,
@@ -56,6 +61,8 @@ func GetUserGroupAssignments(c *fiber.Ctx) error {
             "note":       note,
             "source":     source,
             "created_at": createdAt,
+            "assigned_by": assignedBy,
+            "assigned_by_username": assignedByUsername,
         })
     }
     return c.JSON(results)
@@ -70,6 +77,8 @@ func AssignGroupsToUserAPI(c *fiber.Ctx) error {
         UserID     uint     `json:"user_id"`
         GroupIDs   []uint   `json:"group_ids"`
         GroupNames []string `json:"group_names"`
+        Note       string   `json:"note"`
+        Source     string   `json:"source"`
     }
     if err := c.BodyParser(&req); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "Invalid request"})
@@ -120,9 +129,18 @@ func AssignGroupsToUserAPI(c *fiber.Ctx) error {
             return err
         }
         if !clearOnly {
-            // Insert new
+            // Determine assigned_by via username in context (best-effort)
+            var assignedBy uint
+            if unameVal := c.Locals("username"); unameVal != nil {
+                if uname, ok := unameVal.(string); ok && uname != "" {
+                    var u model.User
+                    if err := tx.Select("id").Where("username = ?", uname).First(&u).Error; err == nil { assignedBy = u.ID }
+                }
+            }
+            source := req.Source
+            if source == "" { source = "manual" }
             for _, g := range groups {
-        if err := tx.Create(&model.UserGroupBinding{UserID: req.UserID, GroupID: g.ID, Source: "manual"}).Error; err != nil { return err }
+                if err := tx.Create(&model.UserGroupBinding{UserID: req.UserID, GroupID: g.ID, Source: source, Note: req.Note, AssignedBy: assignedBy}).Error; err != nil { return err }
             }
         }
         return nil

@@ -24,7 +24,7 @@ function groupByUser(rows){
   const map = {};
   rows.forEach(r=>{
     if(!map[r.user_id]) map[r.user_id] = { user_id: r.user_id, username: r.username, groups: [] };
-    map[r.user_id].groups.push({ id: r.group_id, name: r.group_name });
+    map[r.user_id].groups.push({ id: r.group_id, name: r.group_name, note: r.note, source: r.source, assigned_by: r.assigned_by, assigned_by_username: r.assigned_by_username });
   });
   return Object.values(map);
 }
