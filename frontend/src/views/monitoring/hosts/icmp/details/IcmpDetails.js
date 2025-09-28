@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
@@ -35,6 +36,89 @@ const IcmpDetails = () => {
   const [host, setHost] = useState(null);
   const [icmpService, setIcmpService] = useState(null);
   const [availability, setAvailability] = useState(null);
+  const theme = useTheme();
+  const [range, setRange] = useState('24h'); // 6h | 12h | 24h | 7d
+
+  const rangeToMs = (r) => {
+    switch(r){
+      case '6h': return 6*3600*1000;
+      case '12h': return 12*3600*1000;
+      case '24h': return 24*3600*1000;
+      case '7d': return 7*24*3600*1000;
+      default: return 24*3600*1000;
+    }
+  };
+
+  // Derived mini component for timeline chart
+  const PingHistoryChart = ({ events }) => {
+    if (!Array.isArray(events) || events.length === 0) return <Typography variant="body2">No events.</Typography>;
+    // Normalize events: expect occurred_at / status (OK|DOWN)
+    const parsed = events
+      .map(e => ({
+        t: new Date(e.occurred_at || e.occurredAt || e.time || Date.now()).getTime(),
+        status: (e.status || '').toUpperCase(),
+      }))
+      .sort((a,b) => a.t - b.t);
+    const minT = parsed[0].t;
+    const maxT = parsed[parsed.length - 1].t;
+    const span = Math.max(1, maxT - minT);
+    const W = 1000; // px
+    const H = 140;
+    // Build segments between points; last point extends to maxT
+    const segments = [];
+    for (let i=0;i<parsed.length;i++) {
+      const cur = parsed[i];
+      const next = parsed[i+1];
+      const x1 = ((cur.t - minT) / span) * W;
+      const x2 = next ? ((next.t - minT) / span) * W : W;
+      segments.push({ x1, x2, status: cur.status });
+    }
+    const [hover, setHover] = useState(null);
+    const handleMove = (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const t = minT + (x / W) * span;
+      // find segment containing t
+      const seg = segments.find(s => x >= s.x1 && x <= s.x2) || null;
+      setHover(seg ? { x, status: seg.status, time: t } : null);
+    };
+    const handleLeave = () => setHover(null);
+    return (
+      <Box sx={{ width:'100%', overflow:'auto', position:'relative' }}>
+        <Box component="svg" width={W} height={H} onMouseMove={handleMove} onMouseLeave={handleLeave} sx={{ cursor:'crosshair', display:'block', background: theme.palette.mode==='dark'? alpha('#fff',0.02): alpha('#000',0.02), border:'1px solid', borderColor:'divider', borderRadius:1 }}>
+          {/* Background grid */}
+          {Array.from({length:6}).map((_,i)=>(
+            <line key={i} x1={0} x2={W} y1={(H/6)*i} y2={(H/6)*i} stroke={alpha(theme.palette.text.primary,0.08)} strokeWidth={1} />
+          ))}
+          {/* Segments representing status */}
+          {segments.map((s,idx)=>{
+            const color = s.status === 'OK' ? theme.palette.success.main : (s.status === 'DOWN' ? theme.palette.error.main : theme.palette.warning.main);
+            return <rect key={idx} x={s.x1} y={0} width={Math.max(1,s.x2 - s.x1)} height={H} fill={alpha(color,0.45)} stroke={color} strokeWidth={1} />;
+          })}
+          {hover && (
+            <g>
+              <line x1={hover.x} x2={hover.x} y1={0} y2={H} stroke={theme.palette.primary.main} strokeDasharray="4" />
+            </g>
+          )}
+          {/* Time labels (start/mid/end) */}
+          <text x={4} y={H-6} fontSize={11} fill={theme.palette.text.secondary}>{new Date(minT).toLocaleTimeString()}</text>
+          <text x={W/2} y={H-6} fontSize={11} textAnchor="middle" fill={theme.palette.text.secondary}>{new Date(minT + span/2).toLocaleTimeString()}</text>
+          <text x={W-4} y={H-6} fontSize={11} textAnchor="end" fill={theme.palette.text.secondary}>{new Date(maxT).toLocaleTimeString()}</text>
+        </Box>
+        {hover && (
+          <Box sx={{ position:'absolute', top:8, left: hover.x + 12, background:'rgba(0,0,0,0.75)', color:'#fff', px:1, py:0.5, borderRadius:1, fontSize:11, pointerEvents:'none' }}>
+            <div>{new Date(hover.time).toLocaleString()}</div>
+            <div>Status: {hover.status}</div>
+          </Box>
+        )}
+        <Stack direction="row" spacing={1} mt={1} alignItems="center">
+          <Chip size="small" label="OK" color="success" />
+          <Chip size="small" label="DOWN" color="error" />
+          <Chip size="small" label="OTHER" color="warning" />
+        </Stack>
+      </Box>
+    );
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -60,9 +144,9 @@ const IcmpDetails = () => {
         const icmp = Array.isArray(services) ? services.find(s => (s.type || s.service_type || '').toLowerCase() === 'icmp') : null;
         setIcmpService(icmp || null);
 
-        // Availability summary (past 24h default)
-        const to = new Date().toISOString();
-        const from = new Date(Date.now() - 24*3600*1000).toISOString();
+    // Availability summary (selected range)
+    const to = new Date().toISOString();
+    const from = new Date(Date.now() - rangeToMs(range)).toISOString();
         const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=icmp&host_id=${hostId}`, { headers: getAuthHeaders() });
         if (availRes.ok) {
           const av = await availRes.json();
@@ -76,7 +160,7 @@ const IcmpDetails = () => {
       }
     };
     load();
-  }, [hostId]);
+  }, [hostId, range]);
 
   if (loading) return <PageContainer title="ICMP Details"><Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box></PageContainer>;
   if (error) return <PageContainer title="ICMP Details"><Alert severity="error">{error}</Alert></PageContainer>;
@@ -85,72 +169,76 @@ const IcmpDetails = () => {
     <PageContainer title="ICMP Details" description="Host ICMP service details">
       <Breadcrumb title="ICMP Details" items={BCrumb} />
       <Box mt={2} />
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-            <CardContent>
-              <Stack spacing={2}>
-                <Typography variant="h5">ICMP Service - {host?.hostname || host?.ip}</Typography>
-                <Divider />
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Host</Typography>
-                    <Typography>{host?.hostname || host?.ip}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">IP</Typography>
-                    <Typography>{host?.ip || '-'}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Interval</Typography>
-                    <Typography>{icmpService?.interval || host?.heartbeat_interval || '-'} sec</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Last Status</Typography>
-                    <Chip label={(icmpService?.status || 'UNKNOWN').toUpperCase()} color={(icmpService?.status || 'unknown') === 'ok' ? 'success':'warning'} size="small" />
-                  </Grid>
-                </Grid>
-                <Divider />
-                <Typography variant="h6">Availability (24h)</Typography>
-                {availability ? (
-                  <Box>
-                    <Typography variant="body2">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
-                    <Typography variant="body2">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
-                    {Array.isArray(availability.events) && availability.events.length > 0 && (
-                      <Box mt={2}>
-                        <Typography variant="subtitle2">Recent Events</Typography>
-                        <Stack spacing={1} mt={1}>
-                          {availability.events.slice(0,10).map(ev => (
-                            <Box key={ev.id} sx={{ display:'flex', alignItems:'center', gap:1 }}>
-                              <Chip size="small" label={ev.status} color={ev.status === 'OK' ? 'success':'error'} />
-                              <Typography variant="caption">{new Date(ev.occurred_at || ev.occurredAt).toLocaleString()}</Typography>
-                            </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                    )}
-                  </Box>
-                ) : <Typography variant="body2">No availability data.</Typography>}
+      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <Typography variant="h5">ICMP Service - {host?.hostname || host?.ip}</Typography>
+            <Divider />
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="subtitle2">Host</Typography>
+                <Typography>{host?.hostname || host?.ip}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="subtitle2">IP</Typography>
+                <Typography>{host?.ip || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="subtitle2">Interval</Typography>
+                <Typography>{icmpService?.interval || host?.heartbeat_interval || '-'} sec</Typography>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Typography variant="subtitle2">Last Status</Typography>
+                <Chip label={(icmpService?.status || 'UNKNOWN').toUpperCase()} color={(icmpService?.status || 'unknown') === 'ok' ? 'success':'warning'} size="small" />
+              </Grid>
+            </Grid>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Typography variant="h6" sx={{ flexGrow:1 }}>Availability ({range})</Typography>
+              <Stack direction="row" spacing={1}>
+                {['6h','12h','24h','7d'].map(r => (
+                  <Button key={r} size="small" variant={range===r? 'contained':'outlined'} onClick={()=> setRange(r)}>{r}</Button>
+                ))}
               </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-            <CardContent>
-              <Stack spacing={2}>
-                <Typography variant="h6">Actions</Typography>
-                <Button variant="outlined" size="small" onClick={() => window.history.back()}>Back</Button>
-                <Divider />
-                <Typography variant="h6">Raw JSON</Typography>
-                <Box sx={{ maxHeight:300, overflow:'auto', fontSize:12, fontFamily:'monospace', background:'#fafafa', p:1, border:'1px solid #eee' }}>
-                  <pre style={{ margin:0 }}>{JSON.stringify({ host, icmpService, availability }, null, 2)}</pre>
+            </Stack>
+            {availability ? (
+              <Box>
+                <Typography variant="body2">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
+                <Typography variant="body2">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
+                <Box mt={2}>
+                  <PingHistoryChart events={availability.events || availability.items || []} />
                 </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+              </Box>
+            ) : <Typography variant="body2">No availability data.</Typography>}
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <Typography variant="h6">Actions</Typography>
+            <Button variant="outlined" size="small" onClick={() => window.history.back()}>Back</Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <Typography variant="h6">Raw JSON</Typography>
+            <Box sx={{ maxHeight:400, overflow:'auto', fontSize:12, fontFamily:'monospace', background:'#fafafa', p:1, border:'1px solid #eee' }}>
+              <pre style={{ margin:0 }}>{JSON.stringify({ host, icmpService, availability }, null, 2)}</pre>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
     </PageContainer>
   );
 };
