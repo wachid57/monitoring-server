@@ -24,6 +24,7 @@ import {
   Alert,
   CircularProgress,
   Autocomplete,
+  Tooltip,
 } from '@mui/material';
 import {
   IconPlus,
@@ -68,6 +69,12 @@ const PermissionBindings = () => {
   const [permissions, setPermissions] = useState([]);
   const [addRole, setAddRole] = useState(null);
   const [addPerms, setAddPerms] = useState([]);
+  const [bulkPerms, setBulkPerms] = useState([]);
+  const [bulkAdding, setBulkAdding] = useState(false);
+  const [bulkRemovePerms, setBulkRemovePerms] = useState([]);
+  const [bulkRemoving, setBulkRemoving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   // Add Binding dialog (user + multi roles or role + multi permissions?). Based on request: select user (single) and roles (multi) to assign.
   const [addOpen, setAddOpen] = useState(false);
@@ -81,7 +88,7 @@ const PermissionBindings = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/users/roles', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -138,8 +145,8 @@ const PermissionBindings = () => {
   const loadUsersAndRoles = async () => {
     try {
       const [uRes, rRes] = await Promise.all([
-  fetch(BACKEND_URL + API_PREFIX + '/users', { headers: getAuthHeaders() }),
-  fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() })
+  fetch(BACKEND_URL + API_PREFIX + '/admin/users', { headers: getAuthHeaders() }),
+  fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles', { headers: getAuthHeaders() })
       ]);
       if (uRes.status===401||uRes.status===403) return handleAuthError({status:uRes.status});
       if (rRes.status===401||rRes.status===403) return handleAuthError({status:rRes.status});
@@ -198,6 +205,82 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
     } catch(e){ console.error(e); notify.notify('Error tambah permission',{severity:'error'});}
   };
 
+  const handleBulkAddPermissions = async () => {
+    if(!editDialog.role || bulkPerms.length===0) return;
+    setBulkAdding(true);
+    // optimistic
+    setRoles(rs=> rs.map(r=> r.id===editDialog.role.id ? { ...r, Permissions:[...(r.Permissions||r.permissions||[]), ...bulkPerms.filter(p=> !(r.Permissions||r.permissions||[]).some(ep=> ep.id===p.id))] } : r));
+    try {
+      for(const perm of bulkPerms){
+        const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/admin/roles/${editDialog.role.id}/permissions/${perm.id}`, { method:'POST', headers: getAuthHeaders() });
+        if(!resp.ok) notify.notify(`Fail ${perm.name}`, { severity:'error'});
+      }
+      notify.notify('Bulk permissions added', { severity:'success'});
+      setBulkPerms([]);
+      fetchRoles();
+    } catch(e){ console.error(e); notify.notify('Bulk add error',{severity:'error'});} finally { setBulkAdding(false);} 
+  };
+
+  const exportCSV = () => {
+    const header = ['role_id','role_name','permission_id','permission_name'];
+    const rows = filteredRoles.flatMap(r=> (r.Permissions||r.permissions||[]).map(p=> [r.id, '"'+(r.name||'')+'"', p.id, '"'+(p.name||'')+'"']));
+    const csv = [header.join(','), ...rows.map(r=> r.join(','))].join('\n');
+    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'role_permissions.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleBulkRemovePermissions = async () => {
+    if(!editDialog.role || bulkRemovePerms.length===0) return;
+    setBulkRemoving(true);
+    setRoles(rs=> rs.map(r=> r.id===editDialog.role.id ? { ...r, Permissions:(r.Permissions||r.permissions||[]).filter(p=> !bulkRemovePerms.some(bp=> bp.id===p.id)) } : r));
+    try {
+      for(const perm of bulkRemovePerms){
+        const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/admin/roles/${editDialog.role.id}/permissions/${perm.id}`, { method:'DELETE', headers: getAuthHeaders() });
+        if(!resp.ok) notify.notify(`Fail remove ${perm.name}`, { severity:'error'});
+      }
+      notify.notify('Bulk permissions removed', { severity:'success'});
+      setBulkRemovePerms([]);
+      fetchRoles();
+    } catch(e){ console.error(e); notify.notify('Bulk remove error',{severity:'error'});} finally { setBulkRemoving(false);} 
+  };
+
+  const handleImportCSV = (e) => {
+    const file = e.target.files?.[0];
+    if(!file) return;
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = reader.result || '';
+        const lines = String(text).split(/\r?\n/).map(l=> l.trim()).filter(Boolean);
+        // accept either header or raw list; if first line contains comma and 'permission' treat as header
+        let names = [];
+        if(lines.length===0){ notify.notify('CSV kosong',{severity:'warning'}); return; }
+        if(lines[0].toLowerCase().includes('permission')){
+          // assume columns, detect by splitting comma
+          const headerParts = lines[0].split(',').map(h=> h.trim().toLowerCase());
+          const permIdx = headerParts.findIndex(h=> h.includes('permission'));
+          if(permIdx>=0){
+            names = lines.slice(1).map(l=> l.split(',')[permIdx]?.replace(/^"|"$/g,'').trim()).filter(Boolean);
+          }
+        } else {
+          // treat each line as permission name (maybe with commas) -> take first cell
+          names = lines.map(l=> l.split(',')[0].replace(/^"|"$/g,'').trim()).filter(Boolean);
+        }
+        if(names.length===0){ notify.notify('Tidak ada nama permission ditemukan',{severity:'warning'}); return; }
+        const toAdd = permissions.filter(p=> names.includes(p.name) && !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)));
+        if(toAdd.length===0){ notify.notify('Tidak ada permission baru untuk ditambah',{severity:'info'}); return; }
+        setBulkPerms(prev=> [...prev, ...toAdd.filter(p=> !prev.some(pp=> pp.id===p.id))]);
+        notify.notify(`${toAdd.length} permissions queued from CSV`, { severity:'success'});
+      } catch(err){ console.error(err); notify.notify('Import CSV gagal',{severity:'error'});} finally { setImporting(false); if(fileInputRef.current) fileInputRef.current.value=''; }
+    };
+    reader.onerror = ()=> { notify.notify('Gagal membaca file',{severity:'error'}); setImporting(false); };
+    reader.readAsText(file);
+  };
+
   const filteredRoles = roles.filter(role => {
     const textMatch = role.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       role.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -242,15 +325,21 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
                 />
               </Box>
             </Stack>
-            <Button
-              variant="contained"
-              startIcon={<IconPlus />}
-              color="primary"
-              onClick={() => setAddOpen(true)}
-              sx={{ width: 225, alignSelf:{ xs:'stretch', md:'auto' } }}
-            >
-              Add Binding
-            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                onClick={exportCSV}
+              >Export CSV</Button>
+              <Button
+                variant="contained"
+                startIcon={<IconPlus />}
+                color="primary"
+                onClick={() => setAddOpen(true)}
+                sx={{ alignSelf:{ xs:'stretch', md:'auto' } }}
+              >
+                Add Binding
+              </Button>
+            </Stack>
           </Stack>
 
           {error && (
@@ -382,8 +471,38 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
                 options={permissions.filter(p=> !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)))}
                 getOptionLabel={(o)=> o.name }
                 onChange={(_,v)=> { if(v) handleAddPermissionFromEdit(editDialog.role, v); }}
-                renderInput={(params)=><TextField {...params} label="Tambah Permission" placeholder="Ketik untuk cari" />}
+                renderInput={(params)=><TextField {...params} label="Tambah Permission (single)" placeholder="Ketik untuk cari" size="small" />}
               />
+              <Autocomplete
+                multiple
+                options={permissions.filter(p=> !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)))}
+                getOptionLabel={(o)=> o.name }
+                value={bulkPerms}
+                onChange={(_,v)=> setBulkPerms(v)}
+                renderInput={(params)=><TextField {...params} label="Bulk Tambah Permissions" placeholder="Pilih beberapa" size="small" helperText="Pilih beberapa lalu klik 'Add Bulk'" />}
+                filterSelectedOptions
+              />
+              <Stack direction="row" spacing={1}>
+                <Button disabled={bulkPerms.length===0 || bulkAdding} onClick={()=> setBulkPerms([])}>Reset</Button>
+                <Button variant="contained" disabled={bulkPerms.length===0 || bulkAdding} onClick={handleBulkAddPermissions}>{bulkAdding? <CircularProgress size={16}/>:'Add Bulk'}</Button>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <input ref={fileInputRef} type="file" accept=".csv,text/csv" style={{ display:'none' }} onChange={handleImportCSV} />
+                <Button variant="outlined" disabled={importing} onClick={()=> fileInputRef.current && fileInputRef.current.click()}>{importing? 'Importing...' : 'Import CSV'}</Button>
+              </Stack>
+              <Autocomplete
+                multiple
+                options={(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || [])}
+                getOptionLabel={(o)=> o.name }
+                value={bulkRemovePerms}
+                onChange={(_,v)=> setBulkRemovePerms(v)}
+                renderInput={(params)=><TextField {...params} label="Bulk Remove Permissions" placeholder="Pilih yang akan dihapus" size="small" helperText="Pilih beberapa lalu klik 'Remove Bulk'" />}
+                filterSelectedOptions
+              />
+              <Stack direction="row" spacing={1}>
+                <Button disabled={bulkRemovePerms.length===0 || bulkRemoving} onClick={()=> setBulkRemovePerms([])}>Reset Remove</Button>
+                <Button color="error" variant="contained" disabled={bulkRemovePerms.length===0 || bulkRemoving} onClick={handleBulkRemovePermissions}>{bulkRemoving? <CircularProgress size={16}/>:'Remove Bulk'}</Button>
+              </Stack>
             </Stack>
           )}
         </DialogContent>
