@@ -55,7 +55,7 @@ const IcmpDetails = () => {
   };
 
   // Derived mini component for timeline chart
-  const PingHistoryChart = ({ events, width, height=140, compactMode=false, onSvgRef }) => {
+  const PingHistoryChart = ({ events, width, height=140, compactMode=false, onSvgRef, uptimePct, downtimePct }) => {
     if (!Array.isArray(events) || events.length === 0) return <Typography variant="body2">No events.</Typography>;
     // Normalize events: expect occurred_at / status (OK|DOWN)
     const parsed = events
@@ -134,10 +134,12 @@ const IcmpDetails = () => {
           </Box>
         )}
         {!compactMode && (
-          <Stack direction="row" spacing={1} mt={1} alignItems="center">
+          <Stack direction="row" spacing={1} mt={1} alignItems="center" flexWrap="wrap">
             <Chip size="small" label="OK" color="success" />
             <Chip size="small" label="DOWN" color="error" />
             <Chip size="small" label="OTHER" color="warning" />
+            <Chip size="small" label={`Uptime: ${uptimePct ?? '-'}%`} color="success" variant="outlined" />
+            <Chip size="small" label={`Downtime: ${downtimePct ?? '-'}%`} color="error" variant="outlined" />
           </Stack>
         )}
       </Box>
@@ -200,7 +202,7 @@ const IcmpDetails = () => {
   useEffect(()=>{
     const handle = () => {
       if (chartWrapRef.current) {
-        setChartWidth(chartWrapRef.current.getBoundingClientRect().width - 16); // minus padding
+  setChartWidth(chartWrapRef.current.getBoundingClientRect().width); // full width
       }
     };
     handle();
@@ -274,12 +276,8 @@ const IcmpDetails = () => {
             {availability ? (
               <Box sx={{ position:'relative', pt:1 }}>
                 <Box mt={1}>
-                  <PingHistoryChart onSvgRef={svgRef} compactMode={compact} width={chartWidth} events={availability.events || availability.items || []} />
+                  <PingHistoryChart uptimePct={availability.uptime_percentage} downtimePct={availability.downtime_percentage} onSvgRef={svgRef} compactMode={compact} width={chartWidth} events={availability.events || availability.items || []} />
                 </Box>
-                <Stack spacing={0.5} sx={{ position:'absolute', bottom:8, right:8, background: theme.palette.mode==='dark' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.85)', border:'1px solid', borderColor:'divider', px:1, py:0.5, borderRadius:1, fontSize:12 }}>
-                  <Typography variant="caption">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
-                  <Typography variant="caption">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
-                </Stack>
               </Box>
             ) : <Typography variant="body2">No availability data.</Typography>}
           </Stack>
