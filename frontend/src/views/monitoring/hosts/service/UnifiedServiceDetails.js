@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
@@ -70,6 +70,7 @@ const UnifiedServiceDetails = () => {
   const [host, setHost] = useState(null);
   const [serviceObj, setServiceObj] = useState(null);
   const [availability, setAvailability] = useState(null);
+  const [range, setRange] = useState('24h'); // 24h | 7d | 30d
 
   useEffect(() => {
     const load = async () => {
@@ -93,8 +94,11 @@ const UnifiedServiceDetails = () => {
         setServiceObj(svc || null);
 
         // Availability
-        const to = new Date().toISOString();
-        const from = new Date(Date.now() - 24*3600*1000).toISOString();
+    const to = new Date().toISOString();
+    let windowMs = 24*3600*1000;
+    if (range === '7d') windowMs = 7*24*3600*1000;
+    else if (range === '30d') windowMs = 30*24*3600*1000;
+    const from = new Date(Date.now() - windowMs).toISOString();
         const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=${service}&host_id=${hostId}`, { headers: getAuthHeaders() });
         if (availRes.ok) setAvailability(await availRes.json());
       } catch (e) {
@@ -105,7 +109,7 @@ const UnifiedServiceDetails = () => {
       }
     };
     load();
-  }, [hostId, service]);
+  }, [hostId, service, range]);
 
   const title = service === 'icmp' ? 'ICMP Details' : 'Website Details';
   const header = service === 'icmp' ? 'ICMP Service' : 'Website Service';
@@ -153,11 +157,31 @@ const UnifiedServiceDetails = () => {
                     <Typography variant="subtitle2">Last Status</Typography>
                     <Chip label={(serviceObj?.status || 'UNKNOWN').toUpperCase()} color={statusColor(serviceObj?.status)} size="small" />
                   </Grid>
+                  {serviceObj?.latency_ms != null && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2">Latency</Typography>
+                      <Typography>{serviceObj.latency_ms} ms</Typography>
+                    </Grid>
+                  )}
+                  {serviceObj?.response_time_ms != null && (
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="subtitle2">Response Time</Typography>
+                      <Typography>{serviceObj.response_time_ms} ms</Typography>
+                    </Grid>
+                  )}
                 </Grid>
                 {showAvailability && (
                   <>
                     <Divider />
-                    <Typography variant="h6">Availability (24h)</Typography>
+                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+                      <Typography variant="h6" sx={{ mr:1 }}>Availability ({range})</Typography>
+                      <ToggleButtonGroup size="small" value={range} exclusive onChange={(e,val)=> val && setRange(val)}>
+                        <ToggleButton value="24h">24h</ToggleButton>
+                        <ToggleButton value="7d">7d</ToggleButton>
+                        <ToggleButton value="30d">30d</ToggleButton>
+                      </ToggleButtonGroup>
+                      <Tooltip title="Menampilkan uptime & events dalam rentang waktu dipilih"><span /></Tooltip>
+                    </Stack>
                     <Box>
                       {availability.uptime_percentage != null && (
                         <>

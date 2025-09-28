@@ -40,8 +40,7 @@ const MetricsIndex = Loadable(lazy(() => import('../views/monitoring/metrics/Met
 const CPUMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/CPUMetricsList')));
 const MemoryMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/MemoryMetricsList')));
 const DiskMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/DiskMetricsList')));
-const IcmpDetails = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/details/IcmpDetails')));
-const WebsiteDetails = Loadable(lazy(() => import('../views/monitoring/hosts/website/details/WebsiteDetails')));
+const UnifiedServiceDetails = Loadable(lazy(() => import('../views/monitoring/hosts/service/UnifiedServiceDetails')));
 
 /* ========================== INFRASTRUCTURE ======================= */
 // Infrastruktur (hosts, groups, service groups - alias jalur infra)
@@ -121,8 +120,8 @@ const Router = [
       { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
       { path: '/monitoring/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
       { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
-      { path: '/monitoring/hosts/:id/icmp/details', element: <ProtectedRoute><IcmpDetails /></ProtectedRoute> },
-      { path: '/monitoring/hosts/:id/website/details', element: <ProtectedRoute><WebsiteDetails /></ProtectedRoute> },
+      { path: '/monitoring/hosts/:id/icmp/details', element: <ProtectedRoute><UnifiedServiceDetails /></ProtectedRoute> },
+      { path: '/monitoring/hosts/:id/website/details', element: <ProtectedRoute><UnifiedServiceDetails /></ProtectedRoute> },
       { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
       { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
       { path: '/monitoring/availability/icmp', element: <ProtectedRoute><ICMPAvailabilityPage /></ProtectedRoute> },
@@ -145,8 +144,8 @@ const Router = [
       { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
       { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
       { path: '/infrastructure/hosts/details/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
-      { path: '/infrastructure/hosts/details/:id/icmp/details', element: <ProtectedRoute><IcmpDetails /></ProtectedRoute> },
-      { path: '/infrastructure/hosts/details/:id/website/details', element: <ProtectedRoute><WebsiteDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/details/:id/icmp/details', element: <ProtectedRoute><UnifiedServiceDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/details/:id/website/details', element: <ProtectedRoute><UnifiedServiceDetails /></ProtectedRoute> },
       { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><ICMPAvailabilityPage /></ProtectedRoute> },
       { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
       { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
