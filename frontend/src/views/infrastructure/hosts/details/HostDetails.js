@@ -123,6 +123,17 @@ export default function HostDetails() {
     }));
   }, [rawServices]);
 
+  // Color mapping helper
+  const serviceTypeColor = (type) => {
+    const palette = {
+      icmp: { bg: '#1976d2', color:'#fff' },
+      http: { bg: '#9c27b0', color:'#fff' },
+      website: { bg: '#9c27b0', color:'#fff' },
+      https: { bg: '#6a1b9a', color:'#fff' },
+    };
+    return palette[type.toLowerCase()] || { bg:'#455a64', color:'#fff'};
+  };
+
   return (
     <>
       <PageContainer title="Host Details" description="Host and attached services">
@@ -181,13 +192,35 @@ export default function HostDetails() {
                       {services.length === 0 ? (
                         <TableRow><TableCell colSpan={7} align="center">No services</TableCell></TableRow>
                       ) : services.map(svc => (
-                        <TableRow key={`${svc.type}-${svc.id}`}>
+                        <TableRow key={`${svc.type}-${svc.id}`}
+                          hover
+                          onClick={() => {
+                            const basePath = window.location.pathname.startsWith('/infrastructure') ? '/infrastructure/hosts/details' : '/monitoring/hosts';
+                            const hostId = host.ID || host.id;
+                            const typeSeg = svc.type === 'icmp' ? 'icmp' : 'website';
+                            window.location.href = `${basePath}/${hostId}/${typeSeg}/details`;
+                          }}
+                          sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' }, '&:focus-within': { outline: '2px solid #1976d2' } }}
+                          tabIndex={0}
+                          role="button"
+                          aria-label={`Open ${svc.type} service ${svc.name} details`}
+                        >
                           <TableCell>
                             <Chip size="small" color={svc.status==='OK' ? 'success':'default'} label={svc.status} />
                           </TableCell>
                           <TableCell>
                             <Stack direction="row" spacing={1} alignItems="center">
-                              <Chip size="small" label={svc.type.toUpperCase()} />
+                              {(() => {
+                                const type = svc.type.toLowerCase();
+                                const palette = {
+                                  icmp: { bg: '#1976d2', color:'#fff' },
+                                  http: { bg: '#9c27b0', color:'#fff' },
+                                  website: { bg: '#9c27b0', color:'#fff' },
+                                  https: { bg: '#6a1b9a', color:'#fff' },
+                                };
+                                const p = palette[type] || { bg:'#455a64', color:'#fff'};
+                                return <Chip size="small" label={svc.type.toUpperCase()} sx={{ bgcolor:p.bg, color:p.color }} />;
+                              })()}
                               <Typography variant="body2" sx={{ fontWeight:500 }}>{svc.name}</Typography>
                             </Stack>
                           </TableCell>
@@ -198,7 +231,7 @@ export default function HostDetails() {
                             <LinearProgress variant="determinate" value={(()=>{ const l=svc.latency; if(l==null) return 50; return Math.max(5, Math.min(100, (200 - l)/2)); })()} />
                           </TableCell>
                           <TableCell align="center" sx={{ width:48 }}>
-                            <IconButton size="small" onClick={(e)=>{ setMenuAnchor(e.currentTarget); setMenuSvc(svc); }}>
+                            <IconButton size="small" onClick={(e)=>{ e.stopPropagation(); setMenuAnchor(e.currentTarget); setMenuSvc(svc); }}>
                               <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </TableCell>
@@ -265,7 +298,7 @@ export default function HostDetails() {
           try {
             const idd = deleting.item.ID || deleting.item.id;
             const base = deleting.type==='icmp'
-              ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp/${idd}`
+              ? `${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp/${idd}`
               : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl/${idd}`;
             const res = await fetch(base, { method:'DELETE', headers: getAuthHeaders() });
             if(res.status===401||res.status===403) return handleAuthError({status:res.status});
@@ -287,7 +320,7 @@ export default function HostDetails() {
             // attach host id (use json field name expected by backend)
             data.host_id = host.ID || host.id;
             const endpoint = creatingType==='icmp'
-              ? `${BACKEND_URL}${API_PREFIX}/services/availability/icmp`
+              ? `${BACKEND_URL}${API_PREFIX}/monitoring/checker/icmp`
               : `${BACKEND_URL}${API_PREFIX}/monitoring/checker/http-curl`;
             const res = await fetch(endpoint, {
               method:'POST',
