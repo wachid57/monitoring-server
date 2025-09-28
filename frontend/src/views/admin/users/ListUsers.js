@@ -37,6 +37,7 @@ import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
+import { useNotify } from 'src/components/notifications/NotificationProvider';
 
 const BCrumb = [
   {
@@ -61,14 +62,16 @@ const ListUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null });
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: '' });
+  const notifyCtx = useNotify();
+  const notify = notifyCtx?.notify || (()=>{});
+  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', roles: [] });
   const [availableRoles, setAvailableRoles] = useState([]);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   // Edit user state
   const [editOpen, setEditOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
-  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', role: '' });
+  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', roles: [] });
   const [editSaving, setEditSaving] = useState(false);
 
   const fetchUsers = async () => {
@@ -76,10 +79,10 @@ const ListUsers = () => {
     setError('');
     
     try {
-      console.log('Fetching users from:', BACKEND_URL + API_PREFIX + '/users');
+  console.log('Fetching users from:', BACKEND_URL + API_PREFIX + '/admin/users');
       console.log('Auth headers:', getAuthHeaders());
       
-      const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -134,11 +137,11 @@ const ListUsers = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || '') : (user.role || '');
+    const roleNames = (user.roles || []).map(r=> r.name || '').join(' ');
     return (
       user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      roleLabel.toLowerCase().includes(searchTerm.toLowerCase())
+      roleNames.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -256,16 +259,12 @@ const ListUsers = () => {
                         </TableCell>
                         <TableCell>{user.email || '-'}</TableCell>
                         <TableCell>
-                            {(() => {
-                              const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || 'User') : (user.role || 'User');
-                              return (
-                                <Chip
-                                  size="small"
-                                  label={roleLabel}
-                                  color={getRoleColor(roleLabel)}
-                                />
-                              );
-                            })()}
+                          <Stack direction="row" spacing={1} flexWrap="wrap">
+                            {(user.roles || []).length === 0 && <Chip size="small" label="No Role" />}
+                            {(user.roles || []).map(r => (
+                              <Chip key={r.name} size="small" label={r.name} color={getRoleColor(r.name)} />
+                            ))}
+                          </Stack>
                         </TableCell>
                         <TableCell>
                           {user.native ? (
@@ -294,13 +293,12 @@ const ListUsers = () => {
                               color="warning"
                               title={'Edit user'}
                               onClick={() => {
-                                const roleLabel = (user.roles && user.roles.length > 0) ? (user.roles[0].name || 'User') : (user.role || 'User');
                                 setEditUser(user);
                                 setEditForm({
                                   username: user.username || '',
                                   email: user.email || '',
                                   name: user.name || '',
-                                  role: roleLabel || '',
+                                  roles: (user.roles || []).map(r=> r.name),
                                 });
                                 setEditOpen(true);
                               }}
@@ -413,11 +411,12 @@ const ListUsers = () => {
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
           <Autocomplete
+            multiple
             options={availableRoles}
             getOptionLabel={(o)=> o.name || ''}
-            value={availableRoles.find(r=> r.name===newUser.role) || null}
-            onChange={(_,v)=> setNewUser({ ...newUser, role: v?.name || '' })}
-            renderInput={(params)=><TextField {...params} label='Role' margin='dense' placeholder='Select role' helperText='Choose a role' />}
+            value={availableRoles.filter(r=> newUser.roles.includes(r.name))}
+            onChange={(_,v)=> setNewUser({ ...newUser, roles: v.map(r=> r.name) })}
+            renderInput={(params)=><TextField {...params} label='Roles' margin='dense' placeholder='Select roles' helperText='Choose one or more roles' />}
             fullWidth
           />
         </DialogContent>
@@ -445,26 +444,32 @@ const ListUsers = () => {
                 }
                 const data = await res.json();
                 if (res.ok) {
-                  // refresh users
-                  fetchUsers();
+                  const createdId = data.id || data.user?.id;
+                  const createdUser = { id: createdId, username: newUser.username, email: newUser.email, name: newUser.name, roles: [] };
+                  // Optimistically add user
+                  setUsers(prev=> [...prev, createdUser]);
                   setAddDialogOpen(false);
-                  setNewUser({ username: '', email: '', name: '', password: '', role: '' });
-                  // optimistic assign role if name exists
-                  if(newUser.role){
-                    const createdId = (data.id)|| (data.user?.id);
-                    if(createdId){
-                      await fetch(BACKEND_URL + API_PREFIX + '/users/roles/users', {
-                        method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: createdId, role_name: newUser.role })
-                      });
-                    }
+                  // Assign roles sequentially
+                  if (createdId && newUser.roles.length > 0) {
+                    const rolePromises = newUser.roles.map(async (roleName)=> {
+                      const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles/users', { method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: createdId, role_name: roleName }) });
+                      if(!resp.ok){ notify(`Gagal assign role ${roleName}`, { severity:'error'}); }
+                      return resp.ok ? roleName : null;
+                    });
+                    const assigned = (await Promise.all(rolePromises)).filter(Boolean).map(r=> ({ name:r }));
+                    setUsers(prev=> prev.map(u=> u.id===createdId ? { ...u, roles: assigned }: u));
                   }
+                  notify('User created', { severity:'success'});
+                  setNewUser({ username: '', email: '', name: '', password: '', roles: [] });
                 } else {
                   // Backend may create user but fail role binding; show explicit message
                   setFormError(data.error || data.message || 'Failed to create user (role assignment may have failed)');
+                  notify('Failed to create user', { severity:'error'});
                 }
               } catch (err) {
                 console.error('Create user error:', err);
                 setFormError('Failed to create user');
+                notify('Error creating user', { severity:'error'});
               } finally {
                 setSubmitLoading(false);
               }
@@ -485,11 +490,12 @@ const ListUsers = () => {
             <TextField label="Email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} fullWidth />
             <TextField label="Full name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} fullWidth />
             <Autocomplete
+              multiple
               options={availableRoles}
               getOptionLabel={(o)=> o.name || ''}
-              value={availableRoles.find(r=> r.name===editForm.role) || null}
-              onChange={(_,v)=> setEditForm({ ...editForm, role: v?.name || '' })}
-              renderInput={(params)=><TextField {...params} label='Role' placeholder='Select role' helperText='Choose a role' />}
+              value={availableRoles.filter(r=> editForm.roles.includes(r.name))}
+              onChange={(_,v)=> setEditForm({ ...editForm, roles: v.map(r=> r.name) })}
+              renderInput={(params)=><TextField {...params} label='Roles' placeholder='Select roles' helperText='Choose roles' />}
               fullWidth
               disabled={editUser?.native}
             />
@@ -512,7 +518,7 @@ const ListUsers = () => {
               setEditSaving(true);
               try {
                 // Update basic info
-                const res = await fetch(BACKEND_URL + API_PREFIX + `/users/${editUser.id}` , {
+                const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/users/${editUser.id}` , {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                   body: JSON.stringify({ username: editForm.username, email: editForm.email, name: editForm.name })
@@ -524,21 +530,31 @@ const ListUsers = () => {
                   setEditSaving(false);
                   return;
                 }
-                // Assign role if provided
-                if (editForm.role) {
-                  await fetch(BACKEND_URL + API_PREFIX + '/users/roles/users', {
+                // Assign roles (difference set)
+                const existingRoles = (editUser.roles || []).map(r=> r.name);
+                const toAdd = editForm.roles.filter(r=> !existingRoles.includes(r));
+                const finalRoles = new Set(existingRoles);
+                for (const rName of toAdd) {
+                  const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles/users', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                    body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role })
+                    body: JSON.stringify({ user_id: editUser.id, role_name: rName })
                   });
-                  setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles:[{ name: editForm.role }] } : u));
+                  if (!resp.ok) {
+                    notify(`Gagal assign role ${rName}`, { severity:'error'});
+                  } else {
+                    finalRoles.add(rName);
+                  }
                 }
+                // (Removal not yet supported until backend multi-role removal API exists)
+                setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles: Array.from(finalRoles).map(n=> ({ name:n })) } : u));
+                notify('User updated', { severity:'success'});
                 setEditOpen(false);
                 setEditUser(null);
-                fetchUsers();
               } catch (e) {
                 console.error('Edit user error', e);
                 setError('Failed to update user');
+                notify('Failed to update user', { severity:'error'});
               } finally { setEditSaving(false); }
             }}
           >
