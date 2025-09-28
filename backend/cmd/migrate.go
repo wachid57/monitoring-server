@@ -39,7 +39,6 @@ var migrations = []struct {
     {20, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
     {21, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
     {22, "AssignAdminToWpmAdmin", func(db *gorm.DB) error { return migration.AssignAdminToWpmAdmin(db) }},
-    {23, "CreateServiceStatusEventsTable", func(db *gorm.DB) error { return migration.CreateServiceStatusEventsTable(db) }},
 }
 
 func main() {

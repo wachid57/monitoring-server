@@ -57,7 +57,6 @@ func InitDB() error {
 		&model.ICMPCheck{},
 		&model.HTTPCurlCheck{},
 		&model.HostService{},
-		&model.ServiceStatusEvent{}, // added for availability aggregation
 	); err != nil {
 		return err
 	}

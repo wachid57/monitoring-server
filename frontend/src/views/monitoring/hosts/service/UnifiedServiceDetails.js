@@ -1,234 +1,163 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Box, Card, CardContent, CircularProgress, Divider, Grid, Stack, Typography, Alert, Chip, Button } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
-// Extract host id & service type from URL.
-// Supported paths:
-//  /infrastructure/hosts/details/:id/icmp/details
-//  /infrastructure/hosts/details/:id/website/details
-//  /monitoring/hosts/:id/icmp/details
-//  /monitoring/hosts/:id/website/details
-const parsePath = () => {
-  const parts = window.location.pathname.split('/').filter(Boolean);
-  let hostId = null; let service = null;
-  const infraIdx = parts.indexOf('infrastructure');
-  const monIdx = parts.indexOf('monitoring');
-  if (infraIdx !== -1) {
-    const hostsIdx = parts.indexOf('hosts');
-    if (hostsIdx !== -1 && parts[hostsIdx + 1] === 'details') {
-      hostId = parts[hostsIdx + 2];
-      service = parts[hostsIdx + 3]; // icmp | website
-    }
-  } else if (monIdx !== -1) {
-    const hostsIdx = parts.indexOf('hosts');
-    if (hostsIdx !== -1) {
-      hostId = parts[hostsIdx + 1];
-      service = parts[hostsIdx + 2];
-    }
-  }
-  if (!['icmp','website'].includes(service)) service = null;
-  return { hostId, service };
-};
+// Generic detail viewer for any monitored service attached to a host.
+// Fallback until we split per-type detail pages (ICMP, WEBSITE, METRIC, etc.)
 
-const BCrumbBase = [
-  { to: '/', title: 'Home' },
-  { to: '/monitoring/hosts', title: 'Hosts' },
+const crumbBase = [
+	{ to: '/', title: 'Home' },
+	{ to: '/monitoring/hosts', title: 'Hosts' },
+	{ title: 'Service Detail' },
 ];
 
-const statusColor = (s) => (s || '').toLowerCase() === 'ok' ? 'success' : 'error';
-
-// Build sparkline from events (OK vs not OK) over time.
-const Sparkline = ({ events }) => {
-  if (!Array.isArray(events) || events.length === 0) return null;
-  const width = 160; const height = 24;
-  const sorted = [...events].sort((a,b)=> new Date(a.occurred_at||a.occurredAt) - new Date(b.occurred_at||b.occurredAt));
-  const minT = new Date(sorted[0].occurred_at||sorted[0].occurredAt).getTime();
-  const maxT = new Date(sorted[sorted.length-1].occurred_at||sorted[sorted.length-1].occurredAt).getTime();
-  const span = maxT - minT || 1;
-  const points = sorted.map(ev => {
-    const t = new Date(ev.occurred_at||ev.occurredAt).getTime();
-    const x = ((t - minT)/span) * width;
-    const y = ( (ev.status||'').toUpperCase() === 'OK') ? height*0.2 : height*0.8;
-    return { x, y, status: ev.status };
-  });
-  const pathD = points.map((p,i)=> `${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  return (
-    <svg width={width} height={height} style={{ display:'block'}}>
-      <path d={pathD} fill="none" stroke="#1976d2" strokeWidth={1.5} />
-      {points.map((p,i)=>(<circle key={i} cx={p.x} cy={p.y} r={2} fill={(p.status||'').toUpperCase()==='OK'? '#2e7d32':'#d32f2f'} />))}
-    </svg>
-  );
-};
-
 const UnifiedServiceDetails = () => {
-  const { hostId, service } = useMemo(parsePath, []);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [host, setHost] = useState(null);
-  const [serviceObj, setServiceObj] = useState(null);
-  const [availability, setAvailability] = useState(null);
-  const [range, setRange] = useState('24h'); // 24h | 7d | 30d
+	const [service, setService] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState('');
 
-  useEffect(() => {
-    const load = async () => {
-      if (!hostId || !service) { setError('Invalid path'); setLoading(false); return; }
-      try {
-        const hostRes = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}`, { headers: getAuthHeaders() });
-        if (hostRes.status === 401 || hostRes.status === 403) return handleAuthError({ status: hostRes.status });
-        if (!hostRes.ok) { const d = await hostRes.json().catch(()=>({})); throw new Error(d.error || 'Failed load host'); }
-        const hostData = await hostRes.json();
-        setHost(hostData);
+	// Parse path patterns like:
+	// /monitoring/hosts/:hostId/service/:serviceId
+	// /infrastructure/hosts/details/:hostId/service/:serviceId
+	const parseIds = () => {
+		const parts = window.location.pathname.split('/').filter(Boolean);
+		const serviceIdx = parts.indexOf('service');
+		if (serviceIdx === -1 || serviceIdx === parts.length - 1) return { hostId: null, serviceId: null };
+		const serviceId = parts[serviceIdx + 1];
+		// host id should be two positions before 'service' in expected patterns
+		// e.g. monitoring hosts <hostId> service <serviceId>
+		let hostId = null;
+		for (let i = serviceIdx - 1; i >= 0; i--) {
+			if (parts[i] !== 'hosts' && parts[i] !== 'details') {
+				hostId = parts[i];
+				break;
+			}
+		}
+		return { hostId, serviceId };
+	};
 
-        const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}/services`, { headers: getAuthHeaders() });
-        if (!servicesRes.ok) { const d = await servicesRes.json().catch(()=>({})); throw new Error(d.error || 'Failed load services'); }
-        const services = await servicesRes.json();
-        const svc = Array.isArray(services) ? services.find(s => {
-          const t = (s.type || s.service_type || '').toLowerCase();
-          if (service === 'icmp') return t === 'icmp';
-          if (service === 'website') return t === 'http' || t === 'https' || t === 'website';
-          return false;
-        }) : null;
-        setServiceObj(svc || null);
+	const { hostId, serviceId } = parseIds();
 
-        // Availability
-    const to = new Date().toISOString();
-    let windowMs = 24*3600*1000;
-    if (range === '7d') windowMs = 7*24*3600*1000;
-    else if (range === '30d') windowMs = 30*24*3600*1000;
-    const from = new Date(Date.now() - windowMs).toISOString();
-        const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=${service}&host_id=${hostId}`, { headers: getAuthHeaders() });
-        if (availRes.ok) setAvailability(await availRes.json());
-      } catch (e) {
-        console.error(e);
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [hostId, service, range]);
+	useEffect(() => {
+		const fetchService = async () => {
+			if (!serviceId) { setError('Invalid service id'); setLoading(false); return; }
+			setLoading(true);
+			try {
+				// Assuming backend endpoint to get a single host service: /hosts/:id/services then filter or /hosts/:id/services/:serviceId
+				// We'll call specific if available; if 404 fallback to list & find.
+				const specificUrl = `${BACKEND_URL + API_PREFIX}/hosts/${hostId}/services?format=full`;
+				const res = await fetch(specificUrl, { headers: getAuthHeaders() });
+				if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
+				if (!res.ok) {
+					const data = await res.json().catch(() => ({}));
+						setError(data.error || 'Failed load service');
+						setLoading(false);
+						return;
+				}
+				const data = await res.json();
+				// Find service by id
+				let svc = null;
+				if (Array.isArray(data)) {
+					svc = data.find(s => `${s.id}` === `${serviceId}` || `${s.service_id}` === `${serviceId}`);
+				} else if (data && Array.isArray(data.services)) {
+					svc = data.services.find(s => `${s.id}` === `${serviceId}` || `${s.service_id}` === `${serviceId}`);
+				}
+				if (!svc) {
+					setError('Service not found');
+				} else {
+					setService(svc);
+				}
+			} catch (e) {
+				console.error(e);
+				setError('Failed load service');
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchService();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [hostId, serviceId]);
 
-  const title = service === 'icmp' ? 'ICMP Details' : 'Website Details';
-  const header = service === 'icmp' ? 'ICMP Service' : 'Website Service';
+	if (loading) return <PageContainer title="Service Detail"><Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box></PageContainer>;
+	if (error) return <PageContainer title="Service Detail"><Alert severity="error">{error}</Alert></PageContainer>;
 
-  if (loading) return <PageContainer title={title}><Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box></PageContainer>;
-  if (error) return <PageContainer title={title}><Alert severity="error">{error}</Alert></PageContainer>;
+	const tags = (service?.tags || service?.service_tags || '').split(',').map(t => t.trim()).filter(Boolean);
+	const statusColor = service?.status === 'up' ? 'success' : (service?.status === 'down' ? 'error' : 'default');
 
-  const events = availability?.events;
-  const hasEvents = Array.isArray(events) && events.length > 0;
-  const showAvailability = availability && (availability.uptime_percentage != null || hasEvents);
-
-  return (
-    <PageContainer title={title} description={`Host ${service.toUpperCase()} service details`}>
-      <Breadcrumb title={title} items={[...BCrumbBase, { title }]} />
-      <Box mt={2} />
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-            <CardContent>
-              <Stack spacing={2}>
-                <Typography variant="h5">{header} - {host?.hostname || host?.ip}</Typography>
-                <Divider />
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Host</Typography>
-                    <Typography>{host?.hostname || host?.ip}</Typography>
-                  </Grid>
-                  {service === 'website' && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2">URL</Typography>
-                      <Typography>{serviceObj?.url || host?.url || '-'}</Typography>
-                    </Grid>
-                  )}
-                  {service === 'website' && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2">Method</Typography>
-                      <Typography>{serviceObj?.method || host?.method || 'GET'}</Typography>
-                    </Grid>
-                  )}
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Interval</Typography>
-                    <Typography>{serviceObj?.interval || host?.heartbeat_interval || '-'} sec</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2">Last Status</Typography>
-                    <Chip label={(serviceObj?.status || 'UNKNOWN').toUpperCase()} color={statusColor(serviceObj?.status)} size="small" />
-                  </Grid>
-                  {serviceObj?.latency_ms != null && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2">Latency</Typography>
-                      <Typography>{serviceObj.latency_ms} ms</Typography>
-                    </Grid>
-                  )}
-                  {serviceObj?.response_time_ms != null && (
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2">Response Time</Typography>
-                      <Typography>{serviceObj.response_time_ms} ms</Typography>
-                    </Grid>
-                  )}
-                </Grid>
-                {showAvailability && (
-                  <>
-                    <Divider />
-                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                      <Typography variant="h6" sx={{ mr:1 }}>Availability ({range})</Typography>
-                      <ToggleButtonGroup size="small" value={range} exclusive onChange={(e,val)=> val && setRange(val)}>
-                        <ToggleButton value="24h">24h</ToggleButton>
-                        <ToggleButton value="7d">7d</ToggleButton>
-                        <ToggleButton value="30d">30d</ToggleButton>
-                      </ToggleButtonGroup>
-                      <Tooltip title="Menampilkan uptime & events dalam rentang waktu dipilih"><span /></Tooltip>
-                    </Stack>
-                    <Box>
-                      {availability.uptime_percentage != null && (
-                        <>
-                          <Typography variant="body2">Uptime: {availability.uptime_percentage}%</Typography>
-                          <Typography variant="body2">Downtime: {availability.downtime_percentage}%</Typography>
-                        </>
-                      )}
-                      {hasEvents && (
-                        <Box mt={2}>
-                          <Typography variant="subtitle2" sx={{ display:'flex', alignItems:'center', gap:1 }}>
-                            Recent Events <Sparkline events={events.slice(0,50)} />
-                          </Typography>
-                          <Stack spacing={1} mt={1}>
-                            {events.slice(0,10).map(ev => (
-                              <Box key={ev.id} sx={{ display:'flex', alignItems:'center', gap:1 }}>
-                                <Chip size="small" label={ev.status} color={statusColor(ev.status)} />
-                                <Typography variant="caption">{new Date(ev.occurred_at || ev.occurredAt).toLocaleString()}</Typography>
-                              </Box>
-                            ))}
-                          </Stack>
-                        </Box>
-                      )}
-                    </Box>
-                  </>
-                )}
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
-            <CardContent>
-              <Stack spacing={2}>
-                <Typography variant="h6">Actions</Typography>
-                <Button variant="contained" size="small" onClick={() => window.history.back()}>Back</Button>
-                <Divider />
-                <Typography variant="h6">Raw JSON</Typography>
-                <Box sx={{ maxHeight:300, overflow:'auto', fontSize:12, fontFamily:'monospace', background:'#fafafa', p:1, border:'1px solid #eee' }}>
-                  <pre style={{ margin:0 }}>{JSON.stringify({ host, service: serviceObj, availability }, null, 2)}</pre>
-                </Box>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </PageContainer>
-  );
+	return (
+		<PageContainer title="Service Detail" description="Unified monitored service information">
+			<Breadcrumb title="Detail" items={crumbBase} />
+			<Box mt={2} />
+			<Grid container spacing={3}>
+				<Grid item xs={12} md={8}>
+					<Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+						<CardContent>
+							<Stack spacing={2}>
+								<Typography variant="h5">{service?.name || service?.service_name || 'Service'}</Typography>
+								<Stack direction="row" spacing={1} alignItems="center">
+									<Chip size="small" label={service?.type || service?.monitor_type || 'unknown'} />
+									<Chip size="small" color={statusColor} label={service?.status || 'unknown'} />
+									{service?.last_check && <Chip size="small" label={new Date(service.last_check).toLocaleString()} />}
+								</Stack>
+								<Divider />
+								<Grid container spacing={2}>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Endpoint / Target</Typography>
+										<Typography>{service?.url || service?.ip || service?.target || '-'}</Typography>
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Interval (s)</Typography>
+										<Typography>{service?.interval || service?.heartbeat_interval || '-'}</Typography>
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Timeout</Typography>
+										<Typography>{service?.timeout || '-'}</Typography>
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Retries</Typography>
+										<Typography>{service?.retries ?? '-'}</Typography>
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Created</Typography>
+										<Typography>{service?.created_at ? new Date(service.created_at).toLocaleString() : '-'}</Typography>
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<Typography variant="subtitle2">Updated</Typography>
+										<Typography>{service?.updated_at ? new Date(service.updated_at).toLocaleString() : '-'}</Typography>
+									</Grid>
+								</Grid>
+								<Divider />
+								<Typography variant="h6">Tags</Typography>
+								{tags.length ? <Stack direction="row" spacing={1} flexWrap="wrap" rowGap={1}>{tags.map(t => <Chip size="small" key={t} label={t} />)}</Stack> : <Typography color="text.secondary">No tags</Typography>}
+							</Stack>
+						</CardContent>
+					</Card>
+				</Grid>
+				<Grid item xs={12} md={4}>
+					<Card sx={{ border: '1px solid rgba(0,0,0,0.06)' }}>
+						<CardContent>
+							<Stack spacing={2}>
+								<Typography variant="h6">Actions</Typography>
+								<Button variant="outlined" size="small">Recheck Now</Button>
+								<Button variant="outlined" size="small" color="error">Disable</Button>
+								<Divider />
+								<Typography variant="h6">Meta</Typography>
+								<Typography variant="subtitle2">Service ID</Typography>
+								<Typography variant="body2">{serviceId}</Typography>
+								{hostId && <>
+									<Typography variant="subtitle2">Host ID</Typography>
+									<Typography variant="body2">{hostId}</Typography>
+								</>}
+							</Stack>
+						</CardContent>
+					</Card>
+				</Grid>
+			</Grid>
+		</PageContainer>
+	);
 };
 
 export default UnifiedServiceDetails;
