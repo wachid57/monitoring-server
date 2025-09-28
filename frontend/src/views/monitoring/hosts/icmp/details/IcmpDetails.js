@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, Switch, FormControlLabel, Tooltip, IconButton } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, Switch, FormControlLabel, Tooltip, IconButton, Fab } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DownloadIcon from '@mui/icons-material/Download';
 import ImageIcon from '@mui/icons-material/Image';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -55,7 +56,7 @@ const IcmpDetails = () => {
   };
 
   // Derived mini component for timeline chart
-  const PingHistoryChart = ({ events, width, height=140, compactMode=false, onSvgRef }) => {
+  const PingHistoryChart = ({ events, width, height=140, compactMode=false, onSvgRef, uptimePct, downtimePct }) => {
     if (!Array.isArray(events) || events.length === 0) return <Typography variant="body2">No events.</Typography>;
     // Normalize events: expect occurred_at / status (OK|DOWN)
     const parsed = events
@@ -134,10 +135,12 @@ const IcmpDetails = () => {
           </Box>
         )}
         {!compactMode && (
-          <Stack direction="row" spacing={1} mt={1} alignItems="center">
+          <Stack direction="row" spacing={1} mt={1} alignItems="center" flexWrap="wrap">
             <Chip size="small" label="OK" color="success" />
             <Chip size="small" label="DOWN" color="error" />
             <Chip size="small" label="OTHER" color="warning" />
+            <Chip size="small" label={`Uptime: ${uptimePct ?? '-'}%`} color="success" variant="outlined" />
+            <Chip size="small" label={`Downtime: ${downtimePct ?? '-'}%`} color="error" variant="outlined" />
           </Stack>
         )}
       </Box>
@@ -159,7 +162,7 @@ const IcmpDetails = () => {
         setHost(hostData);
 
         // Fetch all services for host to locate ICMP
-        const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}/services`, { headers: getAuthHeaders() });
+        const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${hostId}/services`, { headers: getAuthHeaders() });
         if (!servicesRes.ok) {
           const d = await servicesRes.json().catch(() => ({}));
           throw new Error(d.error || 'Failed load services');
@@ -171,7 +174,7 @@ const IcmpDetails = () => {
     // Availability summary (selected range)
     const to = new Date().toISOString();
     const from = new Date(Date.now() - rangeToMs(range)).toISOString();
-        const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=icmp&host_id=${hostId}`, { headers: getAuthHeaders() });
+        const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=icmp&host_id=${hostId}`, { headers: getAuthHeaders() });
         if (availRes.ok) {
           const av = await availRes.json();
           setAvailability(av);
@@ -200,7 +203,7 @@ const IcmpDetails = () => {
   useEffect(()=>{
     const handle = () => {
       if (chartWrapRef.current) {
-        setChartWidth(chartWrapRef.current.getBoundingClientRect().width - 16); // minus padding
+  setChartWidth(chartWrapRef.current.getBoundingClientRect().width); // full width
       }
     };
     handle();
@@ -213,6 +216,9 @@ const IcmpDetails = () => {
 
   return (
     <PageContainer title="ICMP Details" description="Host ICMP service details">
+      <Fab size="medium" color="primary" onClick={()=> window.history.back()} sx={{ position:'fixed', top: 92, left: 220, zIndex: (t)=> t.zIndex.drawer + 2 }}>
+        <ArrowBackIcon />
+      </Fab>
       <Breadcrumb title="ICMP Details" items={BCrumb} />
       <Box mt={2} />
       <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
@@ -274,23 +280,20 @@ const IcmpDetails = () => {
             {availability ? (
               <Box sx={{ position:'relative', pt:1 }}>
                 <Box mt={1}>
-                  <PingHistoryChart onSvgRef={svgRef} compactMode={compact} width={chartWidth} events={availability.events || availability.items || []} />
+                  <PingHistoryChart uptimePct={availability.uptime_percentage} downtimePct={availability.downtime_percentage} onSvgRef={svgRef} compactMode={compact} width={chartWidth} events={availability.events || availability.items || []} />
                 </Box>
-                <Stack spacing={0.5} sx={{ position:'absolute', bottom:8, right:8, background: theme.palette.mode==='dark' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.85)', border:'1px solid', borderColor:'divider', px:1, py:0.5, borderRadius:1, fontSize:12 }}>
-                  <Typography variant="caption">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
-                  <Typography variant="caption">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
-                </Stack>
               </Box>
             ) : <Typography variant="body2">No availability data.</Typography>}
           </Stack>
         </CardContent>
       </Card>
 
+      {/* Actions card retained (could hold future actions) - removed inline Back button now replaced by floating FAB */}
       <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
         <CardContent>
           <Stack spacing={2}>
             <Typography variant="h6">Actions</Typography>
-            <Button variant="outlined" size="small" onClick={() => window.history.back()}>Back</Button>
+            <Typography variant="body2" color="text.secondary">(More actions coming soon)</Typography>
           </Stack>
         </CardContent>
       </Card>
