@@ -5,6 +5,7 @@ import (
     "monitoring-server/auth"
     "monitoring-server/middlewares"
     "monitoring-server/handler"
+    "time"
 )
 
 // Unified route registration (cleaned duplicate definitions)
@@ -42,8 +43,6 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             //  to avoid breaking older frontends; remove after migration.
             // -----------------------------------------------------------------
             usersGroup := protected.Group("users")
-            usersGroup.Get("/", handler.GetUsers)
-            usersGroup.Post("/", handler.CreateUser)
 
             // User Groups (organizational grouping of users)
             usersGroup.Get("/groups", handler.GetGroups)
@@ -52,6 +51,10 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             usersGroup.Put("/groups/:id", handler.UpdateGroup)
             usersGroup.Delete("/groups/:id", handler.DeleteGroup)
 
+            // LEGACY ROLE ASSIGNMENT ENDPOINTS (to be removed after frontend migration)
+            usersGroup.Get("/", handler.GetUsers)
+            usersGroup.Post("/", handler.CreateUser)
+
             // -----------------------------------------------------------------
             //  Admin Domain (/admin) - centralized RBAC (roles, permissions)
             // -----------------------------------------------------------------
@@ -59,15 +62,7 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
                 adminUsersGroup := protected.Group("admin/users")
                 // Admin Users (preferred new path for user CRUD & role assignment)
                 // Support both '/api/v1.0/admin/users' and '/api/v1.0/admin/users/'
-                // LIST & CREATE
-                adminUsersGroup.Get("", handler.GetUsers)
-                adminUsersGroup.Get("/", handler.GetUsers)
-                adminUsersGroup.Post("", handler.CreateUser)
-                adminUsersGroup.Post("/", handler.CreateUser)
-                // DETAIL CRUD
-                adminUsersGroup.Get("/:id", handler.GetUserByID)
-                adminUsersGroup.Put("/:id", handler.UpdateUser)
-                adminUsersGroup.Delete("/:id", handler.DeleteUser)
+
                 // ROLE ASSIGNMENT ALIAS (mirrors /admin/roles/users)
                 adminUsersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
                 adminUsersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
@@ -75,50 +70,66 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
                 // GROUP ASSIGNMENTS (user <-> groups) under admin users namespace
                 adminUsersGroup.Get("/groups/users", handler.GetUserGroupAssignments)
                 adminUsersGroup.Post("/groups/users", handler.AssignGroupsToUserAPI)
+                
+                // DETAIL CRUD
+                adminUsersGroup.Get("/:id", handler.GetUserByID)
+                adminUsersGroup.Put("/:id", handler.UpdateUser)
+                adminUsersGroup.Delete("/:id", handler.DeleteUser)
+
+                // LIST & CREATE
+                adminUsersGroup.Get("", handler.GetUsers)
+                adminUsersGroup.Get("/", handler.GetUsers)
+                adminUsersGroup.Post("", handler.CreateUser)
+                adminUsersGroup.Post("/", handler.CreateUser)
 
             // Centralized admin group for all RBAC management
         // Group: /api/v1.0/admin -> Centralized RBAC management
         adminGroup := protected.Group("admin")
 
-            // Permissions CRUD (/admin/permissions)
-            adminGroup.Get("/permissions", handler.GetPermissions)
-            adminGroup.Post("/permissions", handler.CreatePermission)
+            // Permissions CRUD (/admin/permissions) - ordered longest path -> shortest
             adminGroup.Get("/permissions/:id", handler.GetPermission)
             adminGroup.Put("/permissions/:id", handler.UpdatePermission)
             adminGroup.Delete("/permissions/:id", handler.DeletePermission)
+            adminGroup.Post("/permissions", handler.CreatePermission)
+            adminGroup.Get("/permissions", handler.GetPermissions)
 
-            // Roles CRUD (/admin/roles) plus aliases with trailing slash
-            // Role Bindings (user <-> role mapping) & listing (add slash aliases for robustness)
-            adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
-            adminGroup.Get("/roles/bindings/", handler.GetRoleBindings)
-            adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
-            adminGroup.Post("/roles/bindings/", handler.CreateRoleBinding)
-            adminGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
+            // Role Bindings (user <-> role mapping) & listing (longest -> shortest)
             adminGroup.Get("/roles/bindings/:id/", handler.GetRoleBindingByID)
-            adminGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
+            adminGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
             adminGroup.Put("/roles/bindings/:id/", handler.UpdateRoleBinding)
-            adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+            adminGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
             adminGroup.Delete("/roles/bindings/:id/", handler.DeleteRoleBinding)
+            adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+            adminGroup.Post("/roles/bindings/", handler.CreateRoleBinding)
+            adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+            adminGroup.Get("/roles/bindings/", handler.GetRoleBindings)
+            adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
 
-            // User-role assignments (simple assign/list) alias under admin
-            adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
-            adminGroup.Get("/roles/users/", handler.GetUserRoleAssignments)
-            adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+            // User-role assignments (simple assign/list) alias under admin (longest -> shortest)
             adminGroup.Post("/roles/users/", handler.AssignRoleToUserAPI)
+            adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+            adminGroup.Get("/roles/users/", handler.GetUserRoleAssignments)
+            adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
 
-            // Dynamic role operations placed AFTER static subpaths to prevent shadowing
-            adminGroup.Get("/roles/:id", handler.GetRoleByID)
+            // Role-Permission linking semantics (longest -> shorter)
+            adminGroup.Post("/roles/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
+            adminGroup.Delete("/roles/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
+            adminGroup.Get("/roles/:id/permissions", handler.GetRolePermissions)
+
+            // Dynamic role operations (longest -> shortest; health kept above final base paths)
             adminGroup.Get("/roles/:id/", handler.GetRoleByID)
-            adminGroup.Put("/roles/:id", handler.UpdateRole)
+            adminGroup.Get("/roles/:id", handler.GetRoleByID)
             adminGroup.Put("/roles/:id/", handler.UpdateRole)
-            adminGroup.Delete("/roles/:id", handler.DeleteRole)
+            adminGroup.Put("/roles/:id", handler.UpdateRole)
             adminGroup.Delete("/roles/:id/", handler.DeleteRole)
+            adminGroup.Delete("/roles/:id", handler.DeleteRole)
 
-            // User-role assignments (simple assign/list) alias under admin
-            adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
-            adminGroup.Get("/roles/users/", handler.GetUserRoleAssignments)
-            adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
-            adminGroup.Post("/roles/users/", handler.AssignRoleToUserAPI)
+            // Roles CRUD base & health (longest -> shortest)
+            adminGroup.Get("/roles/_health", func(c *fiber.Ctx) error { return c.JSON(fiber.Map{"status":"ok","ts": time.Now().Unix()}) })
+            adminGroup.Post("/roles/", handler.CreateRole)
+            adminGroup.Post("/roles", handler.CreateRole)
+            adminGroup.Get("/roles/", handler.GetRoles)
+            adminGroup.Get("/roles", handler.GetRoles)
 
             // Remove direct CRUD under /admin/users/roles to enforce single canonical path (/admin/roles)
 
@@ -126,10 +137,8 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             adminGroup.Get("/groups/users", handler.GetUserGroupAssignments)
             adminGroup.Post("/groups/users", handler.AssignGroupsToUserAPI)
 
-            // Role-Permission linking semantics
-            adminGroup.Get("/roles/:id/permissions", handler.GetRolePermissions)
-            adminGroup.Post("/roles/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
-            adminGroup.Delete("/roles/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
+            // (Role-Permission & Roles CRUD moved above for ordered grouping)
+
 
             // Provide groups listing for admin menus
             adminGroup.Get("/groups/list", handler.GetGroups)
