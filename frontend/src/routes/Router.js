@@ -143,6 +143,7 @@ const Router = [
       { path: '/notifications/contactgroups', element: <ProtectedRoute><ContactGroups /></ProtectedRoute> },
       { path: '/notifications/list', element: <ProtectedRoute><NotificationsList /></ProtectedRoute> },
       { path: '/notifications/acknowledged', element: <ProtectedRoute><AcknowledgedList /></ProtectedRoute> },
+      { path: '/monitoring/alerts/rules', element: <ProtectedRoute><AlertRulesPage /></ProtectedRoute> },
 
   // ------------------------------------------------------------------
   // INFRASTRUCTURE (alias /infrastructure/* sebagai jalur alternatif
