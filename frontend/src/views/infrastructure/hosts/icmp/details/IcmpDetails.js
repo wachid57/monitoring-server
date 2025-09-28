@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, Switch, FormControlLabel, Tooltip, IconButton } from '@mui/material';
+import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button, Switch, FormControlLabel, Tooltip, IconButton, Fab } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DownloadIcon from '@mui/icons-material/Download';
 import ImageIcon from '@mui/icons-material/Image';
 import { alpha, useTheme } from '@mui/material/styles';
@@ -215,6 +216,9 @@ const IcmpDetails = () => {
 
   return (
     <PageContainer title="ICMP Details" description="Host ICMP service details">
+      <Fab size="medium" color="primary" onClick={()=> window.history.back()} sx={{ position:'fixed', top: 92, left: 220, zIndex: (t)=> t.zIndex.drawer + 2 }}>
+        <ArrowBackIcon />
+      </Fab>
       <Breadcrumb title="ICMP Details" items={BCrumb} />
       <Box mt={2} />
       <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
@@ -284,11 +288,12 @@ const IcmpDetails = () => {
         </CardContent>
       </Card>
 
+      {/* Actions card retained (could hold future actions) - removed inline Back button now replaced by floating FAB */}
       <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
         <CardContent>
           <Stack spacing={2}>
             <Typography variant="h6">Actions</Typography>
-            <Button variant="outlined" size="small" onClick={() => window.history.back()}>Back</Button>
+            <Typography variant="body2" color="text.secondary">(More actions coming soon)</Typography>
           </Stack>
         </CardContent>
       </Card>
