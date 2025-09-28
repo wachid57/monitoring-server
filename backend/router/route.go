@@ -30,86 +30,72 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         // Dashboard endpoint
         protected.Get("/dashboard", handler.DashboardHandler)
 
-        // CRUD endpoints for users, roles, groups, role bindings
-        usersGroup := protected.Group("users")
+    // CRUD endpoints for users (moved roles & permissions under /admin)
+    usersGroup := protected.Group("users")
     usersGroup.Get("/", handler.GetUsers)
     usersGroup.Post("/", handler.CreateUser)
 
-    // CRUD Role (order matters: static paths before ":id" to avoid shadowing)
-    usersGroup.Get("/roles", handler.GetRoles)
-
-    // User-role assignments (list and assign) - must come before /roles/:id
+    // User-role assignment APIs kept for backward compatibility? (deprecated)
+    // NOTE: Prefer /api/v1.0/admin/roles/users & /api/v1.0/admin/roles/bindings going forward.
+    // Marked as deprecated; can be removed after frontend migration.
     usersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
     usersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
-
-    // Role bindings accessible under users/roles/bindings - before /roles/:id
     usersGroup.Get("/roles/bindings", handler.GetRoleBindings)
     usersGroup.Post("/roles/bindings", handler.CreateRoleBinding)
     usersGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
     usersGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
     usersGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
 
-    // Parametric role routes after static subpaths
-    usersGroup.Post("/roles", handler.CreateRole)
-    usersGroup.Get("/roles/:id", handler.GetRoleByID)
-    usersGroup.Put("/roles/:id", handler.UpdateRole)
-    usersGroup.Delete("/roles/:id", handler.DeleteRole)
+    // CRUD Group (user grouping not admin-specific)
+    usersGroup.Get("/groups", handler.GetGroups)
+    usersGroup.Post("/groups", handler.CreateGroup)
+    usersGroup.Get("/groups/:id", handler.GetGroupByID)
+    usersGroup.Put("/groups/:id", handler.UpdateGroup)
+    usersGroup.Delete("/groups/:id", handler.DeleteGroup)
 
-        // Role-permission management accessible under users/roles/permission
-        usersGroup.Get("/roles/permission/:id", handler.GetRolePermissions)
-        usersGroup.Post("/roles/permission/:roleId/:permissionId", handler.AssignPermissionToRole)
-        usersGroup.Delete("/roles/permission/:roleId/:permissionId", handler.RemovePermissionFromRole)
+    // Admin group: all role & permission management centralized here
+    adminGroup := protected.Group("admin")
 
-        // CRUD Group
-        usersGroup.Get("/groups", handler.GetGroups)
-        usersGroup.Post("/groups", handler.CreateGroup)
-        usersGroup.Get("/groups/:id", handler.GetGroupByID)
-        usersGroup.Put("/groups/:id", handler.UpdateGroup)
-        usersGroup.Delete("/groups/:id", handler.DeleteGroup)
+    // Permissions under /admin/permissions
+    adminGroup.Get("/permissions", handler.GetPermissions)
+    adminGroup.Post("/permissions", handler.CreatePermission)
+    adminGroup.Get("/permissions/:id", handler.GetPermission)
+    adminGroup.Put("/permissions/:id", handler.UpdatePermission)
+    adminGroup.Delete("/permissions/:id", handler.DeletePermission)
 
-        // CRUD Permissions
-        permissionsGroup := protected.Group("permissions")
-        permissionsGroup.Get("/", handler.GetPermissions)
-        permissionsGroup.Post("/", handler.CreatePermission)
-        permissionsGroup.Get("/:id", handler.GetPermission)
-        permissionsGroup.Put("/:id", handler.UpdatePermission)
-        permissionsGroup.Delete("/:id", handler.DeletePermission)
-
-        // Admin aliases for permissions (requested frontend paths)
-        adminGroup := protected.Group("admin")
-        adminGroup.Get("/permissions/list", handler.GetPermissions)
-        adminGroup.Get("/permissions/bindings", handler.GetPermissions)
-
-    // Admin aliases for roles and bindings (order matters)
+    // Roles under /admin/roles
     adminGroup.Get("/roles", handler.GetRoles)
-    // Bindings first to avoid /roles/:id capturing "bindings"
-    adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
-    adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
-    adminGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
-    adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
-    // Parametric role routes after
     adminGroup.Post("/roles", handler.CreateRole)
     adminGroup.Get("/roles/:id", handler.GetRoleByID)
     adminGroup.Put("/roles/:id", handler.UpdateRole)
     adminGroup.Delete("/roles/:id", handler.DeleteRole)
 
-        // Also expose permissions under users/permissions for symmetry
-        usersGroup.Get("/permissions", handler.GetPermissions)
-        usersGroup.Post("/permissions", handler.CreatePermission)
-        usersGroup.Get("/permissions/:id", handler.GetPermission)
-        usersGroup.Put("/permissions/:id", handler.UpdatePermission)
-        usersGroup.Delete("/permissions/:id", handler.DeletePermission)
+    // Role bindings (user-role direct bindings) under /admin/roles/bindings
+    adminGroup.Get("/roles/bindings", handler.GetRoleBindings)
+    adminGroup.Post("/roles/bindings", handler.CreateRoleBinding)
+    adminGroup.Get("/roles/bindings/:id", handler.GetRoleBindingByID)
+    adminGroup.Put("/roles/bindings/:id", handler.UpdateRoleBinding)
+    adminGroup.Delete("/roles/bindings/:id", handler.DeleteRoleBinding)
+
+    // User-role assignment listing (alias) under /admin/roles/users
+    adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
+    adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+
+    // Role-permission assignment under /admin/roles/:roleId/permissions/:permissionId
+    adminGroup.Get("/roles/:id/permissions", handler.GetRolePermissions)
+    adminGroup.Post("/roles/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
+    adminGroup.Delete("/roles/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
 
         // User specific routes (place after static subpaths to avoid shadowing)
         usersGroup.Get("/:id", handler.GetUserByID)
         usersGroup.Put("/:id", handler.UpdateUser)
         usersGroup.Delete("/:id", handler.DeleteUser)
 
-        // Role-Permission Management
-        rolesGroup := protected.Group("roles")
-        rolesGroup.Get("/:id/permissions", handler.GetRolePermissions)
-        rolesGroup.Post("/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
-        rolesGroup.Delete("/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
+    // Legacy role-permission management (deprecated) kept for compatibility
+    rolesGroup := protected.Group("roles")
+    rolesGroup.Get("/:id/permissions", handler.GetRolePermissions)
+    rolesGroup.Post("/:roleId/permissions/:permissionId", handler.AssignPermissionToRole)
+    rolesGroup.Delete("/:roleId/permissions/:permissionId", handler.RemovePermissionFromRole)
 
     // Host Group Bindings (static, must be registered before /hosts/groups/:id)
     hgb := protected.Group("hosts/groups/bindings")

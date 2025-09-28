@@ -13,7 +13,7 @@ import (
 // @Produce json
 // @Success 200 {array} model.Role
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles [get]
+// @Router /api/v1.0/admin/roles [get]
 func GetRoles(c *fiber.Ctx) error {
     var roles []model.Role
     // preload permissions so API returns role permissions too
@@ -34,7 +34,7 @@ func GetRoles(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles [post]
+// @Router /api/v1.0/admin/roles [post]
 func CreateRole(c *fiber.Ctx) error {
     var role model.Role
     if err := c.BodyParser(&role); err != nil {
@@ -54,7 +54,7 @@ func CreateRole(c *fiber.Ctx) error {
 // @Success 200 {object} model.Role
 // @Failure 404 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles/{id} [get]
+// @Router /api/v1.0/admin/roles/{id} [get]
 func GetRoleByID(c *fiber.Ctx) error {
     var role model.Role
     id := c.Params("id")
@@ -76,7 +76,7 @@ func GetRoleByID(c *fiber.Ctx) error {
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles/{id} [put]
+// @Router /api/v1.0/admin/roles/{id} [put]
 func UpdateRole(c *fiber.Ctx) error {
     var role model.Role
     id := c.Params("id")
@@ -99,7 +99,7 @@ func UpdateRole(c *fiber.Ctx) error {
 // @Success 204
 // @Failure 500 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles/{id} [delete]
+// @Router /api/v1.0/admin/roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
     id := c.Params("id")
     var role model.Role
@@ -122,7 +122,7 @@ func DeleteRole(c *fiber.Ctx) error {
 // @Param user_id query int false "User ID"
 // @Success 200 {array} map[string]interface{}
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles/users [get]
+// @Router /api/v1.0/admin/roles/users [get]
 func GetUserRoleAssignments(c *fiber.Ctx) error {
     userID := c.Query("user_id")
     var results []map[string]interface{}
@@ -169,7 +169,7 @@ func GetUserRoleAssignments(c *fiber.Ctx) error {
 // @Param body body map[string]interface{} true "{user_id, role_id?, role_name?}"
 // @Success 200 {object} map[string]string
 // @Security BearerAuth
-// @Router /api/v1.0/users/roles/users [post]
+// @Router /api/v1.0/admin/roles/users [post]
 func AssignRoleToUserAPI(c *fiber.Ctx) error {
     var req struct {
         UserID  uint   `json:"user_id"`
