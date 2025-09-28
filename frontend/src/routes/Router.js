@@ -21,12 +21,13 @@ const RollbaseCASL = Loadable(lazy(() => import('../views/pages/rollbaseCASL/Rol
 
 /* ============================= ADMIN ============================= */
 // Manajemen user, roles, permissions, admin groups
-const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
 const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/GroupsList')));
+const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
 const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
+const UserGroupsList = Loadable(lazy(() => import('../views/admin/users/groups/UserGroupsList')));
 
 /* ============================ MONITORING ========================= */
 // Monitoring host availability, metrics, ICMP, website, add host
@@ -107,6 +108,7 @@ const Router = [
       { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
       { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
       { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
+  { path: '/admin/users/groups/list', element: <ProtectedRoute><UserGroupsList /></ProtectedRoute> },
 
   // ------------------------------------------------------------------
   // MONITORING (hosts, availability, metrics, reports, notifications)

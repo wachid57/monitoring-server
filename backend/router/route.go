@@ -81,6 +81,10 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
                 adminUsersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
                 adminUsersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
 
+                // GROUP ASSIGNMENTS (user <-> groups) under admin users namespace
+                adminUsersGroup.Get("/groups/users", handler.GetUserGroupAssignments)
+                adminUsersGroup.Post("/groups/users", handler.AssignGroupsToUserAPI)
+
             // Centralized admin group for all RBAC management
         // Group: /api/v1.0/admin -> Centralized RBAC management
         adminGroup := protected.Group("admin")
@@ -109,6 +113,10 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             // User-role assignments (simple assign/list) alias under admin
             adminGroup.Get("/roles/users", handler.GetUserRoleAssignments)
             adminGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+
+            // User-group assignments (listing & replace semantics)
+            adminGroup.Get("/groups/users", handler.GetUserGroupAssignments)
+            adminGroup.Post("/groups/users", handler.AssignGroupsToUserAPI)
 
             // Role-Permission linking semantics
             adminGroup.Get("/roles/:id/permissions", handler.GetRolePermissions)
