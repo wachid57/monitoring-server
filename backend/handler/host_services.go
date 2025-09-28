@@ -7,7 +7,16 @@ import (
     "monitoring-server/model"
 )
 
-// GetHostServices aggregates a host and its related monitoring checks (ICMP + HTTP Curl) and unified host_services
+// GetHostServices godoc
+// @Summary Get aggregated services for host
+// @Description Returns host record plus unified host_services rows (auto rebuild if empty & source checks exist)
+// @Tags HostServices
+// @Param id path int true "Host ID"
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1.0/infrastructure/hosts/{id}/services [get]
 func GetHostServices(c *fiber.Ctx) error {
     id := c.Params("id")
     var host model.Host

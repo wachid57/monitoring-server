@@ -8,7 +8,13 @@ import (
 	"gorm.io/gorm"
 )
 
-// ListUserSettings returns all settings for the authenticated user
+// ListUserSettings godoc
+// @Summary List user settings (own)
+// @Tags UserSettings
+// @Produce json
+// @Success 200 {array} model.UserSetting
+// @Security BearerAuth
+// @Router /api/v1.0/account/setting/profiles/user-settings/ [get]
 func ListUserSettings(c *fiber.Ctx) error {
 	username := c.Locals("username")
 	if username == nil {
@@ -34,7 +40,16 @@ func ListUserSettings(c *fiber.Ctx) error {
 	return c.JSON(settings)
 }
 
-// UpsertUserSetting creates or updates a user setting by key for the authenticated user
+// UpsertUserSetting godoc
+// @Summary Upsert user setting (own)
+// @Description Create or update a user-scoped setting by key
+// @Tags UserSettings
+// @Accept json
+// @Produce json
+// @Param data body model.UserSetting true "User Setting"
+// @Success 200 {object} model.UserSetting
+// @Security BearerAuth
+// @Router /api/v1.0/account/setting/profiles/user-settings/ [post]
 func UpsertUserSetting(c *fiber.Ctx) error {
 	username := c.Locals("username")
 	if username == nil {
@@ -83,7 +98,13 @@ func UpsertUserSetting(c *fiber.Ctx) error {
 	return c.Status(201).JSON(payload)
 }
 
-// DeleteUserSetting deletes a setting by key for the authenticated user
+// DeleteUserSetting godoc
+// @Summary Delete user setting (own)
+// @Tags UserSettings
+// @Param key path string true "Setting Key"
+// @Success 204
+// @Security BearerAuth
+// @Router /api/v1.0/account/setting/profiles/user-settings/{key} [delete]
 func DeleteUserSetting(c *fiber.Ctx) error {
 	username := c.Locals("username")
 	if username == nil {

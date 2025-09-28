@@ -8,7 +8,16 @@ import (
 	"monitoring-server/model"
 )
 
-// RebuildHostServices rebuilds host_services rows for a given host id
+// RebuildHostServices godoc
+// @Summary Rebuild aggregated host services for a host
+// @Description Reconstruct rows in host_services from underlying check tables (ICMP, HTTP) for a host
+// @Tags HostServices
+// @Param id path int true "Host ID"
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1.0/infrastructure/hosts/{id}/services/rebuild [post]
 func RebuildHostServices(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var host model.Host
@@ -23,7 +32,16 @@ func RebuildHostServices(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"host_id": host.ID, "services_rebuilt": count})
 }
 
-// PingRefreshHostServices simulates status/latency refresh for services of a host
+// PingRefreshHostServices godoc
+// @Summary Simulate latency & status refresh for host services
+// @Description Demo-only endpoint: randomizes status + latency; records status change events
+// @Tags HostServices
+// @Param id path int true "Host ID"
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Failure 404 {object} map[string]string
+// @Security BearerAuth
+// @Router /api/v1.0/infrastructure/hosts/{id}/services/ping-refresh [post]
 func PingRefreshHostServices(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var host model.Host

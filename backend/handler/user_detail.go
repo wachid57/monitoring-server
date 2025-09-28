@@ -13,7 +13,14 @@ func getUserByUsername(username string) (model.User, error) {
     return u, err
 }
 
-// GetOwnUserDetail returns extended profile for authenticated user
+// GetOwnUserDetail godoc
+// @Summary Get own extended user detail
+// @Description Returns base user info merged with extended profile detail for authenticated user
+// @Tags UserProfile
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /api/v1.0/account/setting/profiles/user-profile/ [get]
 func GetOwnUserDetail(c *fiber.Ctx) error {
     username, _ := c.Locals("username").(string)
     if username == "" {
@@ -41,7 +48,16 @@ func GetOwnUserDetail(c *fiber.Ctx) error {
     })
 }
 
-// UpsertOwnUserDetail creates or updates profile detail for authenticated user
+// UpsertOwnUserDetail godoc
+// @Summary Upsert own extended user detail
+// @Description Creates or updates extended profile fields for authenticated user
+// @Tags UserProfile
+// @Accept json
+// @Produce json
+// @Param data body model.UserDetail true "User Detail"
+// @Success 200 {object} model.UserDetail
+// @Security BearerAuth
+// @Router /api/v1.0/account/setting/profiles/user-profile/ [post]
 func UpsertOwnUserDetail(c *fiber.Ctx) error {
     username, _ := c.Locals("username").(string)
     if username == "" {

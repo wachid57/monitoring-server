@@ -6,7 +6,13 @@ import (
     "monitoring-server/model"
 )
 
-// GetSystemSettings lists all system settings as an array
+// GetSystemSettings godoc
+// @Summary List system settings
+// @Tags SystemSettings
+// @Produce json
+// @Success 200 {array} model.SystemSetting
+// @Security BearerAuth
+// @Router /api/v1.0/system/settings/ [get]
 func GetSystemSettings(c *fiber.Ctx) error {
     var settings []model.SystemSetting
     if err := database.DB.Find(&settings).Error; err != nil {
@@ -15,7 +21,16 @@ func GetSystemSettings(c *fiber.Ctx) error {
     return c.JSON(settings)
 }
 
-// UpsertSystemSetting creates or updates a setting by key
+// UpsertSystemSetting godoc
+// @Summary Upsert system setting
+// @Description Create or update system setting by key (Native entries cannot be newly created by user)
+// @Tags SystemSettings
+// @Accept json
+// @Produce json
+// @Param data body model.SystemSetting true "System Setting"
+// @Success 200 {object} model.SystemSetting
+// @Security BearerAuth
+// @Router /api/v1.0/system/settings/ [post]
 func UpsertSystemSetting(c *fiber.Ctx) error {
     var payload model.SystemSetting
     if err := c.BodyParser(&payload); err != nil {
@@ -44,7 +59,13 @@ func UpsertSystemSetting(c *fiber.Ctx) error {
     return c.Status(201).JSON(payload)
 }
 
-// DeleteSystemSetting deletes by key param
+// DeleteSystemSetting godoc
+// @Summary Delete system setting
+// @Tags SystemSettings
+// @Param key path string true "Setting Key"
+// @Success 204
+// @Security BearerAuth
+// @Router /api/v1.0/system/settings/{key} [delete]
 func DeleteSystemSetting(c *fiber.Ctx) error {
     key := c.Params("key")
     if key == "" {

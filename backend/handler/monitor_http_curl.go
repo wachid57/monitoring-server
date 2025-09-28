@@ -7,7 +7,13 @@ import (
 	"monitoring-server/model"
 )
 
-// ListHTTPCurlChecks returns all HTTP curl checks
+// ListHTTPCurlChecks godoc
+// @Summary List HTTP curl checks
+// @Tags Monitoring-Checks
+// @Produce json
+// @Success 200 {array} model.HTTPCurlCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/http-curl/ [get]
 func ListHTTPCurlChecks(c *fiber.Ctx) error {
 	var checks []model.HTTPCurlCheck
 	if err := database.DB.Find(&checks).Error; err != nil {
@@ -16,7 +22,15 @@ func ListHTTPCurlChecks(c *fiber.Ctx) error {
 	return c.JSON(checks)
 }
 
-// CreateHTTPCurlCheck creates a new HTTP curl check
+// CreateHTTPCurlCheck godoc
+// @Summary Create HTTP curl check
+// @Tags Monitoring-Checks
+// @Accept json
+// @Produce json
+// @Param data body model.HTTPCurlCheck true "HTTP Curl Check"
+// @Success 201 {object} model.HTTPCurlCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/http-curl/ [post]
 func CreateHTTPCurlCheck(c *fiber.Ctx) error {
 	var payload model.HTTPCurlCheck
 	if err := c.BodyParser(&payload); err != nil {
@@ -33,7 +47,14 @@ func CreateHTTPCurlCheck(c *fiber.Ctx) error {
 	return c.Status(201).JSON(payload)
 }
 
-// GetHTTPCurlCheck retrieves a check by ID
+// GetHTTPCurlCheck godoc
+// @Summary Get HTTP curl check
+// @Tags Monitoring-Checks
+// @Produce json
+// @Param id path int true "ID"
+// @Success 200 {object} model.HTTPCurlCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/http-curl/{id} [get]
 func GetHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var check model.HTTPCurlCheck
@@ -43,7 +64,16 @@ func GetHTTPCurlCheck(c *fiber.Ctx) error {
 	return c.JSON(check)
 }
 
-// UpdateHTTPCurlCheck updates a check
+// UpdateHTTPCurlCheck godoc
+// @Summary Update HTTP curl check
+// @Tags Monitoring-Checks
+// @Accept json
+// @Produce json
+// @Param id path int true "ID"
+// @Param data body model.HTTPCurlCheck true "HTTP Curl Check"
+// @Success 200 {object} model.HTTPCurlCheck
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/http-curl/{id} [put]
 func UpdateHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var existing model.HTTPCurlCheck
@@ -71,7 +101,13 @@ func UpdateHTTPCurlCheck(c *fiber.Ctx) error {
 	return c.JSON(existing)
 }
 
-// DeleteHTTPCurlCheck deletes a check
+// DeleteHTTPCurlCheck godoc
+// @Summary Delete HTTP curl check
+// @Tags Monitoring-Checks
+// @Param id path int true "ID"
+// @Success 204
+// @Security BearerAuth
+// @Router /api/v1.0/monitoring/checker/http-curl/{id} [delete]
 func DeleteHTTPCurlCheck(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var existing model.HTTPCurlCheck

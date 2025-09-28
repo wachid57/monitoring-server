@@ -6,7 +6,14 @@ import (
     "monitoring-server/model"
 )
 
-// ListAllHostServices returns all host services across hosts (for service group binding selection)
+// ListAllHostServices godoc
+// @Summary List all host services
+// @Description Returns all host_services across all hosts (used for service group bindings selection)
+// @Tags HostServices
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Security BearerAuth
+// @Router /api/v1.0/infrastructure/services/host-services [get]
 func ListAllHostServices(c *fiber.Ctx) error {
     var services []model.HostService
     if err := database.DB.Find(&services).Error; err != nil {
