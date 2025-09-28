@@ -363,6 +363,8 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
 
             // Aggregated host availability (ICMP + HTTP status history)
             protected.Get("/monitoring/hosts/availability/", handler.GetHostsAvailability)
+            // Infrastructure alias (frontend expects /infrastructure/hosts/availability/)
+            protected.Get("/infrastructure/hosts/availability/", handler.GetHostsAvailability)
         }
 
     // ---------------------------------------------------------------------

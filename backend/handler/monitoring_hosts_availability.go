@@ -6,6 +6,7 @@ import (
     "github.com/gofiber/fiber/v2"
     "monitoring-server/database"
     "monitoring-server/model"
+    "strconv"
 )
 
 type AvailabilityItem struct {
@@ -70,11 +71,21 @@ func GetHostsAvailability(c *fiber.Ctx) error {
     if totalSeconds <= 0 { totalSeconds = 1 }
 
     serviceTypeFilter := c.Query("service_type", "")
+    hostIDStr := c.Query("host_id", "")
+    var hostID uint64
+    var hostIDFilter bool
+    if hostIDStr != "" {
+        if v, err := strconv.ParseUint(hostIDStr, 10, 64); err == nil {
+            hostID = v
+            hostIDFilter = true
+        }
+    }
 
     // Load baseline events (last before from) + in-range events
     var events []model.ServiceStatusEvent
     q := database.DB
     if serviceTypeFilter != "" { q = q.Where("service_type = ?", serviceTypeFilter) }
+    if hostIDFilter { q = q.Where("host_id = ?", hostID) }
     // Fetch events that affect range
     if err := q.Where("occurred_at <= ?", toTime).Order("host_id, service_type, service_id, occurred_at").Find(&events).Error; err != nil {
         return c.Status(500).JSON(fiber.Map{"error": err.Error()})
@@ -84,6 +95,7 @@ func GetHostsAvailability(c *fiber.Ctx) error {
     var hostServices []model.HostService
     hsQ := database.DB
     if serviceTypeFilter != "" { hsQ = hsQ.Where("service_type = ?", serviceTypeFilter) }
+    if hostIDFilter { hsQ = hsQ.Where("host_id = ?", hostID) }
     hsQ.Find(&hostServices)
     labelMap := make(map[string]model.HostService)
     for _, hs := range hostServices {
