@@ -19,38 +19,54 @@ const EcommerceDash = Loadable(lazy(() => import('../views/dashboard/Ecommerce')
 /* Content / Pages */
 const RollbaseCASL = Loadable(lazy(() => import('../views/pages/rollbaseCASL/RollbaseCASL')));
 
-/* Admin & Infra */
+/* ============================= ADMIN ============================= */
+// Manajemen user, roles, permissions, admin groups
 const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
-const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
-const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
-const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
+const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGroups')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
-const HostLists = Loadable(lazy(() => import('../views/infrastructure/hosts/HostLists')));
+const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
+const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));
+const RolesList = Loadable(lazy(() => import('../views/admin/roles/RolesList')));
+
+/* ============================ MONITORING ========================= */
+// Monitoring host availability, metrics, ICMP, website, add host
 const AddHost = Loadable(lazy(() => import('../views/monitoring/hosts/add/AddHost')));
-const HostDetails = Loadable(lazy(() => import('../views/infrastructure/hosts/details/HostDetails')));
-const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
 const HostIcmpList = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/HostIcmpList')));
+const HostsWebsiteList = Loadable(lazy(() => import('../views/monitoring/hosts/website/HostsWebsiteList')));
 const ICMPAvailabilityPage = Loadable(lazy(() => import('../views/monitoring/availability/icmp/ICMPAvailabilityPage')));
-const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
-const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
-const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
-const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroups')));
-const ServicesGroupsBinding = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroupsBinding')));
-const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
-const ManualReports = Loadable(lazy(() => import('../views/reports/manual/ManualReports')));
-const AutomaticReports = Loadable(lazy(() => import('../views/reports/automatic/AutomaticReports')));
 const MetricsIndex = Loadable(lazy(() => import('../views/monitoring/metrics/MetricsIndex')));
 const CPUMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/CPUMetricsList')));
 const MemoryMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/MemoryMetricsList')));
 const DiskMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/DiskMetricsList')));
+
+/* ========================== INFRASTRUCTURE ======================= */
+// Infrastruktur (hosts, groups, service groups - alias jalur infra)
+const HostLists = Loadable(lazy(() => import('../views/infrastructure/hosts/HostLists')));
+const HostDetails = Loadable(lazy(() => import('../views/infrastructure/hosts/details/HostDetails')));
+const AddHostsGroup = Loadable(lazy(() => import('../views/infrastruktur/groups/add/AddHostGroup')));
+const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostsGroupsLists')));
+const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
+const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroups')));
+const ServicesGroupsBinding = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroupsBinding')));
+
+/* ============================ REPORTS ============================ */
+// Laporan manual, otomatis, ketersediaan host
+const AutomaticReports = Loadable(lazy(() => import('../views/reports/automatic/AutomaticReports')));
+const HostsAvailabilityReport = Loadable(lazy(() => import('../views/reports/hosts/availability/Lists')));
+const ManualReports = Loadable(lazy(() => import('../views/reports/manual/ManualReports')));
+
+/* ========================== NOTIFICATIONS ======================== */
+// Contact groups, daftar notifikasi, acknowledged (alert handling)
+const AcknowledgedList = Loadable(lazy(() => import('../views/notifications/AcknowledgedList')));
 const ContactGroups = Loadable(lazy(() => import('../views/notifications/ContactGroups')));
 const NotificationsList = Loadable(lazy(() => import('../views/notifications/NotificationsList')));
-const AcknowledgedList = Loadable(lazy(() => import('../views/notifications/AcknowledgedList')));
-const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGroups')));
-const ProfileSettings = Loadable(lazy(() => import('../views/settings/ProfileSettings')));
-const SystemSettings = Loadable(lazy(() => import('../views/settings/SystemSettings')));
+
+/* ====================== SETTINGS & ACCOUNT ======================= */
+// Pengaturan profil, sistem, user settings
 const AccountUserProfileSettings = Loadable(lazy(() => import('../views/account/setting/profiles/UserProfile')));
 const AccountUserSettings = Loadable(lazy(() => import('../views/account/setting/profiles/UserSettings')));
+const ProfileSettings = Loadable(lazy(() => import('../views/settings/ProfileSettings')));
+const SystemSettings = Loadable(lazy(() => import('../views/settings/SystemSettings')));
 
 /* Auth essentials (remain here for BlankLayout only) */
 const Login = Loadable(lazy(() => import('../views/authentication/auth/Login')));
@@ -58,34 +74,50 @@ const Login2 = Loadable(lazy(() => import('../views/authentication/auth2/Login2'
 const Register = Loadable(lazy(() => import('../views/authentication/registration')));
 const Error = Loadable(lazy(() => import('../views/authentication/Error')));
 
+// Router utama aplikasi. Setiap blok route dikelompokkan (subgroup) dengan komentar
+// agar mudah dipelihara & dipahami struktur navigasinya.
 const Router = [
   {
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', element: <Navigate to='/dashboards/modern' /> },
+  // ------------------------------------------------------------------
+  // REDIRECT ROOT
+  // Arahkan '/' ke dashboard utama (modern)
+  // ------------------------------------------------------------------
+  { path: '/', element: <Navigate to='/dashboards/modern' /> },
 
-      // Dashboards
+  // ------------------------------------------------------------------
+  // DASHBOARDS (overview ringkas sistem)
+  // ------------------------------------------------------------------
       { path: '/dashboards/modern', exact: true, element: <ProtectedRoute><ModernDash /></ProtectedRoute> },
       { path: '/dashboards/ecommerce', exact: true, element: <ProtectedRoute><EcommerceDash /></ProtectedRoute> },
 
-      // Apps (extracted)
+  // ------------------------------------------------------------------
+  // APPS (fitur modular tambahan - diinject via protectedAppsRoutes)
+  // ------------------------------------------------------------------
       ...protectedAppsRoutes,
 
-      // Administration
+  // ------------------------------------------------------------------
+  // ADMINISTRATION (manajemen user, roles, permissions)
+  // Prefix UI: /admin/*
+  // ------------------------------------------------------------------
       { path: '/admin/users/list', element: <ProtectedRoute><ListUsers /></ProtectedRoute> },
       { path: '/admin/roles/list', element: <ProtectedRoute><RolesList /></ProtectedRoute> },
       { path: '/admin/roles/bindings', element: <ProtectedRoute><RolesBindings /></ProtectedRoute> },
       { path: '/admin/permission/lists', element: <ProtectedRoute><PermissionList /></ProtectedRoute> },
       { path: '/admin/permission/bindings', element: <ProtectedRoute><PermissionBindings /></ProtectedRoute> },
 
-      // Monitoring / Hosts & Metrics / Reports / Notifications
+  // ------------------------------------------------------------------
+  // MONITORING (hosts, availability, metrics, reports, notifications)
+  // Prefix UI: /monitoring/* & /reports/* & /notifications/*
+  // ------------------------------------------------------------------
       { path: '/monitoring/hosts', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
       { path: '/monitoring/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
       { path: '/monitoring/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
       { path: '/monitoring/hosts/icmp', element: <ProtectedRoute><HostIcmpList /></ProtectedRoute> },
       { path: '/monitoring/website/lists', element: <ProtectedRoute><HostsWebsiteList /></ProtectedRoute> },
-  { path: '/monitoring/availability/icmp', element: <ProtectedRoute><ICMPAvailabilityPage /></ProtectedRoute> },
+      { path: '/monitoring/availability/icmp', element: <ProtectedRoute><ICMPAvailabilityPage /></ProtectedRoute> },
       { path: '/monitoring/metrics', element: <ProtectedRoute><MetricsIndex /></ProtectedRoute> },
       { path: '/monitoring/metrics/cpu', element: <ProtectedRoute><CPUMetricsList /></ProtectedRoute> },
       { path: '/monitoring/metrics/memory', element: <ProtectedRoute><MemoryMetricsList /></ProtectedRoute> },
@@ -97,7 +129,10 @@ const Router = [
       { path: '/notifications/list', element: <ProtectedRoute><NotificationsList /></ProtectedRoute> },
       { path: '/notifications/acknowledged', element: <ProtectedRoute><AcknowledgedList /></ProtectedRoute> },
 
-      // Infrastructure (alternate + groups)
+  // ------------------------------------------------------------------
+  // INFRASTRUCTURE (alias /infrastructure/* sebagai jalur alternatif
+  // untuk resource yang sama dengan monitoring / hosts / groups)
+  // ------------------------------------------------------------------
       { path: '/infrastructure/hosts/list', element: <ProtectedRoute><HostLists /></ProtectedRoute> },
       { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
       { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
@@ -113,7 +148,9 @@ const Router = [
       { path: '/infrastructure/groups/services/lists', element: <ProtectedRoute><ServicesGroupsLists /></ProtectedRoute> },
       { path: '/infrastructure/groups/services/bindings', element: <ProtectedRoute><ServicesGroupsBinding /></ProtectedRoute> },
 
-      // Settings & Authorization demos
+  // ------------------------------------------------------------------
+  // SETTINGS & ACCOUNT MANAGEMENT
+  // ------------------------------------------------------------------
       { path: '/settings/profile', element: <ProtectedRoute><ProfileSettings /></ProtectedRoute> },
       { path: '/settings/system', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
       { path: '/system/settings', element: <ProtectedRoute><SystemSettings /></ProtectedRoute> },
@@ -121,13 +158,19 @@ const Router = [
       { path: '/account/setting/profiles/user-settings', element: <ProtectedRoute><AccountUserSettings /></ProtectedRoute> },
       { path: '/pages/casl', element: <ProtectedRoute><RollbaseCASL /></ProtectedRoute> },
 
-      // Public & marketing (still behind auth layout)
+  // ------------------------------------------------------------------
+  // PUBLIC / MARKETING (dibungkus ProtectedLayout - bisa dipisah nanti)
+  // ------------------------------------------------------------------
       ...protectedWrappedPublicRoutes,
 
-      // Demo showcase (forms/tables/etc.)
+  // ------------------------------------------------------------------
+  // DEMO SHOWCASE COMPONENTS
+  // ------------------------------------------------------------------
       ...protectedDemoRoutes,
 
-      // Fallback
+  // ------------------------------------------------------------------
+  // FALLBACK / 404 INTERNAL (redirect ke /auth/404)
+  // ------------------------------------------------------------------
       { path: '*', element: <Navigate to='/auth/404' /> },
     ],
   },
@@ -135,6 +178,9 @@ const Router = [
     path: '/',
     element: <BlankLayout />,
     children: [
+  // ------------------------------------------------------------------
+  // AUTH & ERROR PAGES (BlankLayout tanpa navigasi utama)
+  // ------------------------------------------------------------------
       { path: '/auth/404', element: <Error /> },
       { path: '/auth/login', element: <Login /> },
       { path: '/auth/login2', element: <Login2 /> },

@@ -65,6 +65,24 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             //  Admin Domain (/admin) - centralized RBAC (roles, permissions)
             // -----------------------------------------------------------------
         // Group: /api/v1.0/admin -> Centralized RBAC (roles, permissions, bindings)
+                adminUsersGroup := protected.Group("admin/users")
+                // Admin Users (preferred new path for user CRUD & role assignment)
+                // Support both '/api/v1.0/admin/users' and '/api/v1.0/admin/users/'
+                // LIST & CREATE
+                adminUsersGroup.Get("", handler.GetUsers)
+                adminUsersGroup.Get("/", handler.GetUsers)
+                adminUsersGroup.Post("", handler.CreateUser)
+                adminUsersGroup.Post("/", handler.CreateUser)
+                // DETAIL CRUD
+                adminUsersGroup.Get("/:id", handler.GetUserByID)
+                adminUsersGroup.Put("/:id", handler.UpdateUser)
+                adminUsersGroup.Delete("/:id", handler.DeleteUser)
+                // ROLE ASSIGNMENT ALIAS (mirrors /admin/roles/users)
+                adminUsersGroup.Get("/roles/users", handler.GetUserRoleAssignments)
+                adminUsersGroup.Post("/roles/users", handler.AssignRoleToUserAPI)
+
+            // Centralized admin group for all RBAC management
+        // Group: /api/v1.0/admin -> Centralized RBAC management
         adminGroup := protected.Group("admin")
 
             // Permissions CRUD (/admin/permissions)
