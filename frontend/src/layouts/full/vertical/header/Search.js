@@ -26,16 +26,10 @@ const Search = () => {
   };
 
   const filterRoutes = (rotr, cSearch) => {
-    if (!Array.isArray(rotr) || !cSearch) return rotr || [];
-    const needle = cSearch.toLocaleLowerCase();
-    if (rotr.length > 1) {
-      return rotr.filter((t) => {
-        const href = (t && t.href) ? String(t.href) : '';
-        const title = (t && t.title) ? String(t.title) : '';
-        if (!title && !href) return false;
-        return href.toLocaleLowerCase().includes(needle) || title.toLocaleLowerCase().includes(needle);
-      });
-    }
+    if (rotr.length > 1)
+      return rotr.filter((t) =>
+        t.title ? t.href.toLocaleLowerCase().includes(cSearch.toLocaleLowerCase()) : '',
+      );
     return rotr;
   };
   const searchData = filterRoutes(Menuitems, search);

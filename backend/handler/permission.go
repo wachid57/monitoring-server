@@ -13,7 +13,7 @@ import (
 // @Produce json
 // @Success 200 {array} model.Permission
 // @Security BearerAuth
-// @Router /api/v1.0/admin/permissions [get]
+// @Router /api/v1.0/permissions/ [get]
 func GetPermissions(c *fiber.Ctx) error {
 	var perms []model.Permission
 	if err := database.DB.Find(&perms).Error; err != nil {
@@ -30,7 +30,7 @@ func GetPermissions(c *fiber.Ctx) error {
 // @Param data body model.Permission true "Permission"
 // @Success 201 {object} model.Permission
 // @Security BearerAuth
-// @Router /api/v1.0/admin/permissions [post]
+// @Router /api/v1.0/permissions/ [post]
 func CreatePermission(c *fiber.Ctx) error {
 	p := new(model.Permission)
 	if err := c.BodyParser(p); err != nil {
@@ -49,7 +49,7 @@ func CreatePermission(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Success 200 {object} model.Permission
 // @Security BearerAuth
-// @Router /api/v1.0/admin/permissions/{id} [get]
+// @Router /api/v1.0/permissions/{id} [get]
 func GetPermission(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	var p model.Permission
@@ -68,7 +68,7 @@ func GetPermission(c *fiber.Ctx) error {
 // @Param data body model.Permission true "Permission"
 // @Success 200 {object} model.Permission
 // @Security BearerAuth
-// @Router /api/v1.0/admin/permissions/{id} [put]
+// @Router /api/v1.0/permissions/{id} [put]
 func UpdatePermission(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	var p model.Permission
@@ -90,7 +90,7 @@ func UpdatePermission(c *fiber.Ctx) error {
 // @Param id path int true "ID"
 // @Success 204
 // @Security BearerAuth
-// @Router /api/v1.0/admin/permissions/{id} [delete]
+// @Router /api/v1.0/permissions/{id} [delete]
 func DeletePermission(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	if err := database.DB.Delete(&model.Permission{}, id).Error; err != nil {

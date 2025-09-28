@@ -78,13 +78,13 @@ const Menuitems = [
    id: uniqueId(),
     title: 'Availability',
     icon: IconChartHistogram,
+    href: '/monitoring/metrics',
     children: [
       {
         id: uniqueId(),
         title: 'ICMP',
         icon: IconPoint,
-  // Updated path to new ICMP availability view
-  href: '/monitoring/availability/icmp',
+  href: '/monitoring/hosts/icmp',
       },
       {
         id: uniqueId(),
@@ -100,6 +100,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'System Metrics',
     icon: IconChartHistogram,
+    href: '/monitoring/metrics',
     children: [
       {
         id: uniqueId(),
@@ -130,6 +131,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Hosts',
     icon: IconApps,
+    href: '/infrastructure/hosts',
     children: [
       {
         id: uniqueId(),
@@ -143,6 +145,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Groups',
     icon: IconPackage,
+    href: '/infrastructure/hostgroups',
     children: [
       {
         id: uniqueId(),
@@ -205,6 +208,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Availability Reports',
     icon: IconChartPie2,
+  href: '/report/hosts/availability',
   },
   {
     id: uniqueId(),
@@ -227,6 +231,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Users',
     icon: IconUserCircle,
+    href: '/admin/users/',
     children: [
       {
         id: uniqueId(),
@@ -240,6 +245,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Roles',
     icon: IconSettings,
+    href: '/admin/roles/',
     children: [
       {
         id: uniqueId(),
@@ -260,6 +266,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Permissions',
     icon: IconSettings,
+    href: '/admin/permission/',
     children: [
       {
         id: uniqueId(),
@@ -279,6 +286,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Groups',
     icon: IconPackage,
+    href: '/admin/groups/',
     children: [
       {
         id: uniqueId(),

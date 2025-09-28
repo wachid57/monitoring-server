@@ -7,8 +7,8 @@ import (
 )
 
 // GetHostGroupBindings godoc
-// @Summary List Host Group Bindings
-// @Tags HostGroupBinding
+// @Summary List host group bindings
+// @Tags HostGroupBindings
 // @Produce json
 // @Success 200 {array} model.HostGroupBinding
 // @Security BearerAuth
@@ -22,11 +22,11 @@ func GetHostGroupBindings(c *fiber.Ctx) error {
 }
 
 // CreateHostGroupBinding godoc
-// @Summary Create Host Group Binding
-// @Tags HostGroupBinding
+// @Summary Create host group binding
+// @Tags HostGroupBindings
 // @Accept json
 // @Produce json
-// @Param data body model.HostGroupBinding true "Host Group Binding"
+// @Param data body model.HostGroupBinding true "HostGroup Binding"
 // @Success 200 {object} model.HostGroupBinding
 // @Security BearerAuth
 // @Router /api/v1.0/hosts/groups/bindings/ [post]
@@ -42,8 +42,8 @@ func CreateHostGroupBinding(c *fiber.Ctx) error {
 }
 
 // GetHostGroupBindingByID godoc
-// @Summary Get Host Group Binding by ID
-// @Tags HostGroupBinding
+// @Summary Get host group binding
+// @Tags HostGroupBindings
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.HostGroupBinding
@@ -59,12 +59,12 @@ func GetHostGroupBindingByID(c *fiber.Ctx) error {
 }
 
 // UpdateHostGroupBinding godoc
-// @Summary Update Host Group Binding
-// @Tags HostGroupBinding
+// @Summary Update host group binding
+// @Tags HostGroupBindings
 // @Accept json
 // @Produce json
 // @Param id path int true "ID"
-// @Param data body model.HostGroupBinding true "Host Group Binding"
+// @Param data body model.HostGroupBinding true "HostGroup Binding"
 // @Success 200 {object} model.HostGroupBinding
 // @Security BearerAuth
 // @Router /api/v1.0/hosts/groups/bindings/{id} [put]
@@ -84,8 +84,8 @@ func UpdateHostGroupBinding(c *fiber.Ctx) error {
 }
 
 // DeleteHostGroupBinding godoc
-// @Summary Delete Host Group Binding
-// @Tags HostGroupBinding
+// @Summary Delete host group binding
+// @Tags HostGroupBindings
 // @Param id path int true "ID"
 // @Success 204
 // @Security BearerAuth

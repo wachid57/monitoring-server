@@ -56,7 +56,6 @@ func InitDB() error {
 		&model.ICMPCheck{},
 		&model.HTTPCurlCheck{},
 		&model.HostService{},
-		&model.ServiceStatusEvent{},
 	); err != nil {
 		return err
 	}

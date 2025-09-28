@@ -33,13 +33,12 @@ var migrations = []struct {
     {16, "CreateReportManualTable", func(db *gorm.DB) error { return migration.CreateReportManualTable(db) }},
     {17, "CreateReportAutomaticTable", func(db *gorm.DB) error { return migration.CreateReportAutomaticTable(db) }},
     {18, "CreateAvailabilityWebsiteTable", func(db *gorm.DB) error { return migration.CreateAvailabilityWebsiteTable(db) }},
-    {19, "CreateServiceStatusEventsTable", func(db *gorm.DB) error { return migration.CreateServiceStatusEventsTable(db) }},
 
     // Seed data (run after schema)
-    {20, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},
-    {21, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
-    {22, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
-    {23, "AssignAdminToWpmAdmin", func(db *gorm.DB) error { return migration.AssignAdminToWpmAdmin(db) }},
+    {19, "CreateDefaultPermissions", func(db *gorm.DB) error { return migration.CreateDefaultPermissions(db) }},
+    {20, "CreateDefaultRoles", func(db *gorm.DB) error { return migration.CreateDefaultRoles(db) }},
+    {21, "CreateDefaultUser", func(db *gorm.DB) error { return migration.CreateDefaultUser(db) }},
+    {22, "AssignAdminToWpmAdmin", func(db *gorm.DB) error { return migration.AssignAdminToWpmAdmin(db) }},
 }
 
 func main() {

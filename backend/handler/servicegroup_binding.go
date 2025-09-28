@@ -7,8 +7,8 @@ import (
 )
 
 // GetServiceGroupBindings godoc
-// @Summary List Service Group Bindings
-// @Tags ServiceGroupBinding
+// @Summary List service group bindings
+// @Tags ServiceGroupBindings
 // @Produce json
 // @Success 200 {array} model.ServiceGroupBinding
 // @Security BearerAuth
@@ -22,11 +22,11 @@ func GetServiceGroupBindings(c *fiber.Ctx) error {
 }
 
 // CreateServiceGroupBinding godoc
-// @Summary Create Service Group Binding
-// @Tags ServiceGroupBinding
+// @Summary Create service group binding
+// @Tags ServiceGroupBindings
 // @Accept json
 // @Produce json
-// @Param data body model.ServiceGroupBinding true "Service Group Binding"
+// @Param data body model.ServiceGroupBinding true "ServiceGroup Binding"
 // @Success 200 {object} model.ServiceGroupBinding
 // @Security BearerAuth
 // @Router /api/v1.0/services/groups/bindings/ [post]
@@ -40,8 +40,8 @@ func CreateServiceGroupBinding(c *fiber.Ctx) error {
 }
 
 // GetServiceGroupBindingByID godoc
-// @Summary Get Service Group Binding by ID
-// @Tags ServiceGroupBinding
+// @Summary Get service group binding
+// @Tags ServiceGroupBindings
 // @Produce json
 // @Param id path int true "ID"
 // @Success 200 {object} model.ServiceGroupBinding
@@ -57,12 +57,12 @@ func GetServiceGroupBindingByID(c *fiber.Ctx) error {
 }
 
 // UpdateServiceGroupBinding godoc
-// @Summary Update Service Group Binding
-// @Tags ServiceGroupBinding
+// @Summary Update service group binding
+// @Tags ServiceGroupBindings
 // @Accept json
 // @Produce json
 // @Param id path int true "ID"
-// @Param data body model.ServiceGroupBinding true "Service Group Binding"
+// @Param data body model.ServiceGroupBinding true "ServiceGroup Binding"
 // @Success 200 {object} model.ServiceGroupBinding
 // @Security BearerAuth
 // @Router /api/v1.0/services/groups/bindings/{id} [put]
@@ -80,8 +80,8 @@ func UpdateServiceGroupBinding(c *fiber.Ctx) error {
 }
 
 // DeleteServiceGroupBinding godoc
-// @Summary Delete Service Group Binding
-// @Tags ServiceGroupBinding
+// @Summary Delete service group binding
+// @Tags ServiceGroupBindings
 // @Param id path int true "ID"
 // @Success 204
 // @Security BearerAuth
