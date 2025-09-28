@@ -40,6 +40,7 @@ const MetricsIndex = Loadable(lazy(() => import('../views/monitoring/metrics/Met
 const CPUMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/CPUMetricsList')));
 const MemoryMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/MemoryMetricsList')));
 const DiskMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/DiskMetricsList')));
+
 // Host service detail pages (ICMP & Website specific + unified placeholder)
 const IcmpDetails = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/details/IcmpDetails')));
 const WebsiteDetails = Loadable(lazy(() => import('../views/monitoring/hosts/website/details/WebsiteDetails')));
@@ -54,6 +55,12 @@ const HostsGroupsLists = Loadable(lazy(() => import('../views/infrastruktur/grou
 const HostGroupBindings = Loadable(lazy(() => import('../views/infrastruktur/groups/hosts/HostGroupBindings')));
 const ServicesGroupsLists = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroups')));
 const ServicesGroupsBinding = Loadable(lazy(() => import('../views/infrastructure/services/groups/ServicesGroupsBinding')));
+
+// Host service detail pages (ICMP & Website specific + unified placeholder)
+const InfraIcmpDetails = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/details/IcmpDetails')));
+const InfraWebsiteDetails = Loadable(lazy(() => import('../views/monitoring/hosts/website/details/WebsiteDetails')));
+const InfraUnifiedServiceDetails = Loadable(lazy(() => import('../views/monitoring/hosts/service/UnifiedServiceDetails')));
+
 
 /* ============================ REPORTS ============================ */
 // Laporan manual, otomatis, ketersediaan host
@@ -145,9 +152,9 @@ const Router = [
       { path: '/infrastructure/hosts/add', element: <ProtectedRoute><AddHost /></ProtectedRoute> },
       { path: '/infrastructure/hosts/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
       { path: '/infrastructure/hosts/details/:id', element: <ProtectedRoute><HostDetails /></ProtectedRoute> },
-      { path: '/infrastructure/hosts/details/:id/icmp/details', element: <ProtectedRoute><IcmpDetails /></ProtectedRoute> },
-      { path: '/infrastructure/hosts/details/:id/website/details', element: <ProtectedRoute><WebsiteDetails /></ProtectedRoute> },
-      { path: '/infrastructure/hosts/details/:id/service/:serviceId', element: <ProtectedRoute><UnifiedServiceDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/details/:id/icmp/details', element: <ProtectedRoute><InfraIcmpDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/details/:id/website/details', element: <ProtectedRoute><InfraWebsiteDetails /></ProtectedRoute> },
+      { path: '/infrastructure/hosts/details/:id/service/:serviceId', element: <ProtectedRoute><InfraUnifiedServiceDetails /></ProtectedRoute> },
       { path: '/infrastructure/hosts/icmp', element: <ProtectedRoute><ICMPAvailabilityPage /></ProtectedRoute> },
       { path: '/infrastructure/hostgroups/list', element: <ProtectedRoute><HostsGroupsLists /></ProtectedRoute> },
       { path: '/infrastructure/hostgroups/add', element: <ProtectedRoute><AddHostsGroup /></ProtectedRoute> },
