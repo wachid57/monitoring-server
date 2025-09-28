@@ -6,7 +6,7 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 import {
   Card, CardContent, Stack, Box, TextField, InputAdornment, IconButton,
   Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper,
-  Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert
+  Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert, Tooltip, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
 import { IconSearch, IconPlus, IconEdit, IconX, IconCheck } from '@tabler/icons';
 import { useNotify } from 'src/components/notifications/NotificationProvider';
@@ -36,10 +36,11 @@ const UserGroupBindings = () => {
   const [allGroups, setAllGroups] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [openAssign, setOpenAssign] = useState(false);
-  const [form, setForm] = useState({ user_id: '', group_ids: [] });
+  const [form, setForm] = useState({ user_id: '', group_ids: [], note: '', source: 'manual' });
   const [saving, setSaving] = useState(false);
   const [rowEdit, setRowEdit] = useState(null); // user_id currently editing
   const [rowGroupsDraft, setRowGroupsDraft] = useState([]);
+  const [filterGroup, setFilterGroup] = useState('');
   const notifyCtx = useNotify();
   const notify = notifyCtx?.notify || (()=>{});
   const [error, setError] = useState('');
@@ -80,27 +81,45 @@ const UserGroupBindings = () => {
 
   useEffect(()=>{ fetchAssignments(); fetchUsersAndGroups(); }, []);
 
-  const filtered = assignments.filter(a=>
-    a.username.toLowerCase().includes(search.toLowerCase()) ||
-    a.groups.some(g=> g.name.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = assignments.filter(a=> {
+    const textMatch = a.username.toLowerCase().includes(search.toLowerCase()) || a.groups.some(g=> g.name.toLowerCase().includes(search.toLowerCase()));
+    if(!textMatch) return false;
+    if(filterGroup){ return a.groups.some(g=> String(g.id) === String(filterGroup)); }
+    return true;
+  });
 
   return (
     <PageContainer title="User Group Bindings" description="Manage user group memberships">
       <Breadcrumb title="User Group Bindings" items={BCrumb} />
       <Card>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" mb={3}>
-            <Box sx={{ minWidth: 300 }}>
-              <TextField
-                placeholder="Search user or group..."
-                value={search}
-                onChange={e=> setSearch(e.target.value)}
-                InputProps={{ startAdornment: <InputAdornment position="start"><IconSearch size={18} /></InputAdornment> }}
-                fullWidth
-              />
-            </Box>
-            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setOpenAssign(true); setForm({ user_id:'', group_ids: []}); }}>Assign Groups</Button>
+          <Stack direction={{ xs:'column', sm:'row' }} spacing={2} justifyContent="space-between" mb={3} alignItems={{ sm:'center' }}>
+            <Stack direction={{ xs:'column', sm:'row' }} spacing={2} flexGrow={1}>
+              <Box sx={{ minWidth: 260 }}>
+                <TextField
+                  placeholder="Search user or group..."
+                  value={search}
+                  onChange={e=> setSearch(e.target.value)}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><IconSearch size={18} /></InputAdornment> }}
+                  fullWidth
+                  size="small"
+                />
+              </Box>
+              <Box sx={{ minWidth: 200 }}>
+                <TextField
+                  select
+                  label="Filter Group"
+                  value={filterGroup}
+                  onChange={e=> setFilterGroup(e.target.value)}
+                  size="small"
+                  fullWidth
+                >
+                  <option value=""></option>
+                  {allGroups.map(g=> <option key={g.id} value={g.id}>{g.name}</option>)}
+                </TextField>
+              </Box>
+            </Stack>
+            <Button variant="contained" startIcon={<IconPlus />} onClick={()=>{ setOpenAssign(true); setForm({ user_id:'', group_ids: [], note:'', source:'manual'}); }}>Assign Groups</Button>
           </Stack>
 
           {error && <Alert severity="error" sx={{ mb:2 }}>{error}</Alert>}
@@ -144,7 +163,17 @@ const UserGroupBindings = () => {
                             </TextField>
                           ) : (
                             <Stack direction="row" spacing={1} flexWrap="wrap">
-                              {row.groups.map(g=> <Chip key={g.id} label={g.name} size="small" />)}
+                              {row.groups.map(g=> (
+                                <Tooltip key={g.id} title={
+                                  <Box sx={{ p:0.5 }}>
+                                    <div><strong>Source:</strong> {g.source || '-'}</div>
+                                    <div><strong>Note:</strong> {g.note || '-'}</div>
+                                    {g.assigned_by_username && <div><strong>By:</strong> {g.assigned_by_username}</div>}
+                                  </Box>
+                                } arrow>
+                                  <Chip label={g.name} size="small" variant={g.source && g.source !== 'manual' ? 'outlined' : 'filled'} color={g.source === 'sync' ? 'info' : (g.source === 'api' ? 'secondary' : 'default')} />
+                                </Tooltip>
+                              ))}
                               {row.groups.length === 0 && <Chip label="(none)" size="small" variant="outlined" />}
                             </Stack>
                           )}
@@ -153,13 +182,13 @@ const UserGroupBindings = () => {
                         <TableCell align="right">
                           {editing ? (
                             <Stack direction="row" spacing={1} justifyContent="flex-end">
-                              <IconButton size="small" color="success" onClick={async ()=> {
+          <IconButton size="small" color="success" onClick={async ()=> {
                                 setSaving(true);
                                 try {
                                   const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', {
                                     method:'POST',
                                     headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
-                                    body: JSON.stringify({ user_id: row.user_id, group_ids: rowGroupsDraft })
+            body: JSON.stringify({ user_id: row.user_id, group_ids: rowGroupsDraft, note: '', source: 'manual' })
                                   });
                                   if(res.ok){ await fetchAssignments(); notify('Updated', { severity:'success'}); setRowEdit(null); }
                                   else { const d = await res.json(); notify(d.error || 'Failed update', { severity:'error'}); }
@@ -220,6 +249,26 @@ const UserGroupBindings = () => {
             >
               {allGroups.map(g=> <option key={g.id} value={g.id}>{g.name}</option>)}
             </TextField>
+            <TextField
+              label="Note"
+              value={form.note}
+              onChange={e=> setForm({ ...form, note: e.target.value })}
+              placeholder="Optional note"
+              fullWidth
+              size="small"
+            />
+            <TextField
+              select
+              label="Source"
+              value={form.source}
+              onChange={e=> setForm({ ...form, source: e.target.value })}
+              size="small"
+              fullWidth
+            >
+              <option value="manual">manual</option>
+              <option value="api">api</option>
+              <option value="sync">sync</option>
+            </TextField>
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -231,7 +280,7 @@ const UserGroupBindings = () => {
               setSaving(true);
               try {
                 const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', {
-                  method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: parseInt(form.user_id,10), group_ids: [] })
+                  method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: parseInt(form.user_id,10), group_ids: [], note: form.note, source: form.source })
                 });
                 const data = await res.json();
                 if(res.ok){ await fetchAssignments(); notify('Groups cleared', { severity:'success'}); setOpenAssign(false);} else { notify(data.error || 'Failed clear groups', { severity:'error'}); }
@@ -247,7 +296,7 @@ const UserGroupBindings = () => {
                 const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', {
                   method:'POST',
                   headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
-                  body: JSON.stringify({ user_id: parseInt(form.user_id,10), group_ids: form.group_ids })
+                  body: JSON.stringify({ user_id: parseInt(form.user_id,10), group_ids: form.group_ids, note: form.note, source: form.source })
                 });
                 const data = await res.json();
                 if(res.ok){

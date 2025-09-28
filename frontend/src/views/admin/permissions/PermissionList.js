@@ -69,7 +69,7 @@ const PermissionList = () => {
     setLoading(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/permissions/', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/permissions/', {
         method: 'GET',
         headers: getAuthHeaders()
       });
@@ -95,7 +95,7 @@ const PermissionList = () => {
 
   const handleDelete = async (permId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/permissions/${permId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/permissions/${permId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -126,7 +126,7 @@ const PermissionList = () => {
     setAdding(true);
     setError('');
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + '/permissions/', {
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/permissions/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ name: newRoleName, description: newRoleDesc, module: 'general', action: 'read' })

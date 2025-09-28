@@ -24,7 +24,6 @@ import {
   Alert,
   CircularProgress,
   Autocomplete,
-  Tooltip,
 } from '@mui/material';
 import {
   IconPlus,
@@ -55,19 +54,6 @@ const BCrumb = [
     title: 'List Roles',
   },
 ];
-
-const colorPool = ['primary','secondary','success','warning','info','default'];
-const hashString = (str='') => { let h = 0; for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) & 0xffffffff; } return Math.abs(h); };
-// memoized helpers
-const useChipStyler = () => {
-  return React.useCallback((perm) => {
-    const name = perm?.name || '';
-    const h = hashString(name);
-    const color = colorPool[h % colorPool.length];
-    const variant = (h % 2 === 0) ? 'filled' : 'outlined';
-    return { color, variant };
-  }, []);
-};
 
 const PermissionBindings = () => {
   // Role-permission state (simple: list roles and counts)
@@ -122,7 +108,7 @@ const PermissionBindings = () => {
 
   const handleRemovePermission = async (roleId, permissionId) => {
     try {
-  const res = await fetch(BACKEND_URL + API_PREFIX + `/roles/${roleId}/permissions/${permissionId}`, {
+  const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/roles/${roleId}/permissions/${permissionId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -151,8 +137,8 @@ const PermissionBindings = () => {
   const loadUsersAndRoles = async () => {
     try {
       const [uRes, rRes] = await Promise.all([
-        fetch(BACKEND_URL + API_PREFIX + '/users', { headers: getAuthHeaders() }),
-        fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() })
+  fetch(BACKEND_URL + API_PREFIX + '/users', { headers: getAuthHeaders() }),
+  fetch(BACKEND_URL + API_PREFIX + '/users/roles', { headers: getAuthHeaders() })
       ]);
       if (uRes.status===401||uRes.status===403) return handleAuthError({status:uRes.status});
       if (rRes.status===401||rRes.status===403) return handleAuthError({status:rRes.status});
@@ -165,7 +151,7 @@ const PermissionBindings = () => {
 
   const fetchPermissions = async () => {
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + '/permissions/', { headers: getAuthHeaders() });
+  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/permissions/', { headers: getAuthHeaders() });
       if(res.ok){
         const data = await res.json();
         setPermissions(Array.isArray(data)?data:(data.permissions||[]));
@@ -186,7 +172,7 @@ const PermissionBindings = () => {
     setRoles(rs=> rs.map(r=> r.id===addRole.id ? { ...r, Permissions:[...(r.Permissions||r.permissions||[]), ...addPerms.filter(p=> !(r.Permissions||r.permissions||[]).some(ep=> ep.id===p.id))] } : r));
     try {
       for(const perm of addPerms){
-        const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/roles/${addRole.id}/permissions/${perm.id}`, { method:'POST', headers: getAuthHeaders() });
+  const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/admin/roles/${addRole.id}/permissions/${perm.id}`, { method:'POST', headers: getAuthHeaders() });
         if(!resp.ok){ notify.notify(`Gagal tambah ${perm.name}`, { severity:'error'}); }
       }
       notify.notify('Permissions ditambahkan ke role', { severity:'success'});
@@ -194,13 +180,18 @@ const PermissionBindings = () => {
     } catch(e){ console.error(e); setError('Gagal menambah permissions'); notify.notify('Gagal menambah permissions', { severity:'error'});} finally { setAdding(false);} 
   };
 
-  const chipStyle = useChipStyler();
+  const colorPool = ['primary','secondary','success','warning','info','default'];
+const hashString = (str='') => {
+  let h = 0; for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) & 0xffffffff; }
+  return Math.abs(h);
+};
+const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
 
   const handleAddPermissionFromEdit = async (role, perm) => {
     if(!role || !perm) return; // optimistic
     setRoles(rs=> rs.map(r=> r.id===role.id ? { ...r, Permissions:[...(r.Permissions||r.permissions||[]), perm] } : r));
     try {
-      const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/roles/${role.id}/permissions/${perm.id}`, { method:'POST', headers: getAuthHeaders() });
+  const resp = await fetch(`${BACKEND_URL}${API_PREFIX}/admin/roles/${role.id}/permissions/${perm.id}`, { method:'POST', headers: getAuthHeaders() });
       if(resp.ok) notify.notify('Permission ditambahkan',{severity:'success'});
       else notify.notify('Gagal menambah permission',{severity:'error'});
     } catch(e){ console.error(e); notify.notify('Error tambah permission',{severity:'error'});}
@@ -283,14 +274,9 @@ const PermissionBindings = () => {
                         <TableCell>{role.description || '-'}</TableCell>
                         <TableCell>
                           <Stack direction="row" spacing={1} flexWrap="wrap">
-                            {(role.Permissions || role.permissions || []).map((p) => {
-                              const { color, variant } = chipStyle(p);
-                              return (
-                                <Tooltip key={p.id} title={p.description || p.name} arrow>
-                                  <Chip label={p.name} size="small" color={color} variant={variant} onDelete={() => handleRemovePermission(role.id, p.id)} sx={{ mr:0.5, mb:0.5 }} />
-                                </Tooltip>
-                              );
-                            })}
+                            {(role.Permissions || role.permissions || []).map((p) => (
+                              <Chip key={p.id} label={p.name} size="small" color={getChipColor(p.name)} onDelete={() => handleRemovePermission(role.id, p.id)} />
+                            ))}
                           </Stack>
                         </TableCell>
                         <TableCell align="center">
@@ -351,14 +337,9 @@ const PermissionBindings = () => {
               <Typography variant="subtitle2">Role: {editDialog.role.name}</Typography>
               <Typography variant="caption" color="text.secondary">Tambah atau hapus permission di bawah:</Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap">
-                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p)=> {
-                  const { color, variant } = chipStyle(p);
-                  return (
-                    <Tooltip key={p.id} title={p.description || p.name} arrow>
-                      <Chip label={p.name} size="small" color={color} variant={variant} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} sx={{ mr:0.5, mb:0.5 }} />
-                    </Tooltip>
-                  );
-                })}
+                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p)=> (
+                  <Chip key={p.id} label={p.name} size="small" color={getChipColor(p.name)} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} />
+                ))}
               </Stack>
               <Autocomplete
                 options={permissions.filter(p=> !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)))}
