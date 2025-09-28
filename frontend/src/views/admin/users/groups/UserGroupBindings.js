@@ -8,7 +8,7 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper,
   Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Alert
 } from '@mui/material';
-import { IconSearch, IconPlus } from '@tabler/icons';
+import { IconSearch, IconPlus, IconEdit, IconX, IconCheck } from '@tabler/icons';
 import { useNotify } from 'src/components/notifications/NotificationProvider';
 
 const BCrumb = [
@@ -38,6 +38,8 @@ const UserGroupBindings = () => {
   const [openAssign, setOpenAssign] = useState(false);
   const [form, setForm] = useState({ user_id: '', group_ids: [] });
   const [saving, setSaving] = useState(false);
+  const [rowEdit, setRowEdit] = useState(null); // user_id currently editing
+  const [rowGroupsDraft, setRowGroupsDraft] = useState([]);
   const notifyCtx = useNotify();
   const notify = notifyCtx?.notify || (()=>{});
   const [error, setError] = useState('');
@@ -113,22 +115,74 @@ const UserGroupBindings = () => {
                     <TableCell>User</TableCell>
                     <TableCell>Groups</TableCell>
                     <TableCell>Total</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow><TableCell colSpan={3} align="center">No bindings found</TableCell></TableRow>
-                  ) : filtered.map(row => (
-                    <TableRow key={row.user_id}>
-                      <TableCell>{row.username}</TableCell>
-                      <TableCell>
-                        <Stack direction="row" spacing={1} flexWrap="wrap">
-                          {row.groups.map(g=> <Chip key={g.id} label={g.name} size="small" />)}
-                        </Stack>
-                      </TableCell>
-                      <TableCell>{row.groups.length}</TableCell>
-                    </TableRow>
-                  ))}
+                  ) : filtered.map(row => {
+                    const editing = rowEdit === row.user_id;
+                    return (
+                      <TableRow key={row.user_id}>
+                        <TableCell>{row.username}</TableCell>
+                        <TableCell>
+                          {editing ? (
+                            <TextField
+                              select
+                              value={rowGroupsDraft}
+                              onChange={e=> {
+                                const values = Array.from(e.target.selectedOptions).map(o=> parseInt(o.value,10));
+                                setRowGroupsDraft(values);
+                              }}
+                              SelectProps={{ native:true, multiple:true }}
+                              size="small"
+                              helperText="CTRL/CMD multi-select; kosongkan untuk clear"
+                              fullWidth
+                            >
+                              {allGroups.map(g=> <option key={g.id} value={g.id}>{g.name}</option>)}
+                            </TextField>
+                          ) : (
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              {row.groups.map(g=> <Chip key={g.id} label={g.name} size="small" />)}
+                              {row.groups.length === 0 && <Chip label="(none)" size="small" variant="outlined" />}
+                            </Stack>
+                          )}
+                        </TableCell>
+                        <TableCell>{editing ? rowGroupsDraft.length : row.groups.length}</TableCell>
+                        <TableCell align="right">
+                          {editing ? (
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <IconButton size="small" color="success" onClick={async ()=> {
+                                setSaving(true);
+                                try {
+                                  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', {
+                                    method:'POST',
+                                    headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
+                                    body: JSON.stringify({ user_id: row.user_id, group_ids: rowGroupsDraft })
+                                  });
+                                  if(res.ok){ await fetchAssignments(); notify('Updated', { severity:'success'}); setRowEdit(null); }
+                                  else { const d = await res.json(); notify(d.error || 'Failed update', { severity:'error'}); }
+                                } catch(e){ console.error(e); notify('Error update', { severity:'error'});} finally { setSaving(false);} 
+                              }}><IconCheck size={18} /></IconButton>
+                              <IconButton size="small" color="warning" onClick={()=> { setRowEdit(null); setRowGroupsDraft([]); }}><IconX size={18} /></IconButton>
+                            </Stack>
+                          ) : (
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <IconButton size="small" onClick={()=> { setRowEdit(row.user_id); setRowGroupsDraft(row.groups.map(g=> g.id)); }}><IconEdit size={18} /></IconButton>
+                              <Button size="small" color="error" variant="outlined" onClick={async ()=> {
+                                // Clear groups quickly
+                                try {
+                                  const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', { method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: row.user_id, group_ids: [] }) });
+                                  if(res.ok){ await fetchAssignments(); notify('Cleared', { severity:'success'});} else { const d = await res.json(); notify(d.error || 'Failed clear', { severity:'error'});} 
+                                } catch(e){ console.error(e); notify('Error clear', { severity:'error'});} 
+                              }}>Clear</Button>
+                            </Stack>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -170,6 +224,20 @@ const UserGroupBindings = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={()=> setOpenAssign(false)} disabled={saving}>Cancel</Button>
+          <Button
+            color="warning"
+            disabled={saving || !form.user_id}
+            onClick={async ()=> {
+              setSaving(true);
+              try {
+                const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/groups/users', {
+                  method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: parseInt(form.user_id,10), group_ids: [] })
+                });
+                const data = await res.json();
+                if(res.ok){ await fetchAssignments(); notify('Groups cleared', { severity:'success'}); setOpenAssign(false);} else { notify(data.error || 'Failed clear groups', { severity:'error'}); }
+              } catch(e){ console.error(e); notify('Error clearing groups', { severity:'error'});} finally { setSaving(false);} 
+            }}
+          >Clear All</Button>
           <Button
             variant="contained"
             disabled={saving || !form.user_id}

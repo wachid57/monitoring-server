@@ -41,6 +41,7 @@ func InitDB() error {
 		&model.RoleBinding{},
 		&model.UserRole{},
 		&model.User{},
+		&model.UserGroupBinding{},
 		&model.Group{},
 		&model.Host{},
 		&model.HostGroup{},
