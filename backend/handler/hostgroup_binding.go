@@ -6,7 +6,13 @@ import (
     "monitoring-server/model"
 )
 
-// GetHostGroupBindings returns all host group bindings
+// GetHostGroupBindings godoc
+// @Summary List Host Group Bindings
+// @Tags HostGroupBinding
+// @Produce json
+// @Success 200 {array} model.HostGroupBinding
+// @Security BearerAuth
+// @Router /api/v1.0/hosts/groups/bindings/ [get]
 func GetHostGroupBindings(c *fiber.Ctx) error {
     var bindings []model.HostGroupBinding
     if err := database.DB.Find(&bindings).Error; err != nil {
@@ -15,7 +21,15 @@ func GetHostGroupBindings(c *fiber.Ctx) error {
     return c.JSON(bindings)
 }
 
-// CreateHostGroupBinding creates a new binding
+// CreateHostGroupBinding godoc
+// @Summary Create Host Group Binding
+// @Tags HostGroupBinding
+// @Accept json
+// @Produce json
+// @Param data body model.HostGroupBinding true "Host Group Binding"
+// @Success 200 {object} model.HostGroupBinding
+// @Security BearerAuth
+// @Router /api/v1.0/hosts/groups/bindings/ [post]
 func CreateHostGroupBinding(c *fiber.Ctx) error {
     var b model.HostGroupBinding
     if err := c.BodyParser(&b); err != nil {
@@ -27,7 +41,14 @@ func CreateHostGroupBinding(c *fiber.Ctx) error {
     return c.JSON(b)
 }
 
-// GetHostGroupBindingByID returns a binding by id
+// GetHostGroupBindingByID godoc
+// @Summary Get Host Group Binding by ID
+// @Tags HostGroupBinding
+// @Produce json
+// @Param id path int true "ID"
+// @Success 200 {object} model.HostGroupBinding
+// @Security BearerAuth
+// @Router /api/v1.0/hosts/groups/bindings/{id} [get]
 func GetHostGroupBindingByID(c *fiber.Ctx) error {
     var b model.HostGroupBinding
     id := c.Params("id")
@@ -37,7 +58,16 @@ func GetHostGroupBindingByID(c *fiber.Ctx) error {
     return c.JSON(b)
 }
 
-// UpdateHostGroupBinding updates a binding by id
+// UpdateHostGroupBinding godoc
+// @Summary Update Host Group Binding
+// @Tags HostGroupBinding
+// @Accept json
+// @Produce json
+// @Param id path int true "ID"
+// @Param data body model.HostGroupBinding true "Host Group Binding"
+// @Success 200 {object} model.HostGroupBinding
+// @Security BearerAuth
+// @Router /api/v1.0/hosts/groups/bindings/{id} [put]
 func UpdateHostGroupBinding(c *fiber.Ctx) error {
     var b model.HostGroupBinding
     id := c.Params("id")
@@ -53,7 +83,13 @@ func UpdateHostGroupBinding(c *fiber.Ctx) error {
     return c.JSON(b)
 }
 
-// DeleteHostGroupBinding deletes a binding by id
+// DeleteHostGroupBinding godoc
+// @Summary Delete Host Group Binding
+// @Tags HostGroupBinding
+// @Param id path int true "ID"
+// @Success 204
+// @Security BearerAuth
+// @Router /api/v1.0/hosts/groups/bindings/{id} [delete]
 func DeleteHostGroupBinding(c *fiber.Ctx) error {
     id := c.Params("id")
     if err := database.DB.Delete(&model.HostGroupBinding{}, id).Error; err != nil {
