@@ -40,6 +40,8 @@ const MetricsIndex = Loadable(lazy(() => import('../views/monitoring/metrics/Met
 const CPUMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/CPUMetricsList')));
 const MemoryMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/MemoryMetricsList')));
 const DiskMetricsList = Loadable(lazy(() => import('../views/monitoring/metrics/DiskMetricsList')));
+// Alert rules management
+const AlertRulesPage = Loadable(lazy(() => import('../views/monitoring/alerts/AlertRules')));
 
 // Host service detail pages (ICMP & Website specific + unified placeholder)
 const IcmpDetails = Loadable(lazy(() => import('../views/monitoring/hosts/icmp/details/IcmpDetails')));
