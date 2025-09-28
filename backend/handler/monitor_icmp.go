@@ -5,6 +5,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"monitoring-server/database"
 	"monitoring-server/model"
+	rc "monitoring-server/redis"
+	"context"
 )
 
 // ListICMPChecks godoc
@@ -118,4 +120,30 @@ func DeleteICMPCheck(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.SendStatus(204)
+}
+
+// GetICMPLastSample returns last redis sample for a host icmp check
+func GetICMPLastSample(c *fiber.Ctx) error {
+    hostID := c.Params("host_id")
+    serviceID := c.Params("service_id")
+    if hostID == "" || serviceID == "" { return c.Status(400).JSON(fiber.Map{"error":"missing host_id or service_id"}) }
+    if rc.Rdb == nil { return c.Status(503).JSON(fiber.Map{"error":"redis not available"}) }
+    key := "icmp:last:"+hostID+":"+serviceID
+    val, err := rc.Rdb.Get(context.Background(), key).Result()
+    if err != nil { return c.Status(404).JSON(fiber.Map{"error":"not found"}) }
+    return c.SendString(val)
+}
+
+// GetICMPSeries returns recent redis samples
+func GetICMPSeries(c *fiber.Ctx) error {
+    hostID := c.Params("host_id")
+    serviceID := c.Params("service_id")
+    if hostID == "" || serviceID == "" { return c.Status(400).JSON(fiber.Map{"error":"missing host_id or service_id"}) }
+    if rc.Rdb == nil { return c.Status(503).JSON(fiber.Map{"error":"redis not available"}) }
+    key := "icmp:series:"+hostID+":"+serviceID
+    n := c.QueryInt("limit", 100)
+    if n <= 0 { n = 100 }
+    vals, err := rc.Rdb.LRange(context.Background(), key, 0, int64(n-1)).Result()
+    if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+    return c.JSON(vals)
 }

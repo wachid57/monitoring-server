@@ -360,11 +360,19 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             icmpChecker.Get("/:id", handler.GetICMPCheck)
             icmpChecker.Put("/:id", handler.UpdateICMPCheck)
             icmpChecker.Delete("/:id", handler.DeleteICMPCheck)
+            // Realtime samples via Redis
+            icmpChecker.Get("/:id/last", handler.GetICMPLastSample) // requires host_id param for completeness via query? simplified path below
 
             // Aggregated host availability (ICMP + HTTP status history)
             protected.Get("/monitoring/hosts/availability/", handler.GetHostsAvailability)
             // Infrastructure alias (frontend expects /infrastructure/hosts/availability/)
             protected.Get("/infrastructure/hosts/availability/", handler.GetHostsAvailability)
+            // Realtime endpoints (host/service scoped)
+            protected.Get("/infrastructure/hosts/:host_id/icmp/:service_id/last", handler.GetICMPLastSample)
+            protected.Get("/infrastructure/hosts/:host_id/icmp/:service_id/series", handler.GetICMPSeries)
+            // ICMP history per host
+            protected.Get("/infrastructure/hosts/details/:host_id/icmp/history", handler.ListHistoryICMP)
+            protected.Post("/infrastructure/hosts/details/:host_id/icmp/history", handler.CreateHistoryICMP)
         }
 
     // ---------------------------------------------------------------------

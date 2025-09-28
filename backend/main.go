@@ -11,6 +11,8 @@ import (
 	"monitoring-server/router"
 	"log"
 	_ "monitoring-server/docs"
+	rclient "monitoring-server/redis"
+	"monitoring-server/worker"
 )
 
 // @title Monitoring Server Backend API
@@ -31,11 +33,16 @@ func main() {
 		panic(err)
 	}
 	
-	// Initialize Redis (optional - graceful fallback if Redis is not available)
+	// Initialize Redis for sessions (existing) and generic client
 	if err := redisSession.InitRedis(); err != nil {
-		log.Printf("Redis not available, falling back to stateless JWT: %v", err)
+		log.Printf("Redis (session) not available, fallback to stateless JWT: %v", err)
 	} else {
 		log.Println("Redis session management initialized")
+	}
+	if err := rclient.Init(); err != nil {
+		log.Printf("Redis (worker) init failed: %v", err)
+	} else {
+		log.Println("Redis generic client initialized")
 	}
 
 	app := fiber.New()
@@ -61,8 +68,12 @@ func main() {
 		return c.SendString("Backend Fiber API running!")
 	})
 
-	// Panggil router langsung dengan app
+	// Register routes
 	router.RegisterRoutes(app, swaggerHandler)
+
+	// Start ICMP worker (non-blocking)
+	stopCh := make(chan struct{})
+	worker.StartICMPWorker(stopCh)
 
 	app.Listen(":8080")
 }
