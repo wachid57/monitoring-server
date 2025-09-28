@@ -22,7 +22,7 @@ const RollbaseCASL = Loadable(lazy(() => import('../views/pages/rollbaseCASL/Rol
 /* ============================= ADMIN ============================= */
 // Manajemen user, roles, permissions, admin groups
 const ListUsers = Loadable(lazy(() => import('../views/admin/users/ListUsers')));
-const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/ListGroups')));
+const AdminGroupsList = Loadable(lazy(() => import('../views/admin/groups/GroupsList')));
 const PermissionBindings = Loadable(lazy(() => import('../views/admin/permissions/PermissionBindings')));
 const PermissionList = Loadable(lazy(() => import('../views/admin/permissions/PermissionList')));
 const RolesBindings = Loadable(lazy(() => import('../views/admin/roles/RolesBindings')));

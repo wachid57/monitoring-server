@@ -32,10 +32,12 @@ import {
   IconEye,
   IconUserCircle,
 } from '@tabler/icons';
-import Autocomplete from '@mui/material/Autocomplete';
+// Removed Autocomplete (multi-role) in favor of simple single-select dropdown
+// import Autocomplete from '@mui/material/Autocomplete';
 import PageContainer from 'src/components/container/PageContainer';
 import Breadcrumb from 'src/layouts/full/shared/breadcrumb/Breadcrumb';
 import { BACKEND_URL, API_PREFIX } from 'src/config/constants';
+import MenuItem from '@mui/material/MenuItem';
 import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 import { useNotify } from 'src/components/notifications/NotificationProvider';
 
@@ -64,14 +66,14 @@ const ListUsers = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const notifyCtx = useNotify();
   const notify = notifyCtx?.notify || (()=>{});
-  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', roles: [] });
+  const [newUser, setNewUser] = useState({ username: '', email: '', name: '', password: '', role: '' });
   const [availableRoles, setAvailableRoles] = useState([]);
   const [formError, setFormError] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
   // Edit user state
   const [editOpen, setEditOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
-  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', roles: [] });
+  const [editForm, setEditForm] = useState({ username: '', email: '', name: '', role: '' });
   const [editSaving, setEditSaving] = useState(false);
 
   const fetchUsers = async () => {
@@ -113,7 +115,7 @@ const ListUsers = () => {
 
   const handleDelete = async (userId) => {
     try {
-      const res = await fetch(BACKEND_URL + API_PREFIX + `/users/${userId}`, {
+      const res = await fetch(BACKEND_URL + API_PREFIX + `/admin/users/${userId}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -298,7 +300,7 @@ const ListUsers = () => {
                                   username: user.username || '',
                                   email: user.email || '',
                                   name: user.name || '',
-                                  roles: (user.roles || []).map(r=> r.name),
+                                  role: (user.roles && user.roles[0]?.name) || '',
                                 });
                                 setEditOpen(true);
                               }}
@@ -410,15 +412,18 @@ const ListUsers = () => {
             value={newUser.password}
             onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
           />
-          <Autocomplete
-            multiple
-            options={availableRoles}
-            getOptionLabel={(o)=> o.name || ''}
-            value={availableRoles.filter(r=> newUser.roles.includes(r.name))}
-            onChange={(_,v)=> setNewUser({ ...newUser, roles: v.map(r=> r.name) })}
-            renderInput={(params)=><TextField {...params} label='Roles' margin='dense' placeholder='Select roles' helperText='Choose one or more roles' />}
+          <TextField
+            select
+            label="Role"
+            margin="dense"
             fullWidth
-          />
+            value={newUser.role}
+            onChange={(e)=> setNewUser({ ...newUser, role: e.target.value })}
+            helperText='Select role (single)'
+          >
+            <MenuItem value=''>-- None --</MenuItem>
+            {availableRoles.map(r=> <MenuItem key={r.id || r.name} value={r.name}>{r.name}</MenuItem>)}
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)} disabled={submitLoading}>Cancel</Button>
@@ -433,10 +438,10 @@ const ListUsers = () => {
               }
               setSubmitLoading(true);
               try {
-                const res = await fetch(BACKEND_URL + API_PREFIX + '/users', {
+                const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/users', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                  body: JSON.stringify(newUser),
+                  body: JSON.stringify({ username:newUser.username, email:newUser.email, name:newUser.name, password:newUser.password, role:newUser.role }),
                 });
                 if (res.status === 401 || res.status === 403) {
                   handleAuthError({ status: res.status });
@@ -444,23 +449,13 @@ const ListUsers = () => {
                 }
                 const data = await res.json();
                 if (res.ok) {
-                  const createdId = data.id || data.user?.id;
-                  const createdUser = { id: createdId, username: newUser.username, email: newUser.email, name: newUser.name, roles: [] };
-                  // Optimistically add user
-                  setUsers(prev=> [...prev, createdUser]);
+                  const createdUser = data || {};
+                  const createdId = createdUser.id || createdUser.user?.id;
+                  const roles = createdUser.roles || createdUser.Roles || (newUser.role ? [{ name:newUser.role }] : []);
+                  setUsers(prev=> [...prev, { id: createdId, username: createdUser.username || newUser.username, email: createdUser.email || newUser.email, name: createdUser.name || newUser.name, roles }]);
                   setAddDialogOpen(false);
-                  // Assign roles sequentially
-                  if (createdId && newUser.roles.length > 0) {
-                    const rolePromises = newUser.roles.map(async (roleName)=> {
-                      const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles/users', { method:'POST', headers:{ 'Content-Type':'application/json', ...getAuthHeaders() }, body: JSON.stringify({ user_id: createdId, role_name: roleName }) });
-                      if(!resp.ok){ notify(`Gagal assign role ${roleName}`, { severity:'error'}); }
-                      return resp.ok ? roleName : null;
-                    });
-                    const assigned = (await Promise.all(rolePromises)).filter(Boolean).map(r=> ({ name:r }));
-                    setUsers(prev=> prev.map(u=> u.id===createdId ? { ...u, roles: assigned }: u));
-                  }
                   notify('User created', { severity:'success'});
-                  setNewUser({ username: '', email: '', name: '', password: '', roles: [] });
+                  setNewUser({ username: '', email: '', name: '', password: '', role: '' });
                 } else {
                   // Backend may create user but fail role binding; show explicit message
                   setFormError(data.error || data.message || 'Failed to create user (role assignment may have failed)');
@@ -489,16 +484,18 @@ const ListUsers = () => {
             <TextField label="Username" value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} fullWidth />
             <TextField label="Email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} fullWidth />
             <TextField label="Full name" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} fullWidth />
-            <Autocomplete
-              multiple
-              options={availableRoles}
-              getOptionLabel={(o)=> o.name || ''}
-              value={availableRoles.filter(r=> editForm.roles.includes(r.name))}
-              onChange={(_,v)=> setEditForm({ ...editForm, roles: v.map(r=> r.name) })}
-              renderInput={(params)=><TextField {...params} label='Roles' placeholder='Select roles' helperText='Choose roles' />}
+            <TextField
+              select
+              label='Role'
               fullWidth
+              value={editForm.role}
+              onChange={(e)=> setEditForm({ ...editForm, role: e.target.value })}
+              helperText='Select role'
               disabled={editUser?.native}
-            />
+            >
+              <MenuItem value=''>-- None --</MenuItem>
+              {availableRoles.map(r=> <MenuItem key={r.id || r.name} value={r.name}>{r.name}</MenuItem>)}
+            </TextField>
           </Stack>
           {editUser?.native && (
             <Alert severity="info" sx={{ mt: 2 }}>
@@ -530,24 +527,17 @@ const ListUsers = () => {
                   setEditSaving(false);
                   return;
                 }
-                // Assign roles (difference set)
-                const existingRoles = (editUser.roles || []).map(r=> r.name);
-                const toAdd = editForm.roles.filter(r=> !existingRoles.includes(r));
-                const finalRoles = new Set(existingRoles);
-                for (const rName of toAdd) {
+                // Assign role if changed
+                const currentRole = (editUser.roles && editUser.roles[0]?.name) || '';
+                if (editForm.role && editForm.role !== currentRole) {
                   const resp = await fetch(BACKEND_URL + API_PREFIX + '/admin/users/roles/users', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-                    body: JSON.stringify({ user_id: editUser.id, role_name: rName })
+                    method:'POST',
+                    headers:{ 'Content-Type':'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({ user_id: editUser.id, role_name: editForm.role })
                   });
-                  if (!resp.ok) {
-                    notify(`Gagal assign role ${rName}`, { severity:'error'});
-                  } else {
-                    finalRoles.add(rName);
-                  }
+                  if(!resp.ok){ notify('Gagal assign role baru', { severity:'error'}); }
                 }
-                // (Removal not yet supported until backend multi-role removal API exists)
-                setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles: Array.from(finalRoles).map(n=> ({ name:n })) } : u));
+                setUsers(us=> us.map(u=> u.id===editUser.id ? { ...u, roles: editForm.role ? [{ name: editForm.role }] : [] } : u));
                 notify('User updated', { severity:'success'});
                 setEditOpen(false);
                 setEditUser(null);

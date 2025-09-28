@@ -178,6 +178,9 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
         infrastructureGroup.Get("/groups/hosts/:id", handler.GetHostGroupByID)
         infrastructureGroup.Put("/groups/hosts/:id", handler.UpdateHostGroup)
         infrastructureGroup.Delete("/groups/hosts/:id", handler.DeleteHostGroup)
+
+        // Host CRUD & services
+            infrastructureGroup.Get("/hosts", handler.GetHosts)
             infrastructureGroup.Post("/hosts", handler.CreateHost)
             infrastructureGroup.Get("/hosts/:id", handler.GetHostByID)
             infrastructureGroup.Get("/hosts/:id/services", handler.GetHostServices)
