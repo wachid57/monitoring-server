@@ -24,6 +24,7 @@ import {
   Alert,
   CircularProgress,
   Autocomplete,
+  Tooltip,
 } from '@mui/material';
 import {
   IconPlus,
@@ -54,6 +55,19 @@ const BCrumb = [
     title: 'List Roles',
   },
 ];
+
+const colorPool = ['primary','secondary','success','warning','info','default'];
+const hashString = (str='') => { let h = 0; for (let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) & 0xffffffff; } return Math.abs(h); };
+// memoized helpers
+const useChipStyler = () => {
+  return React.useCallback((perm) => {
+    const name = perm?.name || '';
+    const h = hashString(name);
+    const color = colorPool[h % colorPool.length];
+    const variant = (h % 2 === 0) ? 'filled' : 'outlined';
+    return { color, variant };
+  }, []);
+};
 
 const PermissionBindings = () => {
   // Role-permission state (simple: list roles and counts)
@@ -180,7 +194,7 @@ const PermissionBindings = () => {
     } catch(e){ console.error(e); setError('Gagal menambah permissions'); notify.notify('Gagal menambah permissions', { severity:'error'});} finally { setAdding(false);} 
   };
 
-  const chipColors = ['primary','secondary','success','warning','info','default'];
+  const chipStyle = useChipStyler();
 
   const handleAddPermissionFromEdit = async (role, perm) => {
     if(!role || !perm) return; // optimistic
@@ -269,9 +283,14 @@ const PermissionBindings = () => {
                         <TableCell>{role.description || '-'}</TableCell>
                         <TableCell>
                           <Stack direction="row" spacing={1} flexWrap="wrap">
-                            {(role.Permissions || role.permissions || []).map((p) => (
-                              <Chip key={p.id} label={p.name} size="small" onDelete={() => handleRemovePermission(role.id, p.id)} />
-                            ))}
+                            {(role.Permissions || role.permissions || []).map((p) => {
+                              const { color, variant } = chipStyle(p);
+                              return (
+                                <Tooltip key={p.id} title={p.description || p.name} arrow>
+                                  <Chip label={p.name} size="small" color={color} variant={variant} onDelete={() => handleRemovePermission(role.id, p.id)} sx={{ mr:0.5, mb:0.5 }} />
+                                </Tooltip>
+                              );
+                            })}
                           </Stack>
                         </TableCell>
                         <TableCell align="center">
@@ -332,9 +351,14 @@ const PermissionBindings = () => {
               <Typography variant="subtitle2">Role: {editDialog.role.name}</Typography>
               <Typography variant="caption" color="text.secondary">Tambah atau hapus permission di bawah:</Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap">
-                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p,i)=> (
-                  <Chip key={p.id} label={p.name} size="small" color={chipColors[i % chipColors.length]} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} />
-                ))}
+                {(roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).map((p)=> {
+                  const { color, variant } = chipStyle(p);
+                  return (
+                    <Tooltip key={p.id} title={p.description || p.name} arrow>
+                      <Chip label={p.name} size="small" color={color} variant={variant} onDelete={()=> handleRemovePermission(editDialog.role.id, p.id)} sx={{ mr:0.5, mb:0.5 }} />
+                    </Tooltip>
+                  );
+                })}
               </Stack>
               <Autocomplete
                 options={permissions.filter(p=> !( (roles.find(r=> r.id===editDialog.role.id)?.Permissions || editDialog.role.Permissions || editDialog.role.permissions || []).some(ep=> ep.id===p.id)))}
