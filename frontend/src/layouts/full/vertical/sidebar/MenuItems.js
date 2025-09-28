@@ -74,23 +74,23 @@ const Menuitems = [
     navlabel: true,
     subheader: 'Monitoring',
   },
-  {   
-   id: uniqueId(),
+  {
+    id: uniqueId(),
     title: 'Availability',
     icon: IconChartHistogram,
+    href: '#', // added fallback href
     children: [
       {
         id: uniqueId(),
         title: 'ICMP',
         icon: IconPoint,
-  // Updated path to new ICMP availability view
-  href: '/monitoring/availability/icmp',
+        href: '/monitoring/availability/icmp',
       },
       {
         id: uniqueId(),
         title: 'Website',
         icon: IconPoint,
-  href: '/monitoring/hosts/website',
+        href: '/monitoring/availability/website',
       },
     ],
   },
@@ -100,6 +100,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'System Metrics',
     icon: IconChartHistogram,
+    href: '#', // fallback
     children: [
       {
         id: uniqueId(),
@@ -130,6 +131,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Hosts',
     icon: IconApps,
+    href: '#', // fallback
     children: [
       {
         id: uniqueId(),
@@ -143,6 +145,7 @@ const Menuitems = [
     id: uniqueId(),
     title: 'Groups',
     icon: IconPackage,
+    href: '#', // fallback
     children: [
       {
         id: uniqueId(),
