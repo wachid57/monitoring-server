@@ -142,8 +142,11 @@ export default function ICMPAvailabilityPage(){
                   <TableCell>{percentCell(it.downtime_pct)}</TableCell>
                   <TableCell>{percentCell(it.na_pct)}</TableCell>
                 </TableRow>)}
-                {data && data.summary && <TableRow sx={{background:'#111827'}}>
-                  <TableCell colSpan={3}><strong>Summary</strong></TableCell>
+                {data && data.summary && <TableRow sx={(theme)=>({
+                  bgcolor: theme.palette.mode==='dark' ? theme.palette.grey[900] : theme.palette.primary[50],
+                  '& td': { fontWeight: 600, borderTop: `1px solid ${theme.palette.divider}` }
+                })}>
+                  <TableCell colSpan={3}>Summary</TableCell>
                   <TableCell>{percentCell(data.summary.ok_pct||0)}</TableCell>
                   <TableCell>{percentCell(data.summary.warn_pct||0)}</TableCell>
                   <TableCell>{percentCell(data.summary.crit_pct||0)}</TableCell>
