@@ -373,6 +373,16 @@ func RegisterRoutes(app *fiber.App, swaggerHandler *handler.SwaggerHandler) {
             // ICMP history per host
             protected.Get("/infrastructure/hosts/details/:host_id/icmp/history", handler.ListHistoryICMP)
             protected.Post("/infrastructure/hosts/details/:host_id/icmp/history", handler.CreateHistoryICMP)
+            // SSE stream for realtime ICMP samples
+            protected.Get("/infrastructure/hosts/icmp/stream", handler.StreamICMPSamples)
+            // Monitoring Alert Rules CRUD
+            protected.Get("/monitoring/alerts/rules/", handler.ListAlertRules)
+            protected.Post("/monitoring/alerts/rules/", handler.CreateAlertRule)
+            protected.Get("/monitoring/alerts/rules/:id", handler.GetAlertRule)
+            protected.Put("/monitoring/alerts/rules/:id", handler.UpdateAlertRule)
+            protected.Delete("/monitoring/alerts/rules/:id", handler.DeleteAlertRule)
+            // Alerts SSE stream
+            protected.Get("/monitoring/alerts/stream", handler.StreamAlerts)
         }
 
     // ---------------------------------------------------------------------

@@ -301,6 +301,61 @@ const IcmpDetails = () => {
     return ()=>{ active=false; clearInterval(id); };
   }, [icmpService, hostId]);
 
+  useEffect(()=>{
+    if(!icmpService?.id || !hostId) return;
+    let es;
+    let closed = false;
+    let fallbackTimer;
+
+    const startFallback = () => {
+      // already have existing polling (30s) above for avg; here we can trigger an immediate refresh
+      fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${hostId}/icmp/${icmpService.id}/last`, { headers: getAuthHeaders() })
+        .then(r=> r.text())
+        .then(txt=> { try { const obj = JSON.parse(txt); if(obj && obj.latency_ms!=null){ setMetrics(m=>({...m, currentPing: obj.latency_ms.toFixed(2)})); } } catch(e){} })
+        .catch(()=>{});
+      // Retry SSE after delay
+      fallbackTimer = setTimeout(()=>{ if(!closed) init(); }, 8000);
+    };
+
+    const init = () => {
+      try {
+        es = new EventSource(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/icmp/stream?host_id=${hostId}&service_id=${icmpService.id}`, { withCredentials: true });
+        es.onmessage = (ev) => {
+          // default messages (not used; specific 'icmp' event)
+        };
+        es.addEventListener('icmp', (ev)=> {
+          try {
+            const obj = JSON.parse(ev.data);
+            if(obj.host_id == hostId && obj.service_id == icmpService.id){
+              if(typeof obj.latency_ms === 'number'){ setMetrics(m=>({...m, currentPing: obj.latency_ms.toFixed(2)})); }
+              // Could update rolling avg by simple incremental smoothing
+              setMetrics(m=>{
+                const curAvg = parseFloat(m.avgPing24h);
+                if(!isNaN(curAvg) && typeof obj.latency_ms === 'number'){
+                  const newAvg = (curAvg*9 + obj.latency_ms)/10; // simple EMA
+                  return { ...m, avgPing24h: newAvg.toFixed(2) };
+                } else if(typeof obj.latency_ms === 'number') {
+                  return { ...m, avgPing24h: obj.latency_ms.toFixed(2) };
+                }
+                return m;
+              });
+            }
+          } catch(e){ /* ignore */ }
+        });
+        es.onerror = () => {
+          // switch to fallback and try re-open
+          if(es){ es.close(); }
+          startFallback();
+        };
+      } catch(e){
+        startFallback();
+      }
+    };
+
+    init();
+    return ()=>{ closed = true; if(es) es.close(); if(fallbackTimer) clearTimeout(fallbackTimer); };
+  }, [icmpService, hostId]);
+
   if (loading) return <PageContainer title="ICMP Details"><Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box></PageContainer>;
   if (error) return <PageContainer title="ICMP Details"><Alert severity="error">{error}</Alert></PageContainer>;
 

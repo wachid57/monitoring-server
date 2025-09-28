@@ -24,13 +24,29 @@ type checkRuntime struct {
     Check model.ICMPCheck
     NextRun time.Time
     LastStatus string
+    FailCount int
+    LastAlertAt time.Time
 }
+
+// cached alert rules (simple reload with check reload)
+type alertRule struct {
+    ID uint
+    HostID uint
+    ServiceType string
+    ThresholdLatencyMs *float64
+    MaxConsecutiveFailures *int
+    CooldownSec int
+    Enabled bool
+}
+
+var cachedAlertRules []alertRule
 
 func StartICMPWorker(stop <-chan struct{}) {
     go func(){
         log.Println("icmp worker: starting")
         // initial load
         runtimes := loadCheckRuntimes()
+        loadAlertRules()
         ticker := time.NewTicker(5 * time.Second)
         defer ticker.Stop()
         reloadTicker := time.NewTicker(5 * time.Minute)
@@ -45,9 +61,20 @@ func StartICMPWorker(stop <-chan struct{}) {
             case <-reloadTicker.C:
                 // reload checks (add new ones; keep existing schedule for unchanged)
                 runtimes = mergeRuntimes(runtimes, loadCheckRuntimes())
+                loadAlertRules()
             }
         }
     }()
+}
+
+func loadAlertRules() {
+    var rules []model.AlertRule
+    database.DB.Find(&rules)
+    tmp := make([]alertRule,0,len(rules))
+    for _, r := range rules {
+        tmp = append(tmp, alertRule{ID:r.ID, HostID:r.HostID, ServiceType:r.ServiceType, ThresholdLatencyMs:r.ThresholdLatencyMs, MaxConsecutiveFailures:r.MaxConsecutiveFailures, CooldownSec:r.CooldownSec, Enabled:r.Enabled})
+    }
+    cachedAlertRules = tmp
 }
 
 func loadCheckRuntimes() []*checkRuntime {
@@ -119,12 +146,53 @@ func recordStatus(rt *checkRuntime, status string, latencyMs float64, err error)
         rc.Rdb.Set(ctx, keyLast, payload, 0)
         rc.Rdb.LPush(ctx, keySeries, payload)
         rc.Rdb.LTrim(ctx, keySeries, 0, 500)
+    // publish to pubsub channel for SSE consumers
+    pub := fmt.Sprintf("{\"host_id\":%d,\"service_id\":%d,\"ts\":%d,\"latency_ms\":%.2f,\"status\":\"%s\"}", rt.Check.HostID, rt.Check.ID, sample.Timestamp, sample.LatencyMs, sample.Status)
+    rc.Rdb.Publish(ctx, "icmp:samples", pub)
     }
     // if status transition create service_status_events & history_icmp
     if status != rt.LastStatus {
         persistTransition(rt, status, now)
         rt.LastStatus = status
+        // reset fail count on recovery
+        if status == "OK" { rt.FailCount = 0 }
     }
+    // failure counting
+    if status != "OK" { rt.FailCount++ } else { rt.FailCount = 0 }
+    evaluateAlerts(rt, status, latencyMs, now)
+}
+
+func evaluateAlerts(rt *checkRuntime, status string, latencyMs float64, ts time.Time) {
+    if len(cachedAlertRules)==0 { return }
+    for _, rule := range cachedAlertRules {
+        if !rule.Enabled { continue }
+        if rule.HostID != rt.Check.HostID { continue }
+        if rule.ServiceType != "icmp" { continue }
+        triggered := false
+        reason := ""
+        if rule.ThresholdLatencyMs != nil && status=="OK" && latencyMs > *rule.ThresholdLatencyMs {
+            triggered = true
+            reason = fmt.Sprintf("latency %.2fms > threshold %.2fms", latencyMs, *rule.ThresholdLatencyMs)
+        }
+        if !triggered && rule.MaxConsecutiveFailures != nil && rt.FailCount >= *rule.MaxConsecutiveFailures && status != "OK" {
+            triggered = true
+            reason = fmt.Sprintf("failures %d >= %d", rt.FailCount, *rule.MaxConsecutiveFailures)
+        }
+        if !triggered { continue }
+        // cooldown check
+        if rule.CooldownSec > 0 && !rt.LastAlertAt.IsZero() && ts.Sub(rt.LastAlertAt) < time.Duration(rule.CooldownSec)*time.Second {
+            continue
+        }
+        rt.LastAlertAt = ts
+        publishAlert(rule, rt, status, latencyMs, reason, ts)
+    }
+}
+
+func publishAlert(rule alertRule, rt *checkRuntime, status string, latencyMs float64, reason string, ts time.Time) {
+    if rc.Rdb == nil { return }
+    ctx := context.Background()
+    payload := fmt.Sprintf("{\"type\":\"alert\",\"rule_id\":%d,\"host_id\":%d,\"service_type\":\"icmp\",\"service_id\":%d,\"status\":\"%s\",\"latency_ms\":%.2f,\"reason\":\"%s\",\"ts\":%d}", rule.ID, rt.Check.HostID, rt.Check.ID, status, latencyMs, reason, ts.Unix())
+    rc.Rdb.Publish(ctx, "alerts:events", payload)
 }
 
 func persistTransition(rt *checkRuntime, status string, ts time.Time) {
