@@ -61,6 +61,7 @@ const PermissionBindings = () => {
   const [editDialog, setEditDialog] = useState({ open:false, role:null });
   const [permissions, setPermissions] = useState([]);
   const [addRole, setAddRole] = useState(null);
+  // add dialog single permission (instant add on select, no submit button)
   const [addPerm, setAddPerm] = useState(null);
 
   // Add Binding dialog (user + multi roles or role + multi permissions?). Based on request: select user (single) and roles (multi) to assign.
@@ -388,17 +389,41 @@ const getChipColor = (name) => colorPool[ hashString(name) % colorPool.length ];
       </Dialog>
 
       {/* Add Binding Dialog with Autocomplete */}
-  <Dialog open={addOpen} onClose={()=> setAddOpen(false)} maxWidth='sm' fullWidth>
-  <DialogTitle>Tambah Permission ke Role</DialogTitle>
+      <Dialog open={addOpen} onClose={()=> { setAddOpen(false); setAddRole(null); }} maxWidth='sm' fullWidth>
+        <DialogTitle>Tambah Permission ke Role</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <Autocomplete options={roles} getOptionLabel={o=> o.name || `Role ${o.id}`} value={addRole} onChange={(_,v)=> setAddRole(v)} renderInput={(p)=><TextField {...p} label='Role' placeholder='Cari role'/>} fullWidth />
-    <Autocomplete options={permissions.filter(p=> !(addRole && (roles.find(r=> r.id===addRole.id)?.Permissions||[]).some(ep=> ep.id===p.id)))} getOptionLabel={o=> o.name || `Perm ${o.id}`} value={addPerm} onChange={(_,v)=> setAddPerm(v)} renderInput={(p)=><TextField {...p} label='Permission' placeholder='Cari permission' helperText='Pilih satu permission'/>} fullWidth filterSelectedOptions />
+            <Autocomplete 
+              options={roles}
+              getOptionLabel={o=> o.name || `Role ${o.id}`}
+              value={addRole}
+              onChange={(_,v)=> setAddRole(v)}
+              renderInput={(p)=><TextField {...p} label='Role' placeholder='Cari role'/>}
+              fullWidth 
+            />
+            {addRole && (
+              <>
+                <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ rowGap:1 }}>
+                  {(roles.find(r=> r.id===addRole.id)?.Permissions || []).map((p,i)=> {
+                    const color = getChipColor(p.name); const variant = i%2===0?'filled':'outlined';
+                    return <Chip key={p.id} label={p.name} size='small' color={color} variant={variant} />
+                  })}
+                </Stack>
+                <Autocomplete 
+                  options={permissions.filter(p=> !( (roles.find(r=> r.id===addRole.id)?.Permissions||[]).some(ep=> ep.id===p.id)))}
+                  getOptionLabel={o=> o.name || ''}
+                  value={addPerm}
+                  onChange={(_,v)=> { if(v && addRole){ setAddPerm(null); handleAddPermissionFromEdit(addRole, v); } }}
+                  renderInput={(p)=><TextField {...p} label='Permission' placeholder='Ketik untuk cari & pilih' helperText='Pilih permission, otomatis langsung ditambahkan'/>}
+                  fullWidth
+                  filterSelectedOptions
+                />
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={()=> setAddOpen(false)}>Cancel</Button>
-      <Button onClick={handleAddBinding} variant='contained' disabled={adding}>{adding? <CircularProgress size={18}/>:'Tambah'}</Button>
+          <Button onClick={()=> { setAddOpen(false); setAddRole(null); }}>Close</Button>
         </DialogActions>
       </Dialog>
     </PageContainer>
