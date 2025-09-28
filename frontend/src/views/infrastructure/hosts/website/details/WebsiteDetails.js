@@ -88,15 +88,25 @@ const WebsiteDetails = () => {
 		const load=async()=>{
 			if(!hostId){ setError('Invalid host id'); setLoading(false); return; }
 			try {
-				const hostRes= await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}`, { headers:getAuthHeaders() });
+				const hostRes= await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${hostId}`, { headers:getAuthHeaders() });
 				if(hostRes.status===401||hostRes.status===403) return handleAuthError({status:hostRes.status});
+				if(!hostRes.ok){ const d= await hostRes.json().catch(()=>({})); throw new Error(d.error||'Failed load host'); }
 				const h= await hostRes.json(); setHost(h);
-				const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}/services`, { headers:getAuthHeaders() });
-				if(servicesRes.ok){ const svs= await servicesRes.json(); const ws = Array.isArray(svs)? svs.find(s => (s.type || s.service_type || '').toLowerCase()==='website'): null; setWebsiteService(ws||null);}        
+				// fetch services & pick website-like service
+				const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${hostId}/services`, { headers:getAuthHeaders() });
+				if(servicesRes.ok){
+					const svs= await servicesRes.json();
+					const ws = Array.isArray(svs)? svs.find(s => ['website','http','http_curl','httpcurl'].includes((s.type || s.service_type || '').toLowerCase())): null;
+					setWebsiteService(ws||null);
+				}
+				// availability attempts (website then http)
 				const to = new Date().toISOString(); const from=new Date(Date.now()-rangeToMs(range)).toISOString();
-				// reuse availability endpoint (assuming param service_type=website)
-				const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=website&host_id=${hostId}`, { headers:getAuthHeaders() });
-				if(availRes.ok){ const av= await availRes.json(); setAvailability(av); }
+				for(const st of ['website','http']){
+					try {
+						const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=${st}&host_id=${hostId}`, { headers:getAuthHeaders() });
+						if(availRes.ok){ const av= await availRes.json(); setAvailability(av); break; }
+					} catch(_){ /* ignore & try next */ }
+				}
 			} catch(e){ console.error(e); setError(e.message); } finally { setLoading(false);} };
 		load();
 	}, [hostId, range, refreshKey]);

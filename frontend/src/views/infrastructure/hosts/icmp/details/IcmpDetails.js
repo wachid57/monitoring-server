@@ -161,7 +161,7 @@ const IcmpDetails = () => {
         setHost(hostData);
 
         // Fetch all services for host to locate ICMP
-        const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/hosts/${hostId}/services`, { headers: getAuthHeaders() });
+        const servicesRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/${hostId}/services`, { headers: getAuthHeaders() });
         if (!servicesRes.ok) {
           const d = await servicesRes.json().catch(() => ({}));
           throw new Error(d.error || 'Failed load services');
@@ -173,7 +173,7 @@ const IcmpDetails = () => {
     // Availability summary (selected range)
     const to = new Date().toISOString();
     const from = new Date(Date.now() - rangeToMs(range)).toISOString();
-        const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/monitoring/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=icmp&host_id=${hostId}`, { headers: getAuthHeaders() });
+        const availRes = await fetch(`${BACKEND_URL}${API_PREFIX}/infrastructure/hosts/availability/?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&service_type=icmp&host_id=${hostId}`, { headers: getAuthHeaders() });
         if (availRes.ok) {
           const av = await availRes.json();
           setAvailability(av);
