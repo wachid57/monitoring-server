@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress, Alert, Grid, Stack, Divider, Chip, Button } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import PageContainer from 'src/components/container/PageContainer';
@@ -50,7 +50,7 @@ const IcmpDetails = () => {
   };
 
   // Derived mini component for timeline chart
-  const PingHistoryChart = ({ events }) => {
+  const PingHistoryChart = ({ events, width }) => {
     if (!Array.isArray(events) || events.length === 0) return <Typography variant="body2">No events.</Typography>;
     // Normalize events: expect occurred_at / status (OK|DOWN)
     const parsed = events
@@ -62,7 +62,7 @@ const IcmpDetails = () => {
     const minT = parsed[0].t;
     const maxT = parsed[parsed.length - 1].t;
     const span = Math.max(1, maxT - minT);
-    const W = 1000; // px
+  const W = Math.max(300, width || 1000); // responsive width
     const H = 140;
     // Build segments between points; last point extends to maxT
     const segments = [];
@@ -162,6 +162,20 @@ const IcmpDetails = () => {
     load();
   }, [hostId, range]);
 
+  // Responsive width for chart
+  const chartWrapRef = useRef(null);
+  const [chartWidth, setChartWidth] = useState(1000);
+  useEffect(()=>{
+    const handle = () => {
+      if (chartWrapRef.current) {
+        setChartWidth(chartWrapRef.current.getBoundingClientRect().width - 16); // minus padding
+      }
+    };
+    handle();
+    window.addEventListener('resize', handle);
+    return () => window.removeEventListener('resize', handle);
+  }, []);
+
   if (loading) return <PageContainer title="ICMP Details"><Box display="flex" justifyContent="center" py={6}><CircularProgress /></Box></PageContainer>;
   if (error) return <PageContainer title="ICMP Details"><Alert severity="error">{error}</Alert></PageContainer>;
 
@@ -196,8 +210,8 @@ const IcmpDetails = () => {
         </CardContent>
       </Card>
 
-      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3 }}>
-        <CardContent>
+      <Card sx={{ border: '1px solid rgba(0,0,0,0.06)', mb:3, position:'relative' }}>
+        <CardContent ref={chartWrapRef}>
           <Stack spacing={2}>
             <Stack direction="row" alignItems="center" spacing={2}>
               <Typography variant="h6" sx={{ flexGrow:1 }}>Availability ({range})</Typography>
@@ -208,12 +222,14 @@ const IcmpDetails = () => {
               </Stack>
             </Stack>
             {availability ? (
-              <Box>
-                <Typography variant="body2">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
-                <Typography variant="body2">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
-                <Box mt={2}>
-                  <PingHistoryChart events={availability.events || availability.items || []} />
+              <Box sx={{ position:'relative', pt:1 }}>
+                <Box mt={1}>
+                  <PingHistoryChart width={chartWidth} events={availability.events || availability.items || []} />
                 </Box>
+                <Stack spacing={0.5} sx={{ position:'absolute', bottom:8, right:8, background: theme.palette.mode==='dark' ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.85)', border:'1px solid', borderColor:'divider', px:1, py:0.5, borderRadius:1, fontSize:12 }}>
+                  <Typography variant="caption">Uptime: {availability.uptime_percentage ?? '-'}%</Typography>
+                  <Typography variant="caption">Downtime: {availability.downtime_percentage ?? '-'}%</Typography>
+                </Stack>
               </Box>
             ) : <Typography variant="body2">No availability data.</Typography>}
           </Stack>
