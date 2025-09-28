@@ -185,15 +185,11 @@ func AssignRoleToUserAPI(c *fiber.Ctx) error {
     var role model.Role
     if req.RoleID != 0 {
         if err := database.DB.First(&role, req.RoleID).Error; err != nil {
-            return c.Status(404).JSON(fiber.Map{"error": "Role not found"})
+            return c.Status(404).JSON(fiber.Map{"error": "Role not found", "role_id": req.RoleID})
         }
     } else if req.RoleName != "" {
         if err := database.DB.Where("name = ?", req.RoleName).First(&role).Error; err != nil {
-            // create role if missing
-            role = model.Role{Name: req.RoleName}
-            if err := database.DB.Create(&role).Error; err != nil {
-                return c.Status(500).JSON(fiber.Map{"error": "Failed to create role"})
-            }
+            return c.Status(404).JSON(fiber.Map{"error": "Role not found", "role_name": req.RoleName})
         }
     } else {
         return c.Status(400).JSON(fiber.Map{"error": "role_id or role_name is required"})

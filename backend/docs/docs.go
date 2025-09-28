@@ -2826,7 +2826,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1.0/users/roles/bindings": {
+    "/api/v1.0/admin/roles/bindings": {
             "get": {
                 "security": [
                     {
@@ -2907,7 +2907,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1.0/users/roles/bindings/{id}": {
+    "/api/v1.0/admin/roles/bindings/{id}": {
             "get": {
                 "security": [
                     {

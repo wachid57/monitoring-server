@@ -63,14 +63,23 @@ const RolesBindings = () => {
 
   const fetchBindings = async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles/bindings', { headers: getAuthHeaders() });
-      if (res.ok) {
-        const data = await res.json();
-        setBindings(Array.isArray(data) ? data : (data.bindings || data || []));
+      const text = await res.text();
+      let json = [];
+      try { json = text ? JSON.parse(text) : []; } catch(parseErr){ /* non-JSON error */ }
+      if (!res.ok) {
+        const msg = json?.error || `Gagal load bindings (status ${res.status})`;
+        setError(msg);
+        return;
       }
-    } catch (err) { console.error(err); setError('Failed to fetch bindings'); }
-    finally { setLoading(false); }
+      const list = Array.isArray(json) ? json : (json.bindings || []);
+      setBindings(list);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to fetch bindings (network)');
+    } finally { setLoading(false); }
   };
   const fetchRoles = async () => {
     try { const res = await fetch(BACKEND_URL + API_PREFIX + '/admin/roles', { headers: getAuthHeaders() }); if(res.ok){ const data=await res.json(); setRoles(Array.isArray(data)?data:(data.roles||[])); }} catch(e){ console.error(e);} };
@@ -122,6 +131,13 @@ const RolesBindings = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
+                {!loading && filtered.length === 0 && !error && (
+                  <TableRow>
+                    <TableCell colSpan={5} align='center' sx={{py:4}}>
+                      <Typography variant='body2' color='textSecondary'>Belum ada binding.</Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
                 {filtered.map(b=> (
                   <TableRow key={b.id}>
                     <TableCell>{b.id}</TableCell>

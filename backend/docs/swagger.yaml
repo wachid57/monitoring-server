@@ -2221,7 +2221,7 @@ paths:
       summary: Update role by ID
       tags:
       - Roles
-  /api/v1.0/users/roles/bindings:
+  /api/v1.0/admin/roles/bindings:
     get:
       produces:
       - application/json
@@ -2271,7 +2271,7 @@ paths:
       summary: Create a new role binding
       tags:
       - RoleBindings
-  /api/v1.0/users/roles/bindings/{id}:
+  /api/v1.0/admin/roles/bindings/{id}:
     delete:
       parameters:
       - description: Role Binding ID
