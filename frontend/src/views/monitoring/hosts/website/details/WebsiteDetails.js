@@ -9,7 +9,7 @@ import { getAuthHeaders, handleAuthError } from 'src/utils/auth';
 
 const crumbBase = [
 	{ to: '/', title: 'Home' },
-	{ to: '/monitoring/website/lists', title: 'Websites' },
+	{ to: '/infrastructure/hosts/details', title: 'Host Details' },
 	{ title: 'Website Detail' },
 ];
 
@@ -32,9 +32,9 @@ const WebsiteDetails = () => {
 		const fetchWebsite = async () => {
 			setLoading(true);
 			try {
-				// Hypothetical endpoint: /services/availability/website/:id OR /monitoring/hosts/availability/website/:id
-				// We'll try new canonical API: /services/availability/website/:id (backend group: services/availability/website)
-				const url = `${BACKEND_URL + API_PREFIX}/services/availability/website/${id}`;
+				// Hypothetical endpoint: /infrastructure/availability/website/:id 
+				// We'll try new canonical API: /infrastructure/availability/website/:id 
+				const url = `${BACKEND_URL + API_PREFIX}/infrastructure/availability/website/${id}`;
 				const res = await fetch(url, { headers: getAuthHeaders() });
 				if (res.status === 401 || res.status === 403) return handleAuthError({ status: res.status });
 				if (!res.ok) {
